@@ -1,0 +1,37 @@
+{
+  "name": "app",
+  "version": "1.0.50",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "bun run --watch src/index.ts",
+    "----CHECK": "",
+    "format:check": "prettier --check .",
+    "format:fix": "prettier --write .",
+    "lint": "eslint --ignore-path .gitignore .",
+    "lint:fix": "eslint --ignore-path .gitignore --fix . ",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@elysiajs/html": "^0.8.0",
+    "@elysiajs/swagger": "^0.8.0",
+    "@supabase/supabase-js": "^2.39.1",
+    "elysia": "latest"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^6.16.0",
+    "@typescript-eslint/parser": "^6.16.0",
+    "bun-types": "latest",
+    "eslint": "^8.56.0",
+    "prettier": "^3.1.1",
+    "prettier-plugin-tailwindcss": "^0.5.10",
+    "tailwindcss": "^3.4.0",
+    "tailwindcss-animate": "^1.0.7",
+    "@tailwindcss/typography": "^0.5.10",
+    "typed-html": "^3.0.1"
+  },
+  "module": "src/index.js",
+  "type": "module",
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
