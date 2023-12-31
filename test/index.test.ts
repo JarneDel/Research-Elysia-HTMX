@@ -7,7 +7,7 @@ describe('Elysia', () => {
 
     const response = await app
       .handle(new Request('http://localhost/'))
-      .then((res) => res.text())
+      .then(res => res.text())
 
     expect(response).toBe('hi')
   })

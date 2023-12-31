@@ -1,4 +1,5 @@
 // src/libs/supabase.ts
+
 import { createClient } from '@supabase/supabase-js'
 
 const { supabase_url, supabase_service_role } = process.env

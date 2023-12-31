@@ -1,33 +1,40 @@
 {
+  "$schema": "https://json.schemastore.org/package",
   "name": "app",
   "version": "1.0.50",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "bun run --watch src/index.ts",
+    "dev": "concurrently \"bun --inspect --watch src/index.ts\" \"bun run build --watch\"",
+    "build": "tailwindcss -i ./src/styles/globals.css -o ./public/globals.css",
     "----CHECK": "",
     "format:check": "prettier --check .",
     "format:fix": "prettier --write .",
     "lint": "eslint --ignore-path .gitignore .",
     "lint:fix": "eslint --ignore-path .gitignore --fix . ",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit && rm tsconfig.tsbuildinfo"
   },
   "dependencies": {
     "@elysiajs/html": "^0.8.0",
+    "@elysiajs/static": "^0.8.1",
     "@elysiajs/swagger": "^0.8.0",
     "@supabase/supabase-js": "^2.39.1",
     "elysia": "latest"
   },
   "devDependencies": {
+    "@ianvs/prettier-plugin-sort-imports": "^4.1.1",
+    "@tailwindcss/typography": "^0.5.10",
+    "@total-typescript/ts-reset": "^0.5.1",
     "@typescript-eslint/eslint-plugin": "^6.16.0",
     "@typescript-eslint/parser": "^6.16.0",
     "bun-types": "latest",
+    "concurrently": "^8.2.2",
     "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
     "prettier": "^3.1.1",
     "prettier-plugin-tailwindcss": "^0.5.10",
     "tailwindcss": "^3.4.0",
     "tailwindcss-animate": "^1.0.7",
-    "@tailwindcss/typography": "^0.5.10",
-    "typed-html": "^3.0.1"
+    "ts-toolbelt": "^9.6.0"
   },
   "module": "src/index.js",
   "type": "module",
