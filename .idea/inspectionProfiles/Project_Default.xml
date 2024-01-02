@@ -4,10 +4,14 @@
     <inspection_tool class="HtmlUnknownAttribute" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="myValues">
         <value>
-          <list size="3">
+          <list size="7">
             <item index="0" class="java.lang.String" itemvalue="hx-post" />
             <item index="1" class="java.lang.String" itemvalue="hx-target" />
             <item index="2" class="java.lang.String" itemvalue="hx-swap" />
+            <item index="3" class="java.lang.String" itemvalue="hx-get" />
+            <item index="4" class="java.lang.String" itemvalue="hx-push-url" />
+            <item index="5" class="java.lang.String" itemvalue="hx-boost" />
+            <item index="6" class="java.lang.String" itemvalue="hx-trigger" />
           </list>
         </value>
       </option>

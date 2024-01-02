@@ -1,5 +1,6 @@
 import { Elysia, t } from 'elysia'
 import { supabase } from '@/libs'
+import { handleHxRequest } from '@/modules/api/auth/header.ts'
 import { Cookie, RefreshCookie } from '@/types/cookie.type'
 
 export const auth = (app: Elysia) =>
@@ -7,7 +8,7 @@ export const auth = (app: Elysia) =>
     return app
       .post(
         '/sign-up',
-        async ({ body, cookie }) => {
+        async ({ body, cookie, headers, set }) => {
           const { data, error } = await supabase.auth.signUp(body)
           if (error) return error
           cookie.access_token.set({
@@ -20,6 +21,7 @@ export const auth = (app: Elysia) =>
             httpOnly: true,
             path: '/',
           })
+          handleHxRequest(headers, set)
           return data.user
         },
         {
@@ -35,12 +37,19 @@ export const auth = (app: Elysia) =>
             description: 'Sign up a new user',
             tags: ['Authentication'],
           },
+          headers: t.Object({
+            'hx-request': t.Optional(t.String()),
+            'hx-current-url': t.Optional(t.String()),
+          }),
+
           cookie: Cookie,
         },
       )
       .post(
         '/sign-in',
-        async ({ body, cookie }) => {
+        async ({ body, cookie, set, headers }) => {
+          console.log(body)
+          console.log({ headers })
           const { data, error } = await supabase.auth.signInWithPassword(body)
 
           if (error) return error
@@ -55,6 +64,7 @@ export const auth = (app: Elysia) =>
             httpOnly: true,
             path: '/',
           })
+          handleHxRequest(headers, set)
           return data.user
         },
         {
@@ -67,6 +77,10 @@ export const auth = (app: Elysia) =>
             }),
           }),
           cookie: Cookie,
+          headers: t.Object({
+            'hx-request': t.Optional(t.String()),
+            'hx-current-url': t.Optional(t.String()),
+          }),
           detail: {
             description: 'Sign in a user',
             tags: ['Authentication'],
