@@ -4,14 +4,15 @@
   "version": "1.0.50",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "concurrently \"bun --inspect --watch src/index.ts\" \"bun run build --watch\"",
+    "dev": "concurrently \"bun run serve\" \"bun --inspect --watch src/index.ts\" \"bun run build --watch\" ",
     "build": "tailwindcss -i ./src/styles/globals.css -o ./public/globals.css",
     "----CHECK": "",
     "format:check": "prettier --check .",
     "format:fix": "prettier --write .",
     "lint": "eslint --ignore-path .gitignore .",
     "lint:fix": "eslint --ignore-path .gitignore --fix . ",
-    "typecheck": "tsc --noEmit && rm tsconfig.tsbuildinfo"
+    "typecheck": "tsc --noEmit && rm tsconfig.tsbuildinfo",
+    "serve": "browser-sync start --config bs-config.cjs"
   },
   "dependencies": {
     "@elysiajs/html": "^0.8.0",
@@ -26,8 +27,10 @@
     "@total-typescript/ts-reset": "^0.5.1",
     "@typescript-eslint/eslint-plugin": "^6.16.0",
     "@typescript-eslint/parser": "^6.16.0",
+    "browser-sync": "^3.0.2",
     "bun-types": "latest",
     "concurrently": "^8.2.2",
+    "daisyui": "latest",
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.1.0",
     "prettier": "^3.1.1",

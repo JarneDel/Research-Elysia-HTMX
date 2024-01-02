@@ -1,4 +1,3 @@
-import { AuthSessionMissingError } from '@supabase/supabase-js'
 import { Elysia, t } from 'elysia'
 import { Layout } from '@/components/Layout.tsx'
 import { checkAccessToken, login } from '@/libs/auth.ts'
@@ -8,11 +7,11 @@ export const auth = (app: Elysia) =>
   app.group('/auth', app =>
     app.get(
       '/sign-in',
-      async ({ cookie, body }) => {
+      async ({ cookie, set, body }) => {
         const { user, error } = await checkAccessToken(cookie)
-        console.log(user, error)
         if (user?.id) {
-          return { redirect: '/' }
+          set.redirect = '/'
+          return
         }
 
         return (
@@ -29,23 +28,18 @@ export const auth = (app: Elysia) =>
                   hx-target="closest div"
                   hx-swap="outerHTML"
                 >
-                  <div>
-                    <label
-                      for="email"
-                      class="text-sm font-bold block mb-2 font-meidu "
-                    >
-                      Your email
-                    </label>
-                    <input
-                      name="email"
-                      type="email"
-                      id="email"
-                      placeholder="email"
-                      class="rounded text-surface-foreground bg-surface placeholder-surface-foreground py-2 px-3"
-                    />
-                  </div>
+                  <label for="email" class="label">
+                    Your email
+                  </label>
+                  <input
+                    name="email"
+                    type="email"
+                    id="email"
+                    placeholder="email"
+                    class="input"
+                  />
 
-                  <label for="password" class="text-sm font-bold ">
+                  <label for="password" class="label ">
                     Password
                   </label>
                   <input
@@ -53,12 +47,9 @@ export const auth = (app: Elysia) =>
                     name="password"
                     type="password"
                     placeholder="password"
-                    class="rounded text-surface-foreground bg-surface placeholder-surface-foreground py-2 px-3"
+                    class="input"
                   />
-                  <button
-                    type="submit"
-                    class="rounded-sm bg-primary text-primary-foreground hover:bg-primary/90 px-3 py-1.5 mt-2"
-                  >
+                  <button type="submit" class="btn btn-primary">
                     Sign In
                   </button>
                 </form>

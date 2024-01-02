@@ -3,7 +3,7 @@ import { supabase } from '@/libs/supabase.ts'
 
 export interface AuthResult {
   user?: User
-  error?: Error
+  error?: String
 }
 
 function setCookies(cookie: any, session: Session) {
@@ -22,7 +22,7 @@ function setCookies(cookie: any, session: Session) {
 // Main function
 export async function checkAccessToken(cookie: any): Promise<AuthResult> {
   if (!cookie.access_token.value) {
-    return { error: new Error('Access token is required') }
+    return { error: 'Access token is required' }
   }
 
   const user = await supabase.auth.getUser(cookie.access_token.value)
@@ -32,7 +32,7 @@ export async function checkAccessToken(cookie: any): Promise<AuthResult> {
       cookie.refresh_token.value,
     )
     if (refreshed.error) {
-      return { error: refreshed.error }
+      return { error: refreshed.error.message }
     }
     setCookies(cookie, refreshed.data.session!)
     return { user: refreshed.data.user! }
@@ -49,7 +49,7 @@ export async function login(
     password,
   })
   if (error) {
-    return { error }
+    return { error: error.message }
   }
   setCookies(cookie, data.session!)
   return {
