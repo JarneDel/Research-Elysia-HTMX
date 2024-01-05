@@ -3,11 +3,14 @@ import { Elysia, t } from 'elysia'
 import { Layout } from '@/components/Layout.tsx'
 import { initHtmx } from '@/hooks/htmx.hook.tsx'
 import { authen } from '@/libs'
-import { auth } from '@/modules/app/auth/Auth.tsx'
+import { auth } from '@/modules/app/views/auth/Auth.tsx'
 
 export const app = (app: Elysia) =>
   app
     .use(html())
+    .use(initHtmx)
+    .use(auth)
+    .use(authen)
     .get('/', async () => {
       return (
         <Layout title="hello world">
@@ -15,9 +18,6 @@ export const app = (app: Elysia) =>
         </Layout>
       )
     })
-    .use(auth)
-    .use(authen)
-    .use(initHtmx)
 
     .get('/hello', async () => {
       return <div>hello world</div>
