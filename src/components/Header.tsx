@@ -16,12 +16,13 @@ export const Header = (props: props) => (
         <a class="btn btn-ghost btn-sm rounded-btn">Home</a>
       </div>
     </div>
-    <div class="flex-none">
+    <div class="flex-none relative" id="menu">
       <button
         class="btn btn-square btn-ghost"
-        hx-trigger=""
+        hx-trigger="click"
         hx-get="/fragment/account"
-        hx-swap=""
+        hx-target="#menu"
+        hx-swap="innerHTML"
       >
         <Menu />
       </button>

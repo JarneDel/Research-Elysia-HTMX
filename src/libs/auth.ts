@@ -8,17 +8,18 @@ export interface AuthResult {
   session?: Session
 }
 
-function setCookies(cookie: any, session: Session) {
-  cookie.access_token.value = {
-    value: session.access_token,
-    httpOnly: true,
-    path: '/',
-  }
-  cookie.refresh_token.value = {
-    value: session.refresh_token,
-    httpOnly: true,
-    path: '/',
-  }
+export function setAuthCookies(cookie: any, session: Session) {
+  cookie.access_token.value = session.access_token
+  cookie.access_token.httpOnly = true
+  cookie.access_token.path = '/'
+  cookie.access_token.maxAge = 60 * 5
+  cookie.access_token.sameSite = 'strict'
+
+  cookie.refresh_token.maxAge = 60 * 60 * 24 * 30
+  cookie.refresh_token.sameSite = 'strict'
+  cookie.refresh_token.path = '/'
+  cookie.refresh_token.httpOnly = true
+  cookie.refresh_token.value = session.refresh_token
 }
 
 // Main function
@@ -44,7 +45,7 @@ export async function checkAccessToken(cookie: any): Promise<AuthResult> {
       console.log('error refreshing session', refreshed.error.message)
       return { error: refreshed.error.message }
     }
-    setCookies(cookie, refreshed.data.session!)
+    setAuthCookies(cookie, refreshed.data.session!)
     await setAccessTokenToRedis(
       refreshed.data.session!.access_token,
       refreshed.data.user!,
@@ -71,7 +72,7 @@ export async function login(
   if (error) {
     return { error: error.message }
   }
-  setCookies(cookie, data.session!)
+  setAuthCookies(cookie, data.session!)
   return {
     user: data.user!,
   }

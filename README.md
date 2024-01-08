@@ -1,19 +1,40 @@
 # Elysia with Bun runtime
 
+
+## Research question
+- Hoe bouw je een performante real-time livestream collaboratie
+  tool met behulp van HTMX en een bun-Elysiajs backend?
+
+
+### Deel vragen
+1. Wat zijn de kernfunctionaliteiten van een collaborative tool
+2. Hoe kan WebSocket-communicatie worden geïntegreerd in HTMX en Elysia voor realtime updates?
+3. Hoe implementeer je een ElysiaJS-backend voor gegevensopslag en realtime communica-tie?
+4. Hoe kan je gebruikersauthenticatie en authorizatie toepassen in de collaboration tool
+5. Welk(e) live-streaming protocol of service is de beste optie, hoe implementeer ik deze?
+6. Hoe kan je een realtime livestream implementeren met HTMX
+
+
+
+
 ## Getting Started
 
-To get started with this template, simply paste this command into your terminal:
+To start this project, you need to have [Bun](https://bun.sh/) and [Docker](https://docker.com) installed.
 
 ```bash
-bun create elysia ./elysia-example
+curl -fsSL https://bun.sh/install | bash
 ```
 
-## Development
-
-To start the development server run:
-
+# Install dependencies
 ```bash
-bun run dev
+bun install
 ```
 
-Open http://localhost:3000/ with your browser to see the result.
+# start redis
+```bash
+docker run -d -p 6379:6379 redis
+```
+# start dev server
+```bash
+bun dev
+```
