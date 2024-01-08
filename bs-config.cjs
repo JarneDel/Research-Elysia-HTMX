@@ -8,4 +8,8 @@ module.exports = {
   ignore: ['node_modules'],
   reloadDelay: 1000,
   open: false,
+  port: 3001,
+  ui: {
+    port: 3002,
+  },
 }

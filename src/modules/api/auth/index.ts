@@ -11,16 +11,12 @@ export const auth = (app: Elysia) =>
         async ({ body, cookie, headers, set }) => {
           const { data, error } = await supabase.auth.signUp(body)
           if (error) return error
-          cookie.access_token.set({
-            value: data.session!.access_token,
-            httpOnly: true,
-            path: '/',
-          })
-          cookie.refresh_token.set({
-            value: data.session!.refresh_token,
-            httpOnly: true,
-            path: '/',
-          })
+          cookie.access_token.value = data.session!.access_token
+          cookie.access_token.httpOnly = true
+          cookie.access_token.path = '/'
+          cookie.refresh_token.value = data.session!.refresh_token
+          cookie.refresh_token.httpOnly = true
+          cookie.refresh_token.path = '/'
           handleHxRequest(headers, set)
           return data.user
         },
@@ -54,16 +50,12 @@ export const auth = (app: Elysia) =>
 
           if (error) return error
 
-          cookie.refresh_token.set({
-            value: data.session!.refresh_token,
-            httpOnly: true,
-            path: '/',
-          })
-          cookie.access_token.set({
-            value: data.session!.access_token,
-            httpOnly: true,
-            path: '/',
-          })
+          cookie.access_token.value = data.session!.access_token
+          cookie.access_token.httpOnly = true
+          cookie.access_token.path = '/'
+          cookie.refresh_token.value = data.session!.refresh_token
+          cookie.refresh_token.httpOnly = true
+          cookie.refresh_token.path = '/'
           handleHxRequest(headers, set)
           return data.user
         },
