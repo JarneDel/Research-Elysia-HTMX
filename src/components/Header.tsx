@@ -5,7 +5,7 @@ interface props {
 }
 
 export const Header = (props: props) => (
-  <div class="navbar mb-2 shadow-lg bg-neutral text-neutral-content rounded-box">
+  <div class="navbar  bg-base-300">
     <div class="flex-none px-2 mx-2">
       <span class="text-lg font-bold">
         <a href="/">QuizX</a>

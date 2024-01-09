@@ -3,7 +3,8 @@ import { Menu } from '@/components/Header.tsx'
 
 export const accountFragment = (app: Elysia) =>
   app
-    .get('/fragment/account', () => {
+    .get('/fragment/account', ({ set }) => {
+      set.headers['Cache-Control'] = 'public, max-age=604800'
       return (
         <>
           <button
@@ -25,11 +26,17 @@ export const accountFragment = (app: Elysia) =>
                 logout
               </a>
             </li>
+            <li>
+              <a hx-get="/quiz/create" hx-target="main" hx-push-url="true">
+                Create Quiz
+              </a>
+            </li>
           </ul>
         </>
       )
     })
-    .get('/fragment/close', () => {
+    .get('/fragment/close', ({ set }) => {
+      set.headers['Cache-Control'] = 'public, max-age=604800'
       return (
         <>
           <button

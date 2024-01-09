@@ -8,7 +8,6 @@ export const authen = (app: Elysia) =>
   app.derive(async ({ cookie, path, set }) => {
     if (path.startsWith('/auth')) return
     if (path.startsWith('/public')) return
-    if (path.startsWith('/api')) return
     console.log('authen middleware', path)
 
     const { access_token, refresh_token } = cookie

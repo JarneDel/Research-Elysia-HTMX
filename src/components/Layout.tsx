@@ -26,6 +26,7 @@ export const Layout = (props: LayoutProps) => {
           <link href="/public/globals.css" rel="stylesheet" />
           <script src="/public/htmx@1.9.10.min.js"></script>
           <script src="/public/useTheme.js" />
+          <script src="/public/loading-states@1.9.10.js"></script>
           <script>htmx.config.globalViewTransitions = true;</script>
         </head>
         <body>{props.children}</body>

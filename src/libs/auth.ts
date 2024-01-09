@@ -30,7 +30,7 @@ export async function checkAccessToken(cookie: any): Promise<AuthResult> {
   const cachedAccessToken = await redisClient.get(cookie.access_token.value)
   if (cachedAccessToken) {
     console.log('found in redis')
-    return { user: JSON.parse(cachedAccessToken) }
+    return { user: JSON.parse(cachedAccessToken).user }
   }
   const user = await supabase.auth.getUser(cookie.access_token.value)
 
@@ -41,6 +41,7 @@ export async function checkAccessToken(cookie: any): Promise<AuthResult> {
     const refreshed = await supabase.auth.refreshSession({
       refresh_token: cookie.refresh_token.value,
     })
+    console.log({ refreshed })
     if (refreshed.error) {
       console.log('error refreshing session', refreshed.error.message)
       return { error: refreshed.error.message }
