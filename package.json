@@ -13,7 +13,9 @@
     "lint": "eslint --ignore-path .gitignore .",
     "lint:fix": "eslint --ignore-path .gitignore --fix . ",
     "typecheck": "tsc --noEmit && rm tsconfig.tsbuildinfo",
-    "serve": "browser-sync start --config bs-config.cjs"
+    "serve": "browser-sync start --config bs-config.cjs",
+    "---DOCS": "",
+    "docs:generate": "nodemon -e 'ts, tsx' -x \"sleep 1 && curl -s http://localhost:3000/docs/json > ./docs/swagger.json\""
   },
   "dependencies": {
     "@elysiajs/html": "^0.8.0",

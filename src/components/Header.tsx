@@ -1,4 +1,5 @@
 import { User } from '@supabase/supabase-js'
+import { ThemeSwitcher } from '@/components/states/Theme.tsx'
 
 interface props {
   user: User | null | undefined
@@ -41,7 +42,7 @@ export const Header = (props: props) => (
         </li>
       ))}
     </ul>
-
+    <ThemeSwitcher />
     <div class="flex-none relative" id="menu">
       <button
         class="btn btn-square btn-ghost"

@@ -69,6 +69,9 @@ export const auth = (app: Elysia) =>
         },
         {
           cookie: Cookie,
+          detail: {
+            tags: ['View', 'Authentication'],
+          },
         },
       )
       .get(
@@ -135,6 +138,9 @@ export const auth = (app: Elysia) =>
         },
         {
           cookie: Cookie,
+          detail: {
+            tags: ['View', 'Authentication'],
+          },
         },
       ),
   )

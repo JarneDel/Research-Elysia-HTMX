@@ -9,6 +9,9 @@ const app = new Elysia()
   .use(
     swagger({
       autoDarkMode: true,
+      path: '/docs',
+
+      swaggerOptions: {},
     }),
   )
   .use(api)
@@ -17,3 +20,5 @@ const app = new Elysia()
   .listen(3000)
 
 console.log(`🦊 Elysia is running at ${app.server?.url}`)
+
+console.log('hey')

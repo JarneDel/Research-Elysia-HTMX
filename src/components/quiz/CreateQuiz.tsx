@@ -1,13 +1,26 @@
 export const AddAnswer = () => (
   <li class="">
     <button
-      class="btn btn-lg  "
+      class="btn btn-lg px-5 "
       hx-get="/fragment/quiz/page/addAnswer"
       hx-swap="outerHTML"
       hx-include=".answer"
       hx-target="closest li"
     >
-      +
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M5 12h14" />
+        <path d="M12 5v14" />
+      </svg>
     </button>
   </li>
 )
@@ -28,7 +41,7 @@ export const Answer = ({
   <li class="flex w-full bg-base-200 p-2 rounded-box gap-4 relative">
     <AnswerIcon id={id} size={96} />
     <textarea
-      class="textarea sm:input-lg input-ghost sm:h-full answer flex-1 sm:max-h-24 resize-none"
+      class="textarea max-h-12 sm:input-lg input-ghost sm:h-full answer flex-1 sm:max-h-24 resize-none"
       name={`answer${id}`}
       rows="2"
       wrap="soft"
@@ -40,7 +53,7 @@ export const Answer = ({
     <input
       type="checkbox"
       name={`correct-${id}`}
-      class="checkbox checkbox-lg mt-auto checkbox-success correct-answer"
+      class="checkbox checkbox-lg mt-auto checkbox-success correct-answer flex-shrink-0"
       checked={isCorrect}
     />
     {isDeletable && (

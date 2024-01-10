@@ -112,14 +112,14 @@ export const quiz = (app: Elysia) =>
                   hx-put={'/api/quiz/' + data[0].id + '/change-name'}
                   hx-trigger="blur input"
                   name="value"
-                  class="input input-ghost"
+                  class="input input-secondary input-bordered mt-2"
                 />
               </div>
               <div
                 hx-trigger="load"
                 hx-get={'/fragment/quiz/page/' + page + '?quiz=' + params.id}
                 hx-swap="outerHTML"
-                hx-indicator="#spinner"
+                hx-indicator="#quizPage"
               ></div>
               <Loading id="quizPage" />
             </>

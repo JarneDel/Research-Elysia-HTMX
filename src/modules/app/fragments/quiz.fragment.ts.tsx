@@ -52,42 +52,72 @@ export const quiz = (app: Elysia) =>
             .eq('quiz', query.quiz)
             .single()
 
+          console.log(pageData, 'pageData', params.page, query.quiz)
+
           return (
-            <form
-              hx-trigger="input delay:300ms, submit"
-              hx-post={`/api/quiz/${query.quiz}/change-answers/page/${params.page}`}
-              hx-include=".answer, .correct-answer, .page-title"
-              hx-swap="none"
-            >
-              <label class="form-control mb-3">
-                <div class="label-text">Question</div>
-                <input
-                  name="title"
-                  type="text"
-                  class="page-title input input-primary input-bordered"
-                  value={pageData?.question}
-                />
-              </label>
-              <ul class="grid grid-cols-1 md:grid-cols-2 gap-4 md:grid-rows-4 ">
-                {(!pageData || pageData?.answers.length == 0) && (
-                  <>
-                    <Answer id={0} placeholder="Add answer 1" />
-                    <Answer id={1} placeholder="Add answer 2" />
-                    <AddAnswer />
-                  </>
-                )}
-                {pageData?.answers.map((answer: string, index: number) => (
-                  <Answer
-                    id={index}
-                    placeholder={'Add answer' + (index + 1)}
-                    value={answer}
-                    isCorrect={pageData.correct_answers.includes(index)}
-                    isDeletable={index > 1}
+            <div id="page">
+              <form
+                hx-trigger="input delay:300ms, submit"
+                hx-post={`/api/quiz/${query.quiz}/change-answers/page/${params.page}`}
+                hx-include=".answer, .correct-answer, .page-title"
+                hx-swap="none"
+              >
+                <h1 class=""></h1>
+                <label class="form-control mb-3">
+                  <div class="label-text">Question</div>
+                  <input
+                    name="title"
+                    type="text"
+                    class="page-title input input-primary input-bordered"
+                    value={pageData?.question}
                   />
-                ))}
-                {pageData?.answers.length < 6 && <AddAnswer />}
-              </ul>
-            </form>
+                </label>
+                <ul class="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:grid-rows-3 ">
+                  {(!pageData || pageData?.answers.length == 0) && (
+                    <>
+                      <Answer id={0} placeholder="Add answer 1" />
+                      <Answer id={1} placeholder="Add answer 2" />
+                      <AddAnswer />
+                    </>
+                  )}
+                  {pageData?.answers.map((answer: string, index: number) => (
+                    <Answer
+                      id={index}
+                      placeholder={'Add answer' + (index + 1)}
+                      value={answer}
+                      isCorrect={pageData.correct_answers.includes(index)}
+                      isDeletable={index > 1}
+                    />
+                  ))}
+                  {pageData?.answers.length < 6 && <AddAnswer />}
+                </ul>
+              </form>
+              <div class="flex justify-between mt-5">
+                <button
+                  class="btn btn-primary"
+                  hx-get={`/fragment/quiz/page/${
+                    Number(params.page) - 1
+                  }?quiz=${query.quiz}`}
+                  hx-swap="outerHTML"
+                  hx-target="#page"
+                  disabled={Number(params.page) == 1}
+                  hx-trigger="click"
+                >
+                  Previous
+                </button>
+                <button
+                  class="btn btn-primary"
+                  hx-get={`/fragment/quiz/page/${
+                    Number(params.page) + 1
+                  }?quiz=${query.quiz}`}
+                  hx-swap="outerHTML"
+                  hx-target="#page"
+                  hx-trigger="click"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
           )
         },
         {
