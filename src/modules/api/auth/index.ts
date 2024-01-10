@@ -1,6 +1,6 @@
 import { Elysia, t } from 'elysia'
 import { supabase } from '@/libs'
-import { setAuthCookies } from '@/libs/auth.ts'
+import { login, setAuthCookies } from '@/libs/auth.ts'
 import { handleHxRequest } from '@/modules/api/auth/header.ts'
 import { Cookie, RefreshCookie } from '@/types/cookie.type'
 
@@ -42,26 +42,10 @@ export const auth = (app: Elysia) =>
         async ({ body, cookie, set, headers }) => {
           console.log(body)
           console.log({ headers })
-          const { data, error } = await supabase.auth.signInWithPassword(body)
-
-          if (error) return error
-          cookie.access_token.set({
-            value: data.session.access_token,
-            httpOnly: true,
-            path: '/',
-            // maxAge: 60 * 5,
-            sameSite: 'lax',
-          })
-          cookie.refresh_token.set({
-            value: data.session.refresh_token,
-            httpOnly: true,
-            path: '/',
-            // maxAge: 60 * 60 * 24 * 30,
-            sameSite: 'lax',
-          })
+          const { user, session, error } = await login(body, cookie)
 
           handleHxRequest(headers, set)
-          return data.user
+          return user
         },
         {
           body: t.Object({
@@ -86,8 +70,6 @@ export const auth = (app: Elysia) =>
       .get(
         '/sign-out',
         async ({ cookie, set, headers }) => {
-          const { error } = await supabase.auth.signOut()
-          if (error) return error
           cookie.refresh_token.remove({
             path: '/',
             sameSite: 'lax',

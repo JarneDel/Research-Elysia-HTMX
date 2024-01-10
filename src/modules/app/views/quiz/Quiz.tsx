@@ -1,5 +1,6 @@
 import { Elysia, t } from 'elysia'
 import { Alert } from '@/components/errors/Alerts.tsx'
+import { Loading } from '@/components/states/loading.tsx'
 import { supabase } from '@/libs'
 import { checkAccessToken } from '@/libs/auth.ts'
 import { Cookie } from '@/types/cookie.type.ts'
@@ -68,7 +69,7 @@ export const quiz = (app: Elysia) =>
       )
       .get(
         '/:id/edit',
-        async ({ cookie, params }) => {
+        async ({ cookie, params, query }) => {
           const { user, error } = await checkAccessToken(cookie)
           if (error) {
             return <Alert severity="error">Unauthorized</Alert>
@@ -90,6 +91,17 @@ export const quiz = (app: Elysia) =>
               </Alert>
             )
           }
+          const page = query.page ? parseInt(query.page) : 1
+
+          const { data: pageData, count: pageCount } = await supabase
+            .from('page')
+            .select()
+            .eq('quiz', params.id)
+            .eq('page', page)
+            .single()
+
+          console.log(pageCount, 'pageCount')
+          console.log(pageData, 'pageData')
 
           return (
             <>
@@ -98,23 +110,18 @@ export const quiz = (app: Elysia) =>
                   type="text"
                   value={data[0].name}
                   hx-put={'/api/quiz/' + data[0].id + '/change-name'}
-                  hx-trigger="blur"
+                  hx-trigger="blur input"
+                  name="value"
                   class="input input-ghost"
                 />
               </div>
-
-              <ul class="menu">
-                <li></li>
-                <li>
-                  <button
-                    class="btn btn-ghost"
-                    hx-get="/fragment/quiz/page/addAnswer/"
-                    hx-target=" li"
-                  >
-                    +
-                  </button>
-                </li>
-              </ul>
+              <div
+                hx-trigger="load"
+                hx-get={'/fragment/quiz/page/' + page + '?quiz=' + params.id}
+                hx-swap="outerHTML"
+                hx-indicator="#spinner"
+              ></div>
+              <Loading id="quizPage" />
             </>
           )
         },
@@ -124,6 +131,9 @@ export const quiz = (app: Elysia) =>
             tags: ['HTMX', 'Quiz'],
             description: 'Get a quiz',
           },
+          query: t.Object({
+            page: t.Optional(t.String()),
+          }),
           headers: t.Object({
             'HX-Request': t.Optional(t.String()),
           }),

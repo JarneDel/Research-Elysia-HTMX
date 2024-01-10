@@ -1,7 +1,6 @@
-import { Elysia, t } from 'elysia'
-import { Layout } from '@/components/Layout.tsx'
+import { Elysia } from 'elysia'
 import { initHtmx } from '@/hooks/htmx.hook.tsx'
-import { checkAccessToken, login } from '@/libs/auth.ts'
+import { checkAccessToken } from '@/libs/auth.ts'
 import { Cookie } from '@/types/cookie.type.ts'
 
 export const auth = (app: Elysia) =>

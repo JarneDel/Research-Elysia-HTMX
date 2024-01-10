@@ -1,8 +1,6 @@
 import { Elysia } from 'elysia'
 import { checkAccessToken } from '@/libs/auth.ts'
 import { redisClient } from '@/libs/redis.ts'
-import { supabase } from '@/libs/supabase'
-import { Cookie } from '@/types/cookie.type.ts'
 
 export const authen = (app: Elysia) =>
   app.derive(async ({ cookie, path, set }) => {
@@ -18,8 +16,9 @@ export const authen = (app: Elysia) =>
       return
     }
     if (!refresh_token?.value) {
-      set.headers['HX-Redirect'] = '/auth/sign-in'
-      set.redirect = '/auth/sign-in'
+      set.headers['HX-Redirect'] = '/api/auth/sign-out'
+      set.redirect = '/api/auth/sign-out'
+      console.log('no refresh token')
       return
     }
     const cachedAccessToken = await redisClient.get(access_token.value)
@@ -27,7 +26,6 @@ export const authen = (app: Elysia) =>
       return
     }
     const result = await checkAccessToken(cookie)
-    console.log({ result })
     if (result.error) {
       set.headers['HX-Redirect'] = '/auth/sign-in'
       set.redirect = '/auth/sign-in'

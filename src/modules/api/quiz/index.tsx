@@ -136,3 +136,90 @@ export const quiz = (app: Elysia) =>
         },
       },
     )
+    .post(
+      '/quiz/:id/change-answers/page/:page',
+      async ({ body, params, cookie }) => {
+        // todo: error handling
+        console.log(body)
+        const { user, error } = await checkAccessToken(cookie)
+        const { data: quizId, error: quizError } = await supabase
+          .from('quiz')
+          .select()
+          .eq('id', params.id)
+          .eq('created_by', user?.id)
+          .single()
+
+        // check if page exists
+        const { data: page, error: pageError } = await supabase
+          .from('page')
+          .select()
+          .eq('quiz', quizId.id)
+          .eq('page', params.page)
+          .single()
+        console.log(page.id, 'page id')
+
+        // update or create page
+        const result = await supabase
+          .from('page')
+          .upsert({
+            id: page?.id,
+            quiz: quizId.id,
+            page: params.page,
+            // ARRAY INT_2
+            correct_answers: calculateCorrectAnswers(body),
+            // ARRAY TEXT
+            answers: getAnswers(body),
+            question: body.title,
+          })
+          .select('id')
+        console.log(result.status)
+      },
+      {
+        detail: {
+          description: 'Change answers of a quiz',
+          tags: ['Quiz'],
+        },
+        body: t.Object({
+          ...createBody(),
+          title: t.Optional(t.String()),
+        }),
+        cookie: Cookie,
+      },
+    )
+
+const createBody = (max = 6) => {
+  const answerFields: { [key: string]: any } = {}
+  for (let i = 0; i < max; i++) {
+    answerFields[`answer${i}`] = t.Optional(t.String())
+    answerFields[`correct-${i}`] = t.Optional(
+      t.String({
+        pattern: 'on|off',
+      }),
+    )
+  }
+  return answerFields
+}
+
+export const calculateCorrectAnswers = (body: any): number[] => {
+  const correctAnswers: number[] = []
+  for (const [key, value] of Object.entries(body)) {
+    if (key.includes('correct-') && value === 'on') {
+      const index = parseInt(key.replace('correct-', ''))
+      correctAnswers.push(index)
+    }
+  }
+  return correctAnswers
+}
+
+const getAnswers = (body: any): string[] => {
+  const answers: string[] = []
+  for (const [key, value] of Object.entries(body)) {
+    if (key.includes('answer')) {
+      const index = parseInt(key.replace('answer', ''))
+      if (typeof value === 'string') {
+        answers[index] = value
+      }
+    }
+  }
+  return answers
+}

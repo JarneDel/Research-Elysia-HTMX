@@ -6,5 +6,5 @@ export const Cookie = t.Object({
 })
 
 export const RefreshCookie = t.Object({
-  refresh_token: t.String(),
+  refresh_token: t.Optional(t.String()),
 })

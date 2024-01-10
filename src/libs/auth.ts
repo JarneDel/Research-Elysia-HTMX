@@ -4,22 +4,30 @@ import { supabase } from '@/libs/supabase.ts'
 
 export interface AuthResult {
   user?: User
-  error?: String
+  error?: string
   session?: Session
 }
 
 export function setAuthCookies(cookie: any, session: Session) {
-  cookie.access_token.value = session.access_token
-  cookie.access_token.httpOnly = true
-  cookie.access_token.path = '/'
-  cookie.access_token.maxAge = 60 * 5
-  cookie.access_token.sameSite = 'strict'
-
-  cookie.refresh_token.maxAge = 60 * 60 * 24 * 30
-  cookie.refresh_token.sameSite = 'strict'
-  cookie.refresh_token.path = '/'
-  cookie.refresh_token.httpOnly = true
-  cookie.refresh_token.value = session.refresh_token
+  cookie.access_token.set({
+    value: session.access_token
+      ? session.access_token
+      : cookie.access_token.value,
+    httpOnly: true,
+    path: '/',
+    sameSite: 'strict',
+    session: false,
+  })
+  cookie.refresh_token.set({
+    value: session.refresh_token
+      ? session.refresh_token
+      : cookie.refresh_token.value,
+    httpOnly: true,
+    path: '/',
+    sameSite: 'strict',
+    session: false,
+  })
+  console.log({ at: cookie.access_token.value, rt: cookie.refresh_token.value })
 }
 
 // Main function
@@ -27,10 +35,14 @@ export async function checkAccessToken(cookie: any): Promise<AuthResult> {
   if (!cookie.access_token.value) {
     return { error: 'Access token is required' }
   }
+  if (!cookie.refresh_token.value) {
+    return { error: 'Refresh token is required' }
+  }
   const cachedAccessToken = await redisClient.get(cookie.access_token.value)
   if (cachedAccessToken) {
-    console.log('found in redis')
-    return { user: JSON.parse(cachedAccessToken).user }
+    const user = JSON.parse(cachedAccessToken)
+    console.log('found in redis', user.id)
+    return { user }
   }
   const user = await supabase.auth.getUser(cookie.access_token.value)
 
@@ -53,8 +65,7 @@ export async function checkAccessToken(cookie: any): Promise<AuthResult> {
     )
     return { user: refreshed.data.user!, session: refreshed.data.session! }
   }
-  // @ts-ignore
-  await setAccessTokenToRedis(cookie.access_token.value, user.data!)
+  await setAccessTokenToRedis(cookie.access_token.value, user.data.user!)
   return { user: user.data.user! }
 }
 

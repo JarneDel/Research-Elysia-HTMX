@@ -4,6 +4,22 @@ interface props {
   user: User | null | undefined
 }
 
+export const headerLinks = [
+  {
+    name: 'Home',
+    href: '/',
+  },
+  {
+    name: 'Create Quiz',
+    href: '/quiz/create',
+  },
+  // todo make only visible when logged out
+  // {
+  //   name: 'Sign In',
+  //   href: '/auth/sign-in',
+  // },
+]
+
 export const Header = (props: props) => (
   <div class="navbar  bg-base-300">
     <div class="flex-none px-2 mx-2">
@@ -11,11 +27,21 @@ export const Header = (props: props) => (
         <a href="/">QuizX</a>
       </span>
     </div>
-    <div class="flex-1 px-2 mx-2">
-      <div class="items-stretch hidden lg:flex">
-        <a class="btn btn-ghost btn-sm rounded-btn">Home</a>
-      </div>
-    </div>
+    <ul class="flex-1 menu menu-horizontal rounded-box">
+      {headerLinks.map((link, index) => (
+        <li>
+          <a
+            class="btn btn-ghost btn-sm"
+            hx-push-url="true"
+            hx-get={link.href}
+            hx-target="main"
+          >
+            {link.name}
+          </a>
+        </li>
+      ))}
+    </ul>
+
     <div class="flex-none relative" id="menu">
       <button
         class="btn btn-square btn-ghost"
