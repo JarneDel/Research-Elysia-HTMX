@@ -1,5 +1,5 @@
 import { Elysia } from 'elysia'
-import { Header } from '@/components/Header.tsx'
+import { Header } from '@/components/header/Header.tsx'
 import { Layout } from '@/components/Layout.tsx'
 import { checkAccessToken } from '@/libs/auth.ts'
 

@@ -1,5 +1,6 @@
 import { Elysia, t } from 'elysia'
 import { AddAnswer, Answer } from '@/components/quiz/CreateQuiz.tsx'
+import { MediaUpload } from '@/components/quiz/MediaUpload.tsx'
 import { supabase } from '@/libs'
 import { checkAccessToken } from '@/libs/auth.ts'
 import { Cookie } from '@/types/cookie.type.ts'
@@ -44,34 +45,59 @@ export const quiz = (app: Elysia) =>
       .get(
         '/page/:page',
         async ({ params, cookie, query }) => {
-          const { user, error } = await checkAccessToken(cookie)
-          const { data: pageData } = await supabase
+          const { user } = await checkAccessToken(cookie)
+          const {
+            data: pageData,
+            error,
+            status,
+          } = await supabase
             .from('page')
             .select()
             .eq('page', params.page)
             .eq('quiz', query.quiz)
             .single()
+          if (error && status !== 406) {
+            return (
+              <div class="alert alert-error">
+                <span>Something went wrong: {error.message}</span>
+              </div>
+            )
+          }
 
           console.log(pageData, 'pageData', params.page, query.quiz)
 
           return (
             <div id="page">
-              <form
+              <div
                 hx-trigger="input delay:300ms, submit"
                 hx-post={`/api/quiz/${query.quiz}/change-answers/page/${params.page}`}
                 hx-include=".answer, .correct-answer, .page-title"
                 hx-swap="none"
               >
-                <h1 class=""></h1>
+                <h1 class="text-lg font-bold">Question {params.page}</h1>
                 <label class="form-control mb-3">
                   <div class="label-text">Question</div>
                   <input
                     name="title"
                     type="text"
-                    class="page-title input input-primary input-bordered"
+                    class="page-title input input-primary input-bordered text-center input-lg font-bold"
                     value={pageData?.question}
+                    placeholder="start typing your question"
                   />
                 </label>
+                <div
+                  id="media"
+                  class="container max-w-2xl mx-auto border-accent border-2 rounded-md p-2 mb-3"
+                >
+                  <MediaUpload
+                    postURL={`/api/quiz/${query.quiz}/upload_media/${params.page}`}
+                    progressID="progress"
+                    inputID="media-input"
+                    formID="media-form"
+                    target="#media"
+                  />
+                </div>
+
                 <ul class="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:grid-rows-3 ">
                   {(!pageData || pageData?.answers.length == 0) && (
                     <>
@@ -91,7 +117,7 @@ export const quiz = (app: Elysia) =>
                   ))}
                   {pageData?.answers.length < 6 && <AddAnswer />}
                 </ul>
-              </form>
+              </div>
               <div class="flex justify-between mt-5">
                 <button
                   class="btn btn-primary"

@@ -1,7 +1,8 @@
 import { Elysia, t } from 'elysia'
 import { Success } from '@/components/icons/StatusIcons.tsx'
 import { checkAccessToken } from '@/libs/auth.ts'
-import { supabase } from '@/libs/supabase'
+import { updatePageMediaUrl } from '@/libs/quiz.database.ts'
+import { supabase, uploadMediaFile } from '@/libs/supabase'
 import { Cookie } from '@/types/cookie.type.ts'
 
 export const quiz = (app: Elysia) =>
@@ -156,7 +157,7 @@ export const quiz = (app: Elysia) =>
           .eq('quiz', quizId.id)
           .eq('page', params.page)
           .single()
-        console.log(page.id, 'page id')
+        console.log(page.id, 'pagmedia_urle id')
 
         // update or create page
         const result = await supabase
@@ -184,6 +185,57 @@ export const quiz = (app: Elysia) =>
           title: t.Optional(t.String()),
         }),
         cookie: Cookie,
+      },
+    )
+    .post(
+      '/quiz/:id/upload_media/:page',
+      async ({ body, params, cookie }) => {
+        console.log('uploading media')
+        const file = body.media
+
+        const account = await checkAccessToken(cookie)
+        // check ownership of quiz
+        const result = await supabase
+          .from('quiz')
+          .select()
+          .eq('id', params.id)
+          .eq('created_by', account.user?.id)
+          .single()
+        if (!result.data) {
+          console.log('not authorized')
+          // todo: return htmx error
+          return {
+            status: 401,
+            message: 'Unauthorized',
+          }
+        }
+
+        const { error, publicUrl } = await uploadMediaFile(
+          file,
+          params.id + '/' + params.page,
+        )
+        console.log(error, 'error')
+
+        console.log(publicUrl, 'publicUrl')
+        // save media url to page
+        // todo: err handling
+        await updatePageMediaUrl(params.id, params.page, publicUrl!)
+
+        return <img alt={file.name} src={publicUrl} />
+      },
+      {
+        body: t.Object({
+          media: t.File({
+            maxSize: 1024 * 1024 * 5,
+            accept: ['image/*'],
+          }),
+        }),
+        cookie: Cookie,
+        detail: {
+          description: 'Upload media to a quiz page',
+          tags: ['Quiz'],
+        },
+        type: 'multipart/form-data',
       },
     )
 

@@ -1,4 +1,5 @@
 import { User } from '@supabase/supabase-js'
+import { HeaderMenuDropdown } from '@/components/header/HeaderMenuDropdown.tsx'
 import { ThemeSwitcher } from '@/components/states/Theme.tsx'
 
 interface props {
@@ -43,17 +44,7 @@ export const Header = (props: props) => (
       ))}
     </ul>
     <ThemeSwitcher />
-    <div class="flex-none relative" id="menu">
-      <button
-        class="btn btn-square btn-ghost"
-        hx-trigger="click"
-        hx-get="/fragment/account"
-        hx-target="#menu"
-        hx-swap="innerHTML"
-      >
-        <Menu />
-      </button>
-    </div>
+    <HeaderMenuDropdown />
   </div>
 )
 

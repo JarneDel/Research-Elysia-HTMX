@@ -1,6 +1,6 @@
 export const ThemeSwitcher = () => {
   const themes = [
-    'default',
+    'system',
     'light',
     'dark',
     'cupcake',
