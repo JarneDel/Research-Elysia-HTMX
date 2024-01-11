@@ -1,0 +1,5 @@
+.env
+/infra
+Dockerfile
+/test
+node_modules

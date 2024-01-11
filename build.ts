@@ -1,13 +1,22 @@
-import { copyFileSync } from 'fs'
+import { cp, readdir } from 'fs'
 
 await Bun.build({
   entrypoints: ['./src/index.ts'],
-  outdir: './dist/bun',
+  outdir: './build',
   minify: true,
   target: 'bun',
   sourcemap: 'external',
 })
+// copy public folder
+// get all files in public folder
+readdir('./public', (err, files) => {
+  if (err) throw err
 
-copyFileSync('dist/index.d.ts', 'dist/bun/index.d.ts')
+  files.forEach(file => {
+    cp(`./public/${file}`, `./build/public/${file}`, err => {
+      if (err) throw err
+    })
+  })
+})
 
 export {}

@@ -221,7 +221,11 @@ export const quiz = (app: Elysia) =>
         // todo: err handling
         await updatePageMediaUrl(params.id, params.page, publicUrl!)
 
-        return <img alt={file.name} src={publicUrl} />
+        return (
+          <div class="container max-w-2xl mx-auto border-accent border-2 rounded-md p-2 mb-3">
+            <img alt={file.name} src={publicUrl} />)
+          </div>
+        )
       },
       {
         body: t.Object({

@@ -46,6 +46,28 @@ export const quiz = (app: Elysia) =>
         '/page/:page',
         async ({ params, cookie, query }) => {
           const { user } = await checkAccessToken(cookie)
+
+          const quiz = await supabase
+            .from('quiz')
+            .select(
+              `
+              created_by,
+              id,
+              name,
+              page (
+                id,
+                question,
+                answers,
+                correct_answers,
+                page
+              )
+          `,
+            )
+            .eq('id', query.quiz)
+            .eq('created_by', user?.id)
+            .eq('page.page', params.page)
+          console.log(quiz, 'quiz', params.page, query.quiz)
+
           const {
             data: pageData,
             error,

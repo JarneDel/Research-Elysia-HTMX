@@ -1,0 +1,28 @@
+version: '3'
+services:
+  redis:
+    image: redis:latest
+    expose:
+      - '6379'
+    networks:
+        - backend
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+
+  api:
+    build:
+      context: ../
+      dockerfile: Dockerfile
+    ports:
+      - '3000:3000'
+    depends_on:
+        - redis
+    networks:
+        - backend
+    env_file:
+      - ../.env.production.local
+
+networks:
+    backend:
+
+
