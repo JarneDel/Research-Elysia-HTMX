@@ -1,6 +1,7 @@
 import { Elysia, t } from 'elysia'
 import { AddAnswer, Answer } from '@/components/quiz/CreateQuiz.tsx'
 import { MediaUpload } from '@/components/quiz/MediaUpload.tsx'
+import { ViewMedia } from '@/components/quiz/ViewMedia.tsx'
 import { checkAccessToken } from '@/libs/auth.ts'
 import { quizWithPage } from '@/repository/quiz.database.ts'
 import { Cookie } from '@/types/cookie.type.ts'
@@ -94,23 +95,12 @@ export const quiz = (app: Elysia) =>
                       target="#media"
                     />
                   ) : (
-                    <div class="flex justify-center items-center w-full max-h-96">
-                      <div class="indicator">
-                        <button
-                          class="indicator-item badge badge-error"
-                          hx-delete={
-                            '/api/quiz/' + query.quiz + '/media/' + params.page
-                          }
-                          hx-target="#media"
-                          hx-swap="innerHTML"
-                        >
-                          remove
-                        </button>
-                        <div class="max-h-48">
-                          <img src={pageData.media_url} alt="" class="" />
-                        </div>
-                      </div>
-                    </div>
+                    <ViewMedia
+                      mediaURL={pageData.media_url}
+                      quizId={query.quiz!}
+                      page={params.page}
+                      modalId="media_modal"
+                    />
                   )}
                 </div>
 

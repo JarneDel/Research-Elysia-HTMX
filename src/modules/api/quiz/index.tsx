@@ -1,6 +1,7 @@
 import { Elysia, t } from 'elysia'
 import { Success } from '@/components/icons/StatusIcons.tsx'
 import { MediaUpload } from '@/components/quiz/MediaUpload.tsx'
+import { ViewMedia } from '@/components/quiz/ViewMedia.tsx'
 import { checkAccessToken } from '@/libs/auth.ts'
 import { supabase } from '@/libs/supabase'
 import { uploadMediaFile } from '@/repository/media.storage.ts'
@@ -224,8 +225,16 @@ export const quiz = (app: Elysia) =>
         await updatePageMediaUrl(params.id, params.page, publicUrl!)
 
         return (
-          <div class="container max-w-2xl mx-auto border-accent border-2 rounded-md p-2 mb-3">
-            <img alt={file.name} src={publicUrl} />)
+          <div
+            id="media"
+            class="container max-w-2xl mx-auto border-accent border-2 rounded-md p-2 mb-3"
+          >
+            <ViewMedia
+              quizId={params.id}
+              page={params.page}
+              mediaURL={publicUrl!}
+              modalId="new_media_modal"
+            />
           </div>
         )
       },
