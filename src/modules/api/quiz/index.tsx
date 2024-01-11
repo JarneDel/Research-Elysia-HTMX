@@ -1,4 +1,5 @@
 import { Elysia, t } from 'elysia'
+import { Alert } from '@/components/errors/Alerts.tsx'
 import { Success } from '@/components/icons/StatusIcons.tsx'
 import { MediaUpload } from '@/components/quiz/MediaUpload.tsx'
 import { ViewMedia } from '@/components/quiz/ViewMedia.tsx'
@@ -18,11 +19,9 @@ export const quiz = (app: Elysia) =>
         if (!isLegal) {
           if (isHtmx) {
             return (
-              <>
-                <div class="alert alert-error">
-                  <span>Title not long enough</span>
-                </div>
-              </>
+              <Alert severity="error">
+                <span>Title not long enough</span>
+              </Alert>
             )
           }
           return {
@@ -49,11 +48,9 @@ export const quiz = (app: Elysia) =>
             if (result.status === 201) {
               if (!result.data || result.data.length === 0) {
                 return (
-                  <>
-                    <div class="alert alert-error">
-                      <span>Something went wrong: {result.status}</span>
-                    </div>
-                  </>
+                  <Alert severity="error">
+                    <span>Something went wrong: {result.status}</span>
+                  </Alert>
                 )
               }
               return (
@@ -61,7 +58,7 @@ export const quiz = (app: Elysia) =>
                   <div
                     class="alert alert-success"
                     hx-trigger="load delay:1s once"
-                    hx-get={'/quiz/' + result.data[0]?.id}
+                    hx-get={'/quiz/' + result.data[0]?.id + '/edit'}
                   >
                     <Success />
                     <span>Quiz created, redirecting..</span>
@@ -70,11 +67,9 @@ export const quiz = (app: Elysia) =>
               )
             } else {
               return (
-                <>
-                  <div class="alert alert-error">
-                    <span>Something went wrong: {result.status}</span>
-                  </div>
-                </>
+                <Alert severity="error">
+                  <span>Something went wrong: {result.status}</span>
+                </Alert>
               )
             }
           }
@@ -233,7 +228,8 @@ export const quiz = (app: Elysia) =>
               quizId={params.id}
               page={params.page}
               mediaURL={publicUrl!}
-              modalId="new_media_modal"
+              modalId="new-media-modal"
+              allowDelete={true}
             />
           </div>
         )
@@ -258,26 +254,14 @@ export const quiz = (app: Elysia) =>
       async ({ params, cookie }) => {
         const user = await checkAccessToken(cookie)
         if (!user.user) {
-          return (
-            <div class="alert alert-error">
-              <span>Unauthorized</span>
-            </div>
-          )
+          return <Alert severity="error">Unauthorized</Alert>
         }
         const page = await quizWithPage(params.id, user.user?.id, params.page)
         if (!page.data) {
-          return (
-            <div class="alert alert-error">
-              <span>Unauthorized</span>
-            </div>
-          )
+          return <Alert severity="error">Unauthorized</Alert>
         }
         if (page.data.page[0]?.media_url === null) {
-          return (
-            <div class="alert alert-warning">
-              <span>No media to delete</span>
-            </div>
-          )
+          return <Alert severity="warning">No media to delete</Alert>
         }
 
         const { error } = await supabase
@@ -295,9 +279,9 @@ export const quiz = (app: Elysia) =>
 
         return (
           <>
-            <div class="alert alert-success">
-              <span>Media deleted</span>
-            </div>
+            <Alert severity="warning" class="py-2">
+              Media deleted
+            </Alert>
             <MediaUpload
               postURL={`/api/quiz/${page.data.id}/upload_media/${params.page}`}
               progressID="progress"
@@ -316,6 +300,21 @@ export const quiz = (app: Elysia) =>
         },
       },
     )
+    .delete('/quiz/:id', async ({ params, cookie, set }) => {
+      const user = await checkAccessToken(cookie)
+      if (!user.user) {
+        return <Alert severity="error">Unauthorized</Alert>
+      }
+      const { error: quizError } = await supabase
+        .from('quiz')
+        .delete()
+        .eq('id', params.id)
+        .eq('created_by', user.user?.id)
+      if (quizError) {
+        return <Alert severity="error">Something went wrong</Alert>
+      }
+      set.headers['HX-Redirect'] = '/quiz/my'
+    })
 
 const createBody = (max = 6) => {
   const answerFields: { [key: string]: any } = {}

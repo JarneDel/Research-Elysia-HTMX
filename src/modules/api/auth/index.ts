@@ -2,7 +2,7 @@ import { Elysia, t } from 'elysia'
 import { supabase } from '@/libs'
 import { login, setAuthCookies } from '@/libs/auth.ts'
 import { handleHxRequest } from '@/modules/api/auth/header.ts'
-import { Cookie, RefreshCookie } from '@/types/cookie.type'
+import { Cookie } from '@/types/cookie.type'
 
 export const auth = (app: Elysia) =>
   app.group('/auth', app => {
@@ -86,21 +86,6 @@ export const auth = (app: Elysia) =>
             description: 'Sign out a user',
             tags: ['Authentication'],
           },
-        },
-      )
-      .get(
-        'refresh',
-        async ({ cookie: { refresh_token } }) => {
-          const { data, error } = await supabase.auth.refreshSession({
-            refresh_token: refresh_token.toString(),
-          })
-
-          if (error) return error
-
-          return data.user
-        },
-        {
-          cookie: RefreshCookie,
         },
       )
   })

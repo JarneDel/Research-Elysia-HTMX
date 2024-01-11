@@ -38,14 +38,15 @@ export const quiz = (app: Elysia) =>
       )
       .get('/page/plusbutton', () => <AddAnswer />, {
         detail: {
-          tags: ['Fragment', 'Quiz'],
+          tags: ['Fragment', 'Quiz', 'Editor'],
           description: 'Add possible answer to the question',
         },
-        headers: t.Object({}),
+        cookie: Cookie,
       })
       .get(
         '/page/:page',
-        async ({ params, cookie, query }) => {
+        async ({ params, cookie, query, set }) => {
+          set.headers['Cache-Control'] = 'no-cache'
           const { user } = await checkAccessToken(cookie)
           // todo error handling for failed access token
 
@@ -64,27 +65,33 @@ export const quiz = (app: Elysia) =>
           const pageData = data?.page[0]
 
           return (
-            <div id="page">
+            <div
+              id="page"
+              hx-trigger="load"
+              hx-target="#question_number"
+              hx-swap="innerHTML"
+              hx-get={`/fragment/quiz/page/${params.page}/title`}
+            >
               <div
                 hx-trigger="input delay:300ms, submit"
                 hx-post={`/api/quiz/${query.quiz}/change-answers/page/${params.page}`}
                 hx-include=".answer, .correct-answer, .page-title"
                 hx-swap="none"
               >
-                <h1 class="text-lg font-bold">Question {params.page}</h1>
-                <label class="form-control mb-3">
-                  <div class="label-text">Question</div>
-                  <input
-                    name="title"
-                    type="text"
-                    class="page-title input input-primary input-bordered text-center input-lg font-bold"
-                    value={pageData?.question}
-                    placeholder="start typing your question"
-                  />
-                </label>
+                <div class="tooltip w-full my-3" data-tip="Question">
+                  <label class="form-control">
+                    <input
+                      name="title"
+                      type="text"
+                      class="page-title input input-primary input-bordered text-center input-lg font-bold bg-base-200"
+                      value={pageData?.question}
+                      placeholder="start typing your question"
+                    />
+                  </label>
+                </div>
                 <div
                   id="media"
-                  class="container max-w-2xl mx-auto border-accent border-2 rounded-md p-2 mb-3"
+                  class="container max-w-2xl mx-auto border-2 rounded-md p-2 mb-3 bg-base-200"
                 >
                   {!pageData?.media_url ? (
                     <MediaUpload
@@ -100,6 +107,7 @@ export const quiz = (app: Elysia) =>
                       quizId={query.quiz!}
                       page={params.page}
                       modalId="media_modal"
+                      allowDelete={true}
                     />
                   )}
                 </div>
@@ -158,11 +166,14 @@ export const quiz = (app: Elysia) =>
             quiz: t.Optional(t.String()),
           }),
           detail: {
-            tags: ['Fragment', 'Quiz'],
+            tags: ['Fragment', 'Quiz', 'Editor'],
             description: 'Get a quiz',
           },
         },
-      ),
+      )
+      .get('/page/:page/title', async ({ params, cookie, query }) => {
+        return `Question ${params.page}`
+      }),
   )
 
 function createAnswerField(max = 6) {

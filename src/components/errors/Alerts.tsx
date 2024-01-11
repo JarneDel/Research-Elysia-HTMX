@@ -8,11 +8,12 @@ import {
 interface props {
   children?: JSX.Element | JSX.Element[] | string
   severity: 'error' | 'success' | 'info' | 'warning'
+  class?: string
 }
 
 export const Alert = (props: props) => (
   <>
-    <div class={'alert alert-' + props.severity}>
+    <div class={'alert alert-' + props.severity + ' ' + props.class}>
       <span>{switchAlertIcon(props.severity)}</span>
       <span>{props.children}</span>
     </div>

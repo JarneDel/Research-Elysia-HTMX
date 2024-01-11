@@ -36,6 +36,7 @@ export const quizWithPage = async (
               created_by,
               id,
               name,
+              isDraft,
               page (
                 id,
                 question,

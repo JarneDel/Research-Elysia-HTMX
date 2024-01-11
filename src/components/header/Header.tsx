@@ -8,13 +8,10 @@ interface props {
 
 export const headerLinks = [
   {
-    name: 'Home',
-    href: '/',
+    name: 'My Quizzes',
+    href: '/quiz/my',
   },
-  {
-    name: 'Create Quiz',
-    href: '/quiz/create',
-  },
+
   // todo make only visible when logged out
   // {
   //   name: 'Sign In',
@@ -37,12 +34,22 @@ export const Header = (props: props) => (
             hx-push-url="true"
             hx-get={link.href}
             hx-target="main"
+            href={link.href}
           >
             {link.name}
           </a>
         </li>
       ))}
     </ul>
+    <a
+      href="/quiz/create"
+      hx-get="/quiz/create"
+      hx-push-url="true"
+      hx-target="main"
+      class="btn "
+    >
+      Create
+    </a>
     <ThemeSwitcher />
     <HeaderMenuDropdown />
   </div>

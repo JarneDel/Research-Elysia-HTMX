@@ -26,7 +26,7 @@ export const HeaderMenuDropdown = () => {
                 hx-push-url="true"
                 hx-get={link.href}
                 hx-target={link.target}
-                href="#"
+                href={link.href}
               >
                 {link.name}
               </a>

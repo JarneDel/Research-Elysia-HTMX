@@ -23,7 +23,9 @@ export const initHtmx = (app: Elysia): Elysia =>
     return (
       <Layout>
         <Header user={authResult.user} />
-        <main class="container">{response as JSX.Element}</main>
+        <main class="bg-base-100 text-base-content">
+          {response as JSX.Element}
+        </main>
       </Layout>
     )
   })

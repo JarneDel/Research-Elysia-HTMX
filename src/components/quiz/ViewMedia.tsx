@@ -3,6 +3,7 @@ export interface props {
   page: string
   mediaURL: string
   modalId: string
+  allowDelete?: boolean
 }
 
 export const ViewMedia = (props: props) => {
@@ -10,14 +11,16 @@ export const ViewMedia = (props: props) => {
     <>
       <div class="flex justify-center items-center w-full relative">
         <div class="avatar indicator max-h-96">
-          <button
-            class="indicator-item badge badge-error"
-            hx-delete={'/api/quiz/' + props.quizId + '/media/' + props.page}
-            hx-target="#media"
-            hx-swap="innerHTML"
-          >
-            remove
-          </button>
+          {props.allowDelete && (
+            <button
+              class="indicator-item badge badge-error"
+              hx-delete={'/api/quiz/' + props.quizId + '/media/' + props.page}
+              hx-target="#media"
+              hx-swap="innerHTML"
+            >
+              remove
+            </button>
+          )}
           <div class="max-h-96">
             <img src={props.mediaURL} alt="" class="h-full" />
           </div>

@@ -84,7 +84,11 @@
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border-border min-w-0;
+  }
+
+  .full-height {
+    height: calc(100vh - 4.5rem);
   }
 
   .my-indicator{

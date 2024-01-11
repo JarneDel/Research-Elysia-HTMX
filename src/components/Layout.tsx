@@ -23,11 +23,11 @@ export const Layout = (props: LayoutProps) => {
             href="/public/favicon.ico"
           ></link>
           <title>{title}</title>
-          <link href="/public/globals.css" rel="stylesheet" />
+          {/*important to load first*/}
           <script src="/public/htmx@1.9.10.min.js"></script>
-          <script src="/public/useTheme.js" />
-          <script src="/public/loading-states@1.9.10.js"></script>
+          <script defer src="/public/useTheme.js" />
           <script>htmx.config.globalViewTransitions = true;</script>
+          <link href="/public/globals.css" rel="stylesheet" />
         </head>
         <body>{props.children}</body>
       </html>
