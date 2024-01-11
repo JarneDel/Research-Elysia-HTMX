@@ -16,8 +16,9 @@ export function setAuthCookies(cookie: any, session: Session) {
     httpOnly: true,
     path: '/',
     sameSite: 'strict',
-    session: false,
+    maxAge: 60 * 5 * 60, // 5 hours
   })
+  // todo: check if expiration token works with refresh
   cookie.refresh_token.set({
     value: session.refresh_token
       ? session.refresh_token
@@ -25,44 +26,49 @@ export function setAuthCookies(cookie: any, session: Session) {
     httpOnly: true,
     path: '/',
     sameSite: 'strict',
-    session: false,
+    maxAge: 60 * 60 * 24 * 30,
   })
-  console.log({ at: cookie.access_token.value, rt: cookie.refresh_token.value })
 }
 
 // Main function
+const debug = false
 export async function checkAccessToken(cookie: any): Promise<AuthResult> {
-  if (!cookie.access_token.value) {
-    return { error: 'Access token is required' }
-  }
   if (!cookie.refresh_token.value) {
     return { error: 'Refresh token is required' }
   }
-  const cachedAccessToken = await redisClient.get(cookie.access_token.value)
-  if (cachedAccessToken) {
-    const user = JSON.parse(cachedAccessToken)
-    console.log('found in redis', user.id)
-    return { user }
+  if (cookie.access_token.value) {
+    debug && console.log('reading from redis')
+    const cachedAccessToken = await redisClient.get(cookie.access_token.value)
+    if (cachedAccessToken) {
+      const user = JSON.parse(cachedAccessToken)
+      debug && console.log('found in redis', user.id)
+      return { user }
+    }
+    debug && console.log('not found in redis')
   }
-  const user = await supabase.auth.getUser(cookie.access_token.value)
 
+  const user = await supabase.auth.getUser(cookie.access_token.value)
+  console.log({ user: user.data.user })
   if (user.error) {
-    console.log('refreshing session...', cookie.refresh_token.value)
+    debug && console.log('refreshing session...', cookie.refresh_token.value)
     // create new session
 
     const refreshed = await supabase.auth.refreshSession({
       refresh_token: cookie.refresh_token.value,
     })
-    console.log({ refreshed })
+    console.log({ refreshed: refreshed.data.user?.id })
     if (refreshed.error) {
       console.log('error refreshing session', refreshed.error.message)
       return { error: refreshed.error.message }
     }
+    debug && console.log('successfully refreshed session')
+
     setAuthCookies(cookie, refreshed.data.session!)
     await setAccessTokenToRedis(
       refreshed.data.session!.access_token,
       refreshed.data.user!,
     )
+    debug && console.log('successfully set access token to redis')
     return { user: refreshed.data.user!, session: refreshed.data.session! }
   }
   await setAccessTokenToRedis(cookie.access_token.value, user.data.user!)

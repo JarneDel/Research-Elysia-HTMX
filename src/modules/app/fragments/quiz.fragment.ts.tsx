@@ -1,8 +1,8 @@
 import { Elysia, t } from 'elysia'
 import { AddAnswer, Answer } from '@/components/quiz/CreateQuiz.tsx'
 import { MediaUpload } from '@/components/quiz/MediaUpload.tsx'
-import { supabase } from '@/libs'
 import { checkAccessToken } from '@/libs/auth.ts'
+import { quizWithPage } from '@/repository/quiz.database.ts'
 import { Cookie } from '@/types/cookie.type.ts'
 
 export const quiz = (app: Elysia) =>
@@ -46,38 +46,13 @@ export const quiz = (app: Elysia) =>
         '/page/:page',
         async ({ params, cookie, query }) => {
           const { user } = await checkAccessToken(cookie)
+          // todo error handling for failed access token
 
-          const quiz = await supabase
-            .from('quiz')
-            .select(
-              `
-              created_by,
-              id,
-              name,
-              page (
-                id,
-                question,
-                answers,
-                correct_answers,
-                page
-              )
-          `,
-            )
-            .eq('id', query.quiz)
-            .eq('created_by', user?.id)
-            .eq('page.page', params.page)
-          console.log(quiz, 'quiz', params.page, query.quiz)
-
-          const {
-            data: pageData,
-            error,
-            status,
-          } = await supabase
-            .from('page')
-            .select()
-            .eq('page', params.page)
-            .eq('quiz', query.quiz)
-            .single()
+          const { status, data, error } = await quizWithPage(
+            query.quiz!,
+            user?.id!,
+            params.page,
+          )
           if (error && status !== 406) {
             return (
               <div class="alert alert-error">
@@ -85,8 +60,7 @@ export const quiz = (app: Elysia) =>
               </div>
             )
           }
-
-          console.log(pageData, 'pageData', params.page, query.quiz)
+          const pageData = data?.page[0]
 
           return (
             <div id="page">
@@ -111,13 +85,33 @@ export const quiz = (app: Elysia) =>
                   id="media"
                   class="container max-w-2xl mx-auto border-accent border-2 rounded-md p-2 mb-3"
                 >
-                  <MediaUpload
-                    postURL={`/api/quiz/${query.quiz}/upload_media/${params.page}`}
-                    progressID="progress"
-                    inputID="media-input"
-                    formID="media-form"
-                    target="#media"
-                  />
+                  {!pageData?.media_url ? (
+                    <MediaUpload
+                      postURL={`/api/quiz/${query.quiz}/upload_media/${params.page}`}
+                      progressID="progress"
+                      inputID="media-input"
+                      formID="media-form"
+                      target="#media"
+                    />
+                  ) : (
+                    <div class="flex justify-center items-center w-full max-h-96">
+                      <div class="indicator">
+                        <button
+                          class="indicator-item badge badge-error"
+                          hx-delete={
+                            '/api/quiz/' + query.quiz + '/media/' + params.page
+                          }
+                          hx-target="#media"
+                          hx-swap="innerHTML"
+                        >
+                          remove
+                        </button>
+                        <div class="max-h-48">
+                          <img src={pageData.media_url} alt="" class="" />
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <ul class="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:grid-rows-3 ">

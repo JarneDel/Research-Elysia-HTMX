@@ -1,5 +1,7 @@
 .env
+.env.production.local
 /infra
 Dockerfile
 /test
 node_modules
+build/

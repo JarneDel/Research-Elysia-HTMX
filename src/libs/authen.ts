@@ -1,6 +1,5 @@
 import { Elysia } from 'elysia'
 import { checkAccessToken } from '@/libs/auth.ts'
-import { redisClient } from '@/libs/redis.ts'
 
 export const authen = (app: Elysia) =>
   app.derive(async ({ cookie, path, set }) => {
@@ -8,21 +7,11 @@ export const authen = (app: Elysia) =>
     if (path.startsWith('/public')) return
     console.log('authen middleware', path)
 
-    const { access_token, refresh_token } = cookie
-    if (!access_token?.value) {
-      set.headers['HX-Redirect'] = '/auth/sign-in'
-      set.redirect = '/auth/sign-in'
-      console.log('no access token')
-      return
-    }
+    const { refresh_token } = cookie
     if (!refresh_token?.value) {
       set.headers['HX-Redirect'] = '/api/auth/sign-out'
       set.redirect = '/api/auth/sign-out'
       console.log('no refresh token')
-      return
-    }
-    const cachedAccessToken = await redisClient.get(access_token.value)
-    if (cachedAccessToken) {
       return
     }
     const result = await checkAccessToken(cookie)

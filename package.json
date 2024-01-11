@@ -21,6 +21,7 @@
     "@elysiajs/html": "^0.8.0",
     "@elysiajs/static": "^0.8.1",
     "@elysiajs/swagger": "^0.8.0",
+    "@supabase/ssr": "^0.0.10",
     "@supabase/supabase-js": "^2.39.1",
     "elysia": "latest",
     "redis": "^4.6.12"

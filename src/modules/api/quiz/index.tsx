@@ -1,8 +1,10 @@
 import { Elysia, t } from 'elysia'
 import { Success } from '@/components/icons/StatusIcons.tsx'
+import { MediaUpload } from '@/components/quiz/MediaUpload.tsx'
 import { checkAccessToken } from '@/libs/auth.ts'
-import { updatePageMediaUrl } from '@/libs/quiz.database.ts'
-import { supabase, uploadMediaFile } from '@/libs/supabase'
+import { supabase } from '@/libs/supabase'
+import { uploadMediaFile } from '@/repository/media.storage.ts'
+import { quizWithPage, updatePageMediaUrl } from '@/repository/quiz.database.ts'
 import { Cookie } from '@/types/cookie.type.ts'
 
 export const quiz = (app: Elysia) =>
@@ -240,6 +242,69 @@ export const quiz = (app: Elysia) =>
           tags: ['Quiz'],
         },
         type: 'multipart/form-data',
+      },
+    )
+    .delete(
+      '/quiz/:id/media/:page',
+      async ({ params, cookie }) => {
+        const user = await checkAccessToken(cookie)
+        if (!user.user) {
+          return (
+            <div class="alert alert-error">
+              <span>Unauthorized</span>
+            </div>
+          )
+        }
+        const page = await quizWithPage(params.id, user.user?.id, params.page)
+        if (!page.data) {
+          return (
+            <div class="alert alert-error">
+              <span>Unauthorized</span>
+            </div>
+          )
+        }
+        if (page.data.page[0]?.media_url === null) {
+          return (
+            <div class="alert alert-warning">
+              <span>No media to delete</span>
+            </div>
+          )
+        }
+
+        const { error } = await supabase
+          .from('page')
+          .update({ media_url: null })
+          .eq('id', page.data.page[0]?.id)
+
+        if (error) {
+          return (
+            <div class="alert alert-error">
+              <span>Something went wrong: {error.message}</span>
+            </div>
+          )
+        }
+
+        return (
+          <>
+            <div class="alert alert-success">
+              <span>Media deleted</span>
+            </div>
+            <MediaUpload
+              postURL={`/api/quiz/${page.data.id}/upload_media/${params.page}`}
+              progressID="progress"
+              inputID="media-input"
+              formID="media-form"
+              target="#media"
+            />
+          </>
+        )
+      },
+      {
+        cookie: Cookie,
+        detail: {
+          description: 'remove media from a quiz page',
+          tags: ['Quiz'],
+        },
       },
     )
 

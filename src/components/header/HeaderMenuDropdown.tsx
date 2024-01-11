@@ -22,7 +22,12 @@ export const HeaderMenuDropdown = () => {
         <ul class="menu dropdown-content mt-4 z-[1] p-2 shadow bg-base-300 rounded-box w-52 mt-45">
           {links.map((link, index) => (
             <li>
-              <a hx-push-url="true" hx-get={link.href} hx-target={link.target}>
+              <a
+                hx-push-url="true"
+                hx-get={link.href}
+                hx-target={link.target}
+                href="#"
+              >
                 {link.name}
               </a>
             </li>

@@ -13,7 +13,7 @@ COPY . /app
 RUN bun run build
 RUN bun ./build.ts
 
-FROM oven/bun:latest as production
+FROM oven/bun as production
 
 COPY --from=bun /app/build /app
 
