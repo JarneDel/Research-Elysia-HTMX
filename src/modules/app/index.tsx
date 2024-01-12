@@ -1,5 +1,5 @@
 import { html } from '@elysiajs/html'
-import { Elysia } from 'elysia'
+import { Elysia, t } from 'elysia'
 import { initHtmx } from '@/hooks/htmx.hook.tsx'
 import { authen } from '@/libs'
 import { fragments } from '@/modules/app/fragments'
@@ -14,11 +14,19 @@ export const app = (app: Elysia) =>
     .use(authen)
     .use(quiz)
     .use(fragments)
-    .get('/', async () => {
-      return (
-        <div hx-get="/hello" hx-target="closest div" hx-trigger="load"></div>
-      )
-    })
+    .get(
+      '/',
+      async ({ cookie }) => {
+        return (
+          <div hx-get="/hello" hx-target="closest div" hx-trigger="load"></div>
+        )
+      },
+      {
+        cookie: t.Object({
+          anon_user: t.Optional(t.String()),
+        }),
+      },
+    )
 
     .get('/hello', async () => {
       return <div>hello world</div>

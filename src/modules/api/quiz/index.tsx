@@ -1,4 +1,5 @@
 import { Elysia, t } from 'elysia'
+import ShortUniqueId from 'short-unique-id'
 import { Alert } from '@/components/errors/Alerts.tsx'
 import { Success } from '@/components/icons/StatusIcons.tsx'
 import { MediaUpload } from '@/components/quiz/MediaUpload.tsx'
@@ -315,6 +316,34 @@ export const quiz = (app: Elysia) =>
       }
       set.headers['HX-Redirect'] = '/quiz/my'
     })
+    .get('/quiz/:id/start', async ({ params, cookie, set }) => {
+      const user = await checkAccessToken(cookie)
+      if (!user.user) {
+        return <Alert severity="error">Unauthorized</Alert>
+      }
+      const { data, error } = await supabase
+        .from('quiz')
+        .select()
+        .eq('id', params.id)
+        .eq('created_by', user.user?.id)
+        .single()
+
+      if (data.isDraft) {
+        return <Alert severity="error">Quiz is in draft</Alert>
+      }
+
+      const id = generateShortId()
+
+      const result = await supabase.from('active_quiz').insert({
+        id,
+        quiz_id: data?.id,
+        user_id: user.user?.id,
+      })
+      if (result.error) {
+        return <Alert severity="error">Something went wrong</Alert>
+      }
+      set.headers['HX-Redirect'] = '/q/present/'
+    })
 
 const createBody = (max = 6) => {
   const answerFields: { [key: string]: any } = {}
@@ -351,4 +380,12 @@ const getAnswers = (body: any): string[] => {
     }
   }
   return answers
+}
+
+export const generateShortId = () => {
+  const shortId = new ShortUniqueId({
+    length: 6,
+    dictionary: 'alphanum_upper',
+  })
+  return shortId.rnd(6)
 }

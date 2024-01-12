@@ -26,7 +26,7 @@ export const EditQuiz = (props: EditQuizProps) => {
               class="input input-ghost bg-base-200 max-w-40"
             />
           </div>
-          {quiz.isDraft && <div class="badge badge-warning">draft</div>}
+          {quiz.isDraft && <div class="badge badge-secondary">draft</div>}
         </div>
 
         <div

@@ -164,7 +164,14 @@ export const quiz = (app: Elysia) =>
             .select()
             .eq('created_by', account.user?.id)
             .order('updated_at', { ascending: true })
+
+          const { data: nowPresenting, error: nowPresentingError } =
+            await supabase
+              .from('active_quiz')
+              .select('quiz_id')
+              .eq('user_id', account.user?.id)
           console.log('found quizzes', data?.length)
+          console.log('now presenting', nowPresenting)
           return (
             <div class="container">
               <div class=" grid md:grid-cols-2 xl:grid-cols-3 gap-6 mt-5 justify-center">
@@ -177,7 +184,10 @@ export const quiz = (app: Elysia) =>
                             {quiz.name == '' ? 'untitled' : quiz.name}
                           </span>
                           {quiz.isDraft && (
-                            <span class="badge badge-error">draft</span>
+                            <span class="badge badge-secondary">draft</span>
+                          )}
+                          {isPresenting(nowPresenting, quiz.id) && (
+                            <span class="badge badge-success">Presenting</span>
                           )}
                         </h2>
                         <div class="badge badge-ghost">
@@ -187,6 +197,25 @@ export const quiz = (app: Elysia) =>
 
                       <p>{quiz.description}</p>
                       <div class="card-actions justify-end">
+                        {!isPresenting(nowPresenting, quiz.id) &&
+                          !quiz.isDraft && (
+                            <button
+                              class="btn btn-accent"
+                              hx-get={`/api/quiz/${quiz.id}/start`}
+                            >
+                              Present
+                            </button>
+                          )}
+                        {quiz.isDraft && (
+                          <button
+                            class="btn btn-primary btn-secondary"
+                            hx-get={`/quiz/${quiz.id}/edit`}
+                            hx-push-url="true"
+                            hx-target="main"
+                          >
+                            Publish
+                          </button>
+                        )}
                         <button
                           class="btn btn-primary"
                           hx-get={'/quiz/' + quiz.id + '/edit'}
@@ -227,4 +256,12 @@ const parseUpdatedAt = (updatedAt: string): string => {
     month: 'numeric',
     year: year != today.getFullYear() ? 'numeric' : undefined,
   })
+}
+
+const isPresenting = (
+  nowPresenting: { quiz_id: any }[] | null,
+  quizId: string,
+) => {
+  if (nowPresenting == null) return false
+  return nowPresenting.find(item => item.quiz_id === quizId)
 }

@@ -1,20 +1,32 @@
 import { Elysia } from 'elysia'
 import { checkAccessToken } from '@/libs/auth.ts'
+import { setAnonymousSessionCookie } from '@/libs/publicAuth.ts'
 
 export const authen = (app: Elysia) =>
   app.derive(async ({ cookie, path, set }) => {
     if (path.startsWith('/auth')) return
     if (path.startsWith('/public')) return
+
+    const cleanedPath = path.split('?')[0]
+    console.log({ cleanedPath })
+
     console.log('authen middleware', path)
 
-    const { refresh_token } = cookie
-    if (!refresh_token?.value) {
-      set.headers['HX-Redirect'] = '/api/auth/sign-out'
-      set.redirect = '/api/auth/sign-out'
-      console.log('no refresh token')
-      return
-    }
     const result = await checkAccessToken(cookie)
+    console.log(result.user)
+    if (!result.user) {
+      console.log('trying anon')
+      if (
+        publicRoutes.includes(cleanedPath!) ||
+        publicRoutesStartsWith.some(route => cleanedPath!.startsWith(route))
+      ) {
+        if (!cookie.anon_user?.value) {
+          const res = await setAnonymousSessionCookie(cookie)
+          if (res.data) return
+        } else return
+      }
+    }
+
     if (result.error) {
       set.headers['HX-Redirect'] = '/auth/sign-in'
       set.redirect = '/auth/sign-in'
@@ -23,13 +35,6 @@ export const authen = (app: Elysia) =>
     }
     return
   })
-// .state('counter', 1)
-// .derive(async ({ cookie, store, path, set }) => {
-//   const counter = store.counter
-//   const counterCookie = cookie.counter.value
-//   console.log({ counter, counterCookie, path })
-//   cookie.counter.value = counter
-//
-//   // cookie.counter.set(cookie.counter || { value: 0 })
-//   store.counter += 1
-// })
+
+const publicRoutes = ['/', '/hello']
+const publicRoutesStartsWith: string[] = []

@@ -9,6 +9,11 @@ export interface AuthResult {
 }
 
 export function setAuthCookies(cookie: any, session: Session) {
+  cookie.anon_user.remove({
+    path: '/',
+    sameSite: 'strict',
+  })
+
   cookie.access_token.set({
     value: session.access_token
       ? session.access_token
@@ -18,7 +23,6 @@ export function setAuthCookies(cookie: any, session: Session) {
     sameSite: 'strict',
     maxAge: 60 * 5 * 60, // 5 hours
   })
-  // todo: check if expiration token works with refresh
   cookie.refresh_token.set({
     value: session.refresh_token
       ? session.refresh_token

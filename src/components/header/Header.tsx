@@ -26,7 +26,7 @@ export const Header = (props: props) => (
         <a href="/">QuizX</a>
       </span>
     </div>
-    <ul class="flex-1 menu menu-horizontal rounded-box">
+    <ul class="menu menu-horizontal rounded-box">
       {headerLinks.map((link, index) => (
         <li>
           <a
@@ -41,6 +41,21 @@ export const Header = (props: props) => (
         </li>
       ))}
     </ul>
+    <form class="flex-1 flex flex-row items-center justify-center gap-2">
+      {/*todo: make this work*/}
+      <input
+        type="text"
+        class="input"
+        aria-label="Join a quiz by code"
+        placeholder="Join a quiz"
+        // oninput="this.setAttribute('value', this.value)"
+        value=""
+      />
+      <button type="submit" class="btn btn-primary">
+        join
+      </button>
+    </form>
+
     <a
       href="/quiz/create"
       hx-get="/quiz/create"

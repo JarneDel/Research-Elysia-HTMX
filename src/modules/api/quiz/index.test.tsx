@@ -1,8 +1,11 @@
-import { expect, it, test } from 'bun:test'
-import { calculateCorrectAnswers } from '@/modules/api/quiz/index.tsx'
+import { describe, expect, test } from 'bun:test'
+import {
+  calculateCorrectAnswers,
+  generateShortId,
+} from '@/modules/api/quiz/index.tsx'
 
-test('change-page-answers', () => {
-  it('should return the right indexes', () => {
+describe('quiz api module', () => {
+  test('change-page-answers', () => {
     const result = calculateCorrectAnswers({
       answer0: 'a',
       answer1: 'b',
@@ -18,5 +21,12 @@ test('change-page-answers', () => {
       'correct-5': 'on',
     })
     expect(result).toEqual([0, 2, 4, 5])
+  })
+
+  test('create short id', () => {
+    const id = generateShortId()
+    console.log(id)
+    expect(id).toHaveLength(6)
+    expect(id).toMatch(/[a-z0-9]/)
   })
 })
