@@ -258,7 +258,7 @@ export const quiz = (app: Elysia) =>
         }
         const page = await quizWithPage(params.id, user.user?.id, params.page)
         if (!page.data) {
-          return <Alert severity="error">Unauthorized</Alert>
+          return <Alert severity="error">Quiz question does not exist</Alert>
         }
         if (page.data.page[0]?.media_url === null) {
           return <Alert severity="warning">No media to delete</Alert>
@@ -279,7 +279,7 @@ export const quiz = (app: Elysia) =>
 
         return (
           <>
-            <Alert severity="warning" class="py-2">
+            <Alert severity="warning" class="py-2 alert-warning">
               Media deleted
             </Alert>
             <MediaUpload

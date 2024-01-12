@@ -1,7 +1,7 @@
 import { Elysia, t } from 'elysia'
-import { DeleteQuizDialog } from '@/components/dialog/deleteQuiz.dialog.tsx'
 import { Alert } from '@/components/errors/Alerts.tsx'
-import { Loading } from '@/components/states/loading.tsx'
+import { EditQuiz } from '@/components/quiz/EditQuiz.tsx'
+import { EditQuizPage } from '@/components/quiz/EditQuizPage.tsx'
 import { supabase } from '@/libs'
 import { checkAccessToken } from '@/libs/auth.ts'
 import { quizWithPage } from '@/repository/quiz.database.ts'
@@ -88,95 +88,7 @@ export const quiz = (app: Elysia) =>
           }
           const page = pageData?.page || '1'
 
-          return (
-            <>
-              <div class="flex justify-between navbar bg-base-300/60 relative">
-                <div class="flex flex-row items-center gap-2">
-                  <div class="tooltip" data-tip="Title">
-                    <input
-                      type="text"
-                      value={data.name}
-                      hx-put={'/api/quiz/' + data.id + '/change-name'}
-                      hx-trigger="blur input"
-                      name="value"
-                      placeholder="Untitled quiz"
-                      class="input input-ghost bg-base-200"
-                    />
-                  </div>
-                  {data.isDraft && <div class="badge badge-warning">draft</div>}
-                </div>
-
-                <div
-                  class="absolute top-0 bottom-0 left-1/2 transform -translate-x-1/2 flex flex-row items-center gap-2 font-bold text-lg"
-                  id="question_number"
-                >
-                  Question 1
-                </div>
-
-                <div class="flex flex-row items-center gap-2">
-                  <a
-                    class="btn btn-primary"
-                    hx-push-url="true"
-                    hx-get="/quiz/:id/present"
-                    href="#"
-                  >
-                    Present quiz
-                  </a>
-                  <div class="dropdown dropdown-end ">
-                    <button class="flex items-center btn">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      >
-                        <circle cx="12" cy="12" r="1" />
-                        <circle cx="12" cy="5" r="1" />
-                        <circle cx="12" cy="19" r="1" />
-                      </svg>
-                    </button>
-                    <ul
-                      tabindex="0"
-                      class="dropdown-content z-[1] p-2 shadow bg-base-200 rounded-box w-32 mt-4 gap-2 flex flex-col"
-                    >
-                      <li>
-                        <button
-                          class="btn btn-error w-full btn-sm"
-                          onclick="delete_quiz_modal.showModal()"
-                        >
-                          Delete quiz
-                        </button>
-                        <DeleteQuizDialog
-                          id="delete_quiz_modal"
-                          target="main"
-                          deleteURL={`/api/quiz/${data.id}`}
-                        />
-                      </li>
-                      {!data.isDraft && (
-                        <li>
-                          <a class="btn btn-warning w-full btn-sm">Set draft</a>
-                        </li>
-                      )}
-                    </ul>
-                  </div>
-                </div>
-              </div>
-              <div class="container">
-                <div
-                  hx-trigger="load"
-                  hx-get={'/fragment/quiz/page/' + page + '?quiz=' + data.id}
-                  hx-swap="outerHTML"
-                  hx-indicator="#quizPage"
-                ></div>
-                <Loading id="quizPage" />
-              </div>
-            </>
-          )
+          return <EditQuiz pageNumber={page} quizId={params.id} quiz={data} />
         },
         {
           cookie: Cookie,
@@ -193,6 +105,57 @@ export const quiz = (app: Elysia) =>
         },
       )
       .get(
+        '/:id/edit/page/:page',
+        async ({ cookie, headers, params, query }) => {
+          // send without quizEditor when hx-request is present
+          const { user } = await checkAccessToken(cookie)
+
+          const { status, data, error } = await quizWithPage(
+            params.id,
+            user?.id!,
+            params.page,
+          )
+
+          if (error && status !== 406) {
+            return (
+              <div class="alert alert-error">
+                <span>Something went wrong: {error.message}</span>
+              </div>
+            )
+          }
+          const pageData = data?.page[0]
+
+          const pageEditorHTML = (
+            <EditQuizPage
+              pageNumber={params.page}
+              quizId={params.id}
+              page={pageData}
+              quiz={data}
+            />
+          )
+
+          if (headers['hx-request'] != undefined) {
+            return pageEditorHTML
+          }
+          // initialize with quizEditor
+          return (
+            <EditQuiz pageNumber={params.page} quizId={query.quiz!} quiz={data}>
+              {pageEditorHTML}
+            </EditQuiz>
+          )
+        },
+        {
+          cookie: Cookie,
+          query: t.Object({
+            quiz: t.Optional(t.String()),
+          }),
+          headers: t.Object({
+            'hx-request': t.Optional(t.String()),
+          }),
+        },
+      )
+
+      .get(
         '/my',
         async ({ cookie }) => {
           const account = await checkAccessToken(cookie)
@@ -201,8 +164,7 @@ export const quiz = (app: Elysia) =>
             .select()
             .eq('created_by', account.user?.id)
             .order('updated_at', { ascending: true })
-
-          console.log(data, error)
+          console.log('found quizzes', data?.length)
           return (
             <div class="container">
               <div class=" grid md:grid-cols-2 xl:grid-cols-3 gap-6 mt-5 justify-center">
