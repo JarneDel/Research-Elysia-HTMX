@@ -92,7 +92,7 @@ export const EditQuizPage = (params: params) => {
             hx-get={
               '/quiz/' + quizId + '/edit/page/' + (Number(pageNumber) - 1)
             }
-            hx-swap="outerHTML transition:true"
+            hx-swap="outerHTML"
             hx-target="#page"
             disabled={Number(pageNumber) == 1}
             hx-trigger="click"

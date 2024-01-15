@@ -146,6 +146,8 @@ export const quizEditorApi = (app: Elysia) =>
               params.page,
             )
 
+            console.log(data, 'data')
+
             if (!data) {
               return (
                 <Alert severity="error">
@@ -154,29 +156,34 @@ export const quizEditorApi = (app: Elysia) =>
               )
             }
             const page = data.page[0]
-            if (!page) {
-              return (
-                <Alert severity="error">
-                  <span>Something went wrong</span>
-                </Alert>
-              )
-            }
+            console.log(page, 'page')
 
-            // update or create page
-            const result = await supabase
-              .from('page')
-              .upsert({
-                id: page.id!,
+            if (!page) {
+              const result = await supabase.from('page').insert({
                 quiz: data.id,
-                page: page.page,
+                page: params.page,
                 // ARRAY INT_2
                 correct_answers: calculateCorrectAnswers(body),
                 // ARRAY TEXT
                 answers: getAnswers(body),
                 question: sanitize(body.title, 'strict'),
               })
-              .select('id')
-
+            } else {
+              // update or create page
+              const result = await supabase
+                .from('page')
+                .upsert({
+                  id: page.id,
+                  quiz: data.id,
+                  page: params.page,
+                  // ARRAY INT_2
+                  correct_answers: calculateCorrectAnswers(body),
+                  // ARRAY TEXT
+                  answers: getAnswers(body),
+                  question: sanitize(body.title, 'strict'),
+                })
+                .select('id')
+            }
             // todo: response handling
           },
           {
@@ -385,6 +392,7 @@ const createBody = (max = 6) => {
 }
 
 export const calculateCorrectAnswers = (body: any): number[] => {
+  console.log('calculating correct answers')
   const correctAnswers: number[] = []
   for (const [key, value] of Object.entries(body)) {
     if (key.includes('correct-') && value === 'on') {

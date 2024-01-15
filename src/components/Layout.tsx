@@ -28,7 +28,7 @@ export const Layout = (props: LayoutProps) => {
           <script src="/public/htmx-ws.js"></script>
 
           <script defer src="/public/useTheme.js" />
-          <script>htmx.config.globalViewTransitions = true;</script>
+          {/*<script>htmx.config.globalViewTransitions = true;</script>*/}
           <link href="/public/globals.css" rel="stylesheet" />
         </head>
         <body>{props.children}</body>
