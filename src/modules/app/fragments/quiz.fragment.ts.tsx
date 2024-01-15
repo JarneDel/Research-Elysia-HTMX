@@ -38,9 +38,6 @@ export const quiz = (app: Elysia) =>
           description: 'Add possible answer to the question',
         },
         cookie: Cookie,
-      })
-      .get('/page/:page/title', async ({ params, cookie, query }) => {
-        return `Question ${params.page}`
       }),
   )
 
