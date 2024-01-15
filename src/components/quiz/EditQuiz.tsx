@@ -89,7 +89,7 @@ export const EditQuiz = (props: EditQuizProps) => {
           </div>
         </div>
       </div>
-      <div class="container">
+      <div class="container simple-view-transition">
         {children ?? (
           <>
             <div

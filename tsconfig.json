@@ -1,10 +1,11 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
+  "exclude": ["node_modules", "dist", "build", "out", "public", "static"],
+  "include": ["src/**/*"],
   "compilerOptions": {
     /* Type Checking */
     "noUncheckedIndexedAccess": true, // Increases type-safety
     "strict": true,
-
     /* Modules */
     "allowImportingTsExtensions": true,
     "module": "ESNext",

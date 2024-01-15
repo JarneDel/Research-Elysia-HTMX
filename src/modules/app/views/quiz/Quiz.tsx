@@ -2,6 +2,7 @@ import { Elysia, t } from 'elysia'
 import { Alert } from '@/components/errors/Alerts.tsx'
 import { EditQuiz } from '@/components/quiz/EditQuiz.tsx'
 import { EditQuizPage } from '@/components/quiz/EditQuizPage.tsx'
+import { QuizCard } from '@/components/quiz/QuizCard.tsx'
 import { supabase } from '@/libs'
 import { isUser } from '@/libs/authen.ts'
 import { quizWithPage } from '@/repository/quiz.database.ts'
@@ -20,6 +21,12 @@ export const quiz = (app: Elysia) =>
       },
       app =>
         app
+          .resolve(ctx => {
+            return {
+              //@ts-expect-error ctx.authResult is not typesafe yet
+              authResult: ctx.authResult,
+            }
+          })
           .get(
             '/create',
             () => {
@@ -183,59 +190,10 @@ export const quiz = (app: Elysia) =>
                 <div class="container">
                   <div class=" grid md:grid-cols-2 xl:grid-cols-3 gap-6 mt-5 justify-center">
                     {data?.map(quiz => (
-                      <div class="card max-w-96 bg-base-200 min-w-64">
-                        <div class="card-body">
-                          <div class="flex flex-row justify-between">
-                            <h2 class="card-title">
-                              <span safe>
-                                {quiz.name == '' ? 'untitled' : quiz.name}
-                              </span>
-                              {quiz.isDraft && (
-                                <span class="badge badge-secondary">draft</span>
-                              )}
-                              {isPresenting(nowPresenting, quiz.id) && (
-                                <span class="badge badge-success">
-                                  Presenting
-                                </span>
-                              )}
-                            </h2>
-                            <div class="badge badge-ghost">
-                              {parseUpdatedAt(quiz.updated_at)}
-                            </div>
-                          </div>
-
-                          <p safe>{quiz.description}</p>
-                          <div class="card-actions justify-end">
-                            {!isPresenting(nowPresenting, quiz.id) &&
-                              !quiz.isDraft && (
-                                <button
-                                  class="btn btn-accent"
-                                  hx-get={`/api/quiz/${quiz.id}/start`}
-                                >
-                                  Present
-                                </button>
-                              )}
-                            {quiz.isDraft && (
-                              <button
-                                class="btn btn-primary btn-secondary"
-                                hx-get={`/quiz/${quiz.id}/edit`}
-                                hx-push-url="true"
-                                hx-target="main"
-                              >
-                                Publish
-                              </button>
-                            )}
-                            <button
-                              class="btn btn-primary"
-                              hx-get={'/quiz/' + quiz.id + '/edit'}
-                              hx-push-url="true"
-                              hx-target="main"
-                            >
-                              Edit
-                            </button>
-                          </div>
-                        </div>
-                      </div>
+                      <QuizCard
+                        quiz={quiz}
+                        nowPresenting={nowPresenting || []}
+                      />
                     ))}
                   </div>
                 </div>
@@ -257,21 +215,3 @@ export const quiz = (app: Elysia) =>
  * @param updatedAt
  * @returns {string} formatted dd/mm or dd/mm/yyyy if year is different
  */
-const parseUpdatedAt = (updatedAt: string): string => {
-  const date = new Date(updatedAt)
-  const today = new Date()
-  const year = date.getFullYear()
-  return date.toLocaleDateString('en-GB', {
-    day: 'numeric',
-    month: 'numeric',
-    year: year != today.getFullYear() ? 'numeric' : undefined,
-  })
-}
-
-const isPresenting = (
-  nowPresenting: { quiz_id: any }[] | null,
-  quizId: string,
-) => {
-  if (nowPresenting == null) return false
-  return nowPresenting.find(item => item.quiz_id === quizId)
-}

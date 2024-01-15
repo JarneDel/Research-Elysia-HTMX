@@ -92,7 +92,7 @@ export const EditQuizPage = (params: params) => {
             hx-get={
               '/quiz/' + quizId + '/edit/page/' + (Number(pageNumber) - 1)
             }
-            hx-swap="outerHTML"
+            hx-swap="outerHTML transition:true"
             hx-target="#page"
             disabled={Number(pageNumber) == 1}
             hx-trigger="click"
@@ -111,7 +111,7 @@ export const EditQuizPage = (params: params) => {
             hx-get={
               '/quiz/' + quizId + '/edit/page/' + (Number(pageNumber) + 1)
             }
-            hx-swap="outerHTML"
+            hx-swap="outerHTML transition:true"
             hx-push-url="true"
             hx-target="#page"
             hx-trigger="click"

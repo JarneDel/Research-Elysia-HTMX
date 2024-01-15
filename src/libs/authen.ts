@@ -59,6 +59,7 @@ export const isUser = async (ctx: any) => {
 }
 
 export const isAnonymousUser = async (ctx: any) => {
+  console.log('isAnonymousUser')
   const { cookie, set } = ctx
   const result = await checkAccessToken(cookie)
   if (!result.user) {

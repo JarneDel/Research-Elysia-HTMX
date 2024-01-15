@@ -2,9 +2,9 @@ import { describe, expect, test } from 'bun:test'
 import {
   calculateCorrectAnswers,
   generateShortId,
-} from '@/modules/api/quiz/index.tsx'
+} from '@/modules/api/quizEditor/index.tsx'
 
-describe('quiz api module', () => {
+describe('quizEditor api module', () => {
   test('change-page-answers', () => {
     const result = calculateCorrectAnswers({
       answer0: 'a',

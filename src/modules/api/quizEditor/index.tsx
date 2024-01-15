@@ -3,6 +3,7 @@ import ShortUniqueId from 'short-unique-id'
 import { Alert } from '@/components/errors/Alerts.tsx'
 import { Success } from '@/components/icons/StatusIcons.tsx'
 import { MediaUpload } from '@/components/quiz/MediaUpload.tsx'
+import { QuizCard } from '@/components/quiz/QuizCard.tsx'
 import { ViewMedia } from '@/components/quiz/ViewMedia.tsx'
 import { AuthResult } from '@/libs/auth.ts'
 import { isUser } from '@/libs/authen.ts'
@@ -12,7 +13,7 @@ import { uploadMediaFile } from '@/repository/media.storage.ts'
 import { quizWithPage, updatePageMediaUrl } from '@/repository/quiz.database.ts'
 import { Cookie } from '@/types/cookie.type.ts'
 
-export const quiz = (app: Elysia) =>
+export const quizEditorApi = (app: Elysia) =>
   app.guard(
     {
       // Handle user authentication (only allow logged in users)
@@ -24,9 +25,10 @@ export const quiz = (app: Elysia) =>
     },
     app =>
       app
-        .resolve(async ({ cookie, authResult }) => {
+        .resolve(async ctx => {
           return {
-            authResult: authResult as AuthResult,
+            //@ts-expect-error
+            authResult: ctx.authResult as AuthResult,
           }
         })
 
@@ -37,10 +39,12 @@ export const quiz = (app: Elysia) =>
             if (!isLegal) {
               return (
                 <Alert severity="error">
-                  {body.name.length < 4 && <span>Title not long enough</span>}
-                  {body.description.length == 0 && (
-                    <span>You must provide a description</span>
-                  )}
+                  <span>
+                    {body.name.length < 4 && <span>Title not long enough</span>}
+                    {body.description.length == 0 && (
+                      <span>You must provide a description</span>
+                    )}
+                  </span>
                 </Alert>
               )
             }
@@ -50,42 +54,36 @@ export const quiz = (app: Elysia) =>
                 {
                   name: sanitize(body.name, 'strict'),
                   description: sanitize(body.description, 'medium'),
-                  created_by: user.user.id,
+                  created_by: user.user?.id,
                 },
               ])
               .select('id')
-            if (isHtmx) {
-              if (quiz.status === 201) {
-                if (!quiz.data || quiz.data.length === 0) {
-                  return (
-                    <Alert severity="error">
-                      <span safe>Something went wrong: {quiz.status}</span>
-                    </Alert>
-                  )
-                }
-                return (
-                  <>
-                    <div
-                      class="alert alert-success"
-                      hx-trigger="load delay:1s once"
-                      hx-get={'/quiz/' + quiz.data[0]?.id + '/edit'}
-                    >
-                      <Success />
-                      <span>Quiz created, redirecting..</span>
-                    </div>
-                  </>
-                )
-              } else {
+            if (quiz.status === 201) {
+              if (!quiz.data || quiz.data.length === 0) {
                 return (
                   <Alert severity="error">
                     <span safe>Something went wrong: {quiz.status}</span>
                   </Alert>
                 )
               }
-            }
-            if (quiz.status === 201) {
-              set.status = 201
-              return
+              return (
+                <>
+                  <div
+                    class="alert alert-success"
+                    hx-trigger="load delay:1s once"
+                    hx-get={'/quiz/' + quiz.data[0]?.id + '/edit'}
+                  >
+                    <Success />
+                    <span>Quiz created, redirecting..</span>
+                  </div>
+                </>
+              )
+            } else {
+              return (
+                <Alert severity="error">
+                  <span safe>Something went wrong: {quiz.status}</span>
+                </Alert>
+              )
             }
           },
           {
@@ -144,17 +142,33 @@ export const quiz = (app: Elysia) =>
             const { user } = authResult
             const { data } = await quizWithPage(
               params.id,
-              user?.id,
+              user?.id!,
               params.page,
             )
+
+            if (!data) {
+              return (
+                <Alert severity="error">
+                  <span>Something went wrong</span>
+                </Alert>
+              )
+            }
+            const page = data.page[0]
+            if (!page) {
+              return (
+                <Alert severity="error">
+                  <span>Something went wrong</span>
+                </Alert>
+              )
+            }
 
             // update or create page
             const result = await supabase
               .from('page')
               .upsert({
-                id: data.page[0].id,
+                id: page.id!,
                 quiz: data.id,
-                page: data.page[0].page,
+                page: page.page,
                 // ARRAY INT_2
                 correct_answers: calculateCorrectAnswers(body),
                 // ARRAY TEXT
@@ -312,7 +326,7 @@ export const quiz = (app: Elysia) =>
           if (!user.user) {
             return <Alert severity="error">Unauthorized</Alert>
           }
-          const { data, error } = await supabase
+          const { data } = await supabase
             .from('quiz')
             .select()
             .eq('id', params.id)
@@ -334,6 +348,26 @@ export const quiz = (app: Elysia) =>
             return <Alert severity="error">Something went wrong</Alert>
           }
           set.headers['HX-Redirect'] = '/q/present/'
+        })
+        .get('/quiz/:id/publish', async ({ params, authResult }) => {
+          console.log('publishing quiz')
+          const { data, error } = await supabase
+            .from('quiz')
+            .update({
+              isDraft: false,
+            })
+            .eq('id', params.id)
+            .eq('created_by', authResult.user?.id)
+            .select()
+            .single()
+
+          const { data: nowPresenting } = await supabase
+            .from('active_quiz')
+            .select()
+            .eq('user_id', authResult.user?.id)
+            .eq('quiz_id', params.id)
+
+          return <QuizCard quiz={data} nowPresenting={nowPresenting || []} />
         }),
   )
 

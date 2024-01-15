@@ -6,6 +6,7 @@ import { isAnonymousUser } from '@/libs/authen'
 import { sanitizeDerive } from '@/libs/sanitize.ts'
 import { fragments } from '@/modules/app/fragments'
 import { auth } from '@/modules/app/views/auth/Auth.tsx'
+import { q } from '@/modules/app/views/publicPresentation/q.tsx'
 import { quiz } from '@/modules/app/views/quiz/Quiz.tsx'
 import { Cookie } from '@/types/cookie.type.ts'
 
@@ -16,6 +17,7 @@ export const app = (app: Elysia) =>
     .use(auth)
     .use(authen)
     .use(quiz)
+    .use(q)
     .use(fragments)
     .use(sanitizeDerive)
     .guard(

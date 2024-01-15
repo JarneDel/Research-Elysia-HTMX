@@ -25,6 +25,8 @@ export const Layout = (props: LayoutProps) => {
           <title>{title}</title>
           {/*important to load first*/}
           <script src="/public/htmx@1.9.10.min.js"></script>
+          <script src="/public/htmx-ws.js"></script>
+
           <script defer src="/public/useTheme.js" />
           <script>htmx.config.globalViewTransitions = true;</script>
           <link href="/public/globals.css" rel="stylesheet" />

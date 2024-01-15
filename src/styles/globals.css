@@ -94,13 +94,56 @@
   .my-indicator {
     display: none;
   }
+
   .htmx-request .my-indicator {
     display: inline;
   }
+
   .htmx-request.my-indicator {
     display: inline;
   }
+
   /*body {*/
   /*  @apply bg-background text-foreground;*/
   /*}*/
+}
+
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes slide-from-right {
+  from {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes slide-from-left {
+  from {
+    transform: translateX(100%);
+  }
+}
+
+
+
+
+::view-transition-old(slide-it) {
+  animation: 180ms cubic-bezier(.4, 0, 1, 1) both fade-out, 600ms cubic-bezier(.4, 0, 0.2, 1) both slide-to-left;
+}
+
+::view-transition-new(slide-it) {
+  animation: 420ms cubic-bezier(0, 0, 0.2, 1) 90ms both fade-in, 600ms cubic-bezier(.4, 0, 0.2, 1) both slide-from-right;
+}
+
+.simple-view-transition {
+  view-transition-name: slide-it;
 }
