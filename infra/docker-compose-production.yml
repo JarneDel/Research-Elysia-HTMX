@@ -5,9 +5,9 @@ services:
     expose:
       - '6379'
     networks:
-        - backend
+      - backend
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ['CMD', 'redis-cli', 'ping']
 
   api:
     image: jarnedel.registry.jetbrains.space/p/main/containers/api:latest
@@ -17,13 +17,11 @@ services:
     ports:
       - '3000:3000'
     depends_on:
-        - redis
+      - redis
     networks:
-        - backend
+      - backend
     env_file:
       - ../.env.production.local
 
 networks:
-    backend:
-
-
+  backend:

@@ -1,7 +1,6 @@
 import { Elysia } from 'elysia'
 import { Header } from '@/components/header/Header.tsx'
 import { Layout } from '@/components/Layout.tsx'
-import { checkAccessToken } from '@/libs/auth.ts'
 
 export const initHtmx = (app: Elysia): Elysia =>
   app.onAfterHandle(async ({ path, headers, response, set, cookie }) => {
@@ -18,11 +17,12 @@ export const initHtmx = (app: Elysia): Elysia =>
       return <Layout>{response as JSX.Element} </Layout>
     }
 
-    const authResult = await checkAccessToken(cookie)
+    // const authResult = await checkAccessToken(cookie)
 
     return (
       <Layout>
-        <Header user={authResult.user} />
+        {/*<Header user={authResult.user} />*/}
+        <Header />
         <main class="bg-base-100 text-base-content">
           {response as JSX.Element}
         </main>

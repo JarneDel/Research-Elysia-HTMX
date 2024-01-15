@@ -3,7 +3,7 @@ import { HeaderMenuDropdown } from '@/components/header/HeaderMenuDropdown.tsx'
 import { ThemeSwitcher } from '@/components/states/Theme.tsx'
 
 interface props {
-  user: User | null | undefined
+  user?: User
 }
 
 export const headerLinks = [

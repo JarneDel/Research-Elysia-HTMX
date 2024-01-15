@@ -84,21 +84,21 @@
 
 @layer base {
   * {
-    @apply border-border min-w-0;
+    @apply min-w-0;
   }
 
   .full-height {
     height: calc(100vh - 4.5rem);
   }
 
-  .my-indicator{
-    display:none;
+  .my-indicator {
+    display: none;
   }
-  .htmx-request .my-indicator{
-    display:inline;
+  .htmx-request .my-indicator {
+    display: inline;
   }
-  .htmx-request.my-indicator{
-    display:inline;
+  .htmx-request.my-indicator {
+    display: inline;
   }
   /*body {*/
   /*  @apply bg-background text-foreground;*/

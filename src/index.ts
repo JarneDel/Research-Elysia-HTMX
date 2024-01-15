@@ -17,8 +17,8 @@ const app = new Elysia()
   .use(api)
   .use(App)
   .use(staticPlugin())
-  .listen(3000)
+  .listen({
+    port: process.env.PORT || 80,
+  })
 
 console.log(`🦊 Elysia is running at ${app.server?.url}`)
-
-console.log('hey')

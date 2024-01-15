@@ -47,10 +47,11 @@
     /* Output Formatting */
 
     /* Completeness */
-    "skipLibCheck": true
+    "skipLibCheck": true,
 
     /* Command Line */
 
     /* Watch Options */
+    "plugins": [{ "name": "@kitajs/ts-html-plugin" }]
   }
 }

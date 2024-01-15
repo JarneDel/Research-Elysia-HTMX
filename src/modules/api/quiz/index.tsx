@@ -127,7 +127,11 @@ export const quiz = (app: Elysia) =>
       },
       {
         body: t.Object({
-          value: t.String(),
+          value: t.String({
+            // NO HTML tags
+            pattern: '^[^<>]*$',
+            error: '<div class="alert alert-error">Invalid characters</div>',
+          }),
         }),
         cookie: Cookie,
         detail: {
