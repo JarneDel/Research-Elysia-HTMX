@@ -50,6 +50,7 @@ export const authen = (app: Elysia) =>
 export const isUser = async (ctx: any) => {
   const { cookie, set } = ctx
   const result = await checkAccessToken(cookie)
+  ctx.authResult = result
   if (result.error) {
     set.headers['HX-Redirect'] = '/auth/sign-in'
     set.redirect = '/auth/sign-in'

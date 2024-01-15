@@ -17,7 +17,7 @@ export const uploadMediaFile = async (file: File, filename: string) => {
 
   const publicUrl = supabase.storage
     .from('media')
-    .getPublicUrl(result.data?.path!)
+    .getPublicUrl(result.data?.path)
 
   return { publicUrl: publicUrl.data.publicUrl }
 }

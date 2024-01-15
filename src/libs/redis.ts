@@ -1,14 +1,20 @@
-import { createClient } from 'redis'
+import * as process from 'process'
+import { createClient, RedisClientOptions } from 'redis'
 
-console.log({
+let options: RedisClientOptions = {
   url: process.env.REDIS_URL,
-  password: process.env.REDIS_PASS,
-})
+}
+if (process.env.REDIS_PASS) {
+  options.password = process.env.REDIS_PASS
+}
 
-export const redisClient = await createClient({
-  url: process.env.REDIS_URL,
-  password: process.env.REDIS_PASS,
-})
+if (process.env.NODE_ENV === 'development') {
+  options = {
+    url: 'redis://localhost:6379',
+  }
+}
+
+export const redisClient = await createClient(options)
   .on('error', error => {
     console.log({ error })
   })

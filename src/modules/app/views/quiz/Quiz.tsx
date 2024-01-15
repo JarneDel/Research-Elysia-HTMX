@@ -3,7 +3,7 @@ import { Alert } from '@/components/errors/Alerts.tsx'
 import { EditQuiz } from '@/components/quiz/EditQuiz.tsx'
 import { EditQuizPage } from '@/components/quiz/EditQuizPage.tsx'
 import { supabase } from '@/libs'
-import { checkAccessToken } from '@/libs/auth.ts'
+import { isUser } from '@/libs/authen.ts'
 import { quizWithPage } from '@/repository/quiz.database.ts'
 import { Cookie } from '@/types/cookie.type.ts'
 
@@ -12,30 +12,17 @@ export const quiz = (app: Elysia) =>
     app.guard(
       {
         // Handle user authentication (only allow logged in users)
-        beforeHandle: async ctx => {
-          const { cookie, set } = ctx
-          const result = await checkAccessToken(cookie)
-          ctx.authResult = result
-          if (result.error) {
-            set.headers['HX-Redirect'] = '/auth/sign-in'
-            set.redirect = '/auth/sign-in'
-            return 'Unauthorized'
-          }
-        },
+        beforeHandle: isUser,
         cookie: Cookie,
+        headers: t.Object({
+          'HX-Request': t.Optional(t.String()),
+        }),
       },
       app =>
         app
-          // .resolve(async ({ cookie: Cookie }) => {
-          //   const result = await checkAccessToken(Cookie)
-          //   return {
-          //     authResult: result,
-          //   }
-          // })
-
           .get(
             '/create',
-            ({ cookie }) => {
+            () => {
               return (
                 <>
                   <div class="flex items-center justify-center full-height">
@@ -77,19 +64,15 @@ export const quiz = (app: Elysia) =>
               )
             },
             {
-              cookie: Cookie,
               detail: {
                 tags: ['View', 'Quiz'],
                 description: 'Create a new quiz',
               },
-              headers: t.Object({
-                'HX-Request': t.Optional(t.String()),
-              }),
             },
           )
           .get(
             '/:id/edit',
-            async ({ cookie, params, query, authResult }) => {
+            async ({ params, query, authResult }) => {
               const { user, error } = authResult
               if (error) {
                 return <Alert severity="error">Unauthorized</Alert>
@@ -97,7 +80,7 @@ export const quiz = (app: Elysia) =>
 
               const { data, error: dbError } = await quizWithPage(
                 params.id!,
-                user?.id!,
+                user?.id,
                 query.page ? query.page : '1',
               )
 
@@ -116,7 +99,6 @@ export const quiz = (app: Elysia) =>
               )
             },
             {
-              cookie: Cookie,
               detail: {
                 tags: ['View', 'Quiz', 'Editor'],
                 description: 'Get a quiz',
@@ -124,20 +106,17 @@ export const quiz = (app: Elysia) =>
               query: t.Object({
                 page: t.Optional(t.String()),
               }),
-              headers: t.Object({
-                'HX-Request': t.Optional(t.String()),
-              }),
             },
           )
           .get(
             '/:id/edit/page/:page',
-            async ({ cookie, headers, params, query, authResult }) => {
+            async ({ headers, params, query, authResult }) => {
               // send without quizEditor when hx-request is present
               const { user } = authResult
 
               const { status, data, error } = await quizWithPage(
                 params.id,
-                user?.id!,
+                user?.id,
                 params.page,
               )
 
@@ -186,7 +165,7 @@ export const quiz = (app: Elysia) =>
 
           .get(
             '/my',
-            async ({ cookie, authResult: account }) => {
+            async ({ authResult: account }) => {
               const { data, error } = await supabase
                 .from('quiz')
                 .select()
