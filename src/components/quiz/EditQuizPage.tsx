@@ -1,7 +1,11 @@
 import { AddAnswer, Answer } from '@/components/quiz/CreateQuiz.tsx'
 import { MediaUpload } from '@/components/quiz/MediaUpload.tsx'
+import {
+  NextButton,
+  PreviousButton,
+} from '@/components/quiz/PageNavigationButtons.tsx'
+import { QuizValidation } from '@/components/quiz/QuizValidation.tsx'
 import { ViewMedia } from '@/components/quiz/ViewMedia.tsx'
-import { LoadingIndicator } from '@/components/states/loadingIndicator.tsx'
 
 interface params {
   pageNumber: string
@@ -12,7 +16,6 @@ interface params {
 
 export const EditQuizPage = (params: params) => {
   const { quizId, pageNumber, page, quiz } = params
-
   return (
     <>
       <div safe id="question_number" hx-swap-oob="innerHTML">
@@ -38,7 +41,7 @@ export const EditQuizPage = (params: params) => {
                 name="title"
                 type="text"
                 class="page-title input input-primary input-bordered text-center input-lg font-bold bg-base-200"
-                value={quiz?.question}
+                value={page?.question}
                 placeholder="start typing your question"
               />
             </label>
@@ -86,44 +89,14 @@ export const EditQuizPage = (params: params) => {
             {page?.answers.length < 6 && <AddAnswer />}
           </ul>
         </div>
-        <div class="flex justify-between mt-5">
-          <button
-            class="btn btn-primary"
-            hx-get={
-              '/quiz/' + quizId + '/edit/page/' + (Number(pageNumber) - 1)
-            }
-            hx-swap="outerHTML"
-            hx-target="#page"
-            disabled={Number(pageNumber) == 1}
-            hx-trigger="click"
-            hx-push-url="true"
-            hx-indicator="#previous-page-indicator"
-          >
-            Previous
-            <LoadingIndicator
-              id="previous-page-indicator"
-              size="20"
-              class="duration-500"
-            />
-          </button>
-          <button
-            class="btn btn-primary"
-            hx-get={
-              '/quiz/' + quizId + '/edit/page/' + (Number(pageNumber) + 1)
-            }
-            hx-swap="outerHTML transition:true"
-            hx-push-url="true"
-            hx-target="#page"
-            hx-trigger="click"
-            hx-indicator="#next-page-indicator"
-          >
-            Next
-            <LoadingIndicator
-              id="next-page-indicator"
-              size="20"
-              class="duration-500"
-            />
-          </button>
+        <div class="flex justify-between items-center mt-5">
+          <PreviousButton quizId={quizId} pageNumber={pageNumber} />
+          <QuizValidation
+            answers={page.answers}
+            correct_answers={page.correct_answers}
+            question={page.question}
+          />
+          <NextButton quizId={quizId} pageNumber={pageNumber} page={page} />
         </div>
       </div>
     </>

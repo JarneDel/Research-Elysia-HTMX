@@ -1,9 +1,12 @@
+import { PostgrestSingleResponse } from '@supabase/supabase-js'
 import { Elysia, t } from 'elysia'
 import ShortUniqueId from 'short-unique-id'
 import { Alert } from '@/components/errors/Alerts.tsx'
 import { Success } from '@/components/icons/StatusIcons.tsx'
 import { MediaUpload } from '@/components/quiz/MediaUpload.tsx'
+import { NextButton } from '@/components/quiz/PageNavigationButtons.tsx'
 import { QuizCard } from '@/components/quiz/QuizCard.tsx'
+import { QuizValidation } from '@/components/quiz/QuizValidation.tsx'
 import { ViewMedia } from '@/components/quiz/ViewMedia.tsx'
 import { AuthResult } from '@/libs/auth.ts'
 import { isUser } from '@/libs/authen.ts'
@@ -158,19 +161,25 @@ export const quizEditorApi = (app: Elysia) =>
             const page = data.page[0]
             console.log(page, 'page')
 
+            let result: PostgrestSingleResponse<any>
+
             if (!page) {
-              const result = await supabase.from('page').insert({
-                quiz: data.id,
-                page: params.page,
-                // ARRAY INT_2
-                correct_answers: calculateCorrectAnswers(body),
-                // ARRAY TEXT
-                answers: getAnswers(body),
-                question: sanitize(body.title, 'strict'),
-              })
+              result = await supabase
+                .from('page')
+                .insert({
+                  quiz: data.id,
+                  page: params.page,
+                  // ARRAY INT_2
+                  correct_answers: calculateCorrectAnswers(body),
+                  // ARRAY TEXT
+                  answers: getAnswers(body),
+                  question: sanitize(body.title, 'strict'),
+                })
+                .select()
+                .single()
             } else {
               // update or create page
-              const result = await supabase
+              result = await supabase
                 .from('page')
                 .upsert({
                   id: page.id,
@@ -182,9 +191,31 @@ export const quizEditorApi = (app: Elysia) =>
                   answers: getAnswers(body),
                   question: sanitize(body.title, 'strict'),
                 })
-                .select('id')
+                .select()
+                .single()
             }
-            // todo: response handling
+            console.log(result)
+
+            const answerCountNoEmpty = result.data.answers.filter(
+              (answer: string) => answer !== '',
+            ).length
+
+            return (
+              <>
+                <NextButton
+                  hx-swap-oob="outerHTML"
+                  quizId={params.id}
+                  page={result.data}
+                  pageNumber={params.page}
+                />
+                <QuizValidation
+                  hx-swap-oob="outerHTML"
+                  answers={result.data.answers}
+                  correct_answers={result.data.correct_answers}
+                  question={result.data.question}
+                />
+              </>
+            )
           },
           {
             detail: {

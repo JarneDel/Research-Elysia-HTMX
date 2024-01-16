@@ -33,7 +33,7 @@ export const EditQuiz = (props: EditQuizProps) => {
           class="absolute top-0 bottom-0 left-1/2 transform -translate-x-1/2 flex flex-row items-center gap-2 font-bold text-lg"
           id="question_number"
         >
-          Question 1
+          Question {pageNumber}
         </div>
 
         <div class="flex flex-row items-center gap-2">
