@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
   "exclude": ["node_modules", "dist", "build", "out", "public", "static"],
-  "include": ["src/**/*"],
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx"],
   "compilerOptions": {
     /* Type Checking */
     "noUncheckedIndexedAccess": true, // Increases type-safety
@@ -22,7 +22,7 @@
     "noEmit": true,
 
     /* JavaScript Support */
-    "allowJs": true,
+//    "allowJs": true,
 
     /* Editor Support */
 
@@ -53,6 +53,6 @@
     /* Command Line */
 
     /* Watch Options */
-    "plugins": [{ "name": "@kitajs/ts-html-plugin" }]
+//    "plugins": [{ "name": "@kitajs/ts-html-plugin" }]
   }
 }

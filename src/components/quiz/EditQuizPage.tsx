@@ -22,13 +22,7 @@ export const EditQuizPage = (params: params) => {
         Question {pageNumber}
       </div>
 
-      <div
-        id="page"
-        // hx-trigger="load"
-        // hx-target="#question_number"
-        // hx-swap="innerHTML"
-        // hx-get={`/fragment/quiz/page/${pageNumber}/title`}
-      >
+      <div id="page">
         <div
           hx-trigger="input delay:300ms, submit"
           hx-post={`/api/quiz/${quizId}/change-answers/page/${pageNumber}`}

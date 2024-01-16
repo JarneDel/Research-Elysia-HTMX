@@ -1,8 +1,8 @@
 import { Elysia } from 'elysia'
 
-export const app = (app: Elysia) =>
+export const wsQuiz = (app: Elysia) =>
   app.ws('/ws', {
     open: ws => {
-      ws
+      console.log('websocket opened')
     },
   })
