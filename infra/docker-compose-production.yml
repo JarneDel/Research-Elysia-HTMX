@@ -1,7 +1,7 @@
 version: '3'
 services:
   api:
-    image: jarnedel.registry.jetbrains.space/p/main/containers/api:0.0.3
+    image: jarnedel.registry.jetbrains.space/p/main/containers/api:latest
     build:
       context: ../
       dockerfile: Dockerfile

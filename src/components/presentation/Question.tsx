@@ -1,4 +1,3 @@
-import { View } from '@/components/icons/Etc.tsx'
 import { Answer } from '@/components/quiz/CreateQuiz.tsx'
 import { ViewMedia } from '@/components/quiz/ViewMedia.tsx'
 import { supabase } from '@/libs'
@@ -25,8 +24,12 @@ export const Question = async (props: QuestionProps) => {
           </div>
           <div class="text-2xl navbar-center">{props.question}</div>
           <div class="navbar-end ">
-            <div>
-              <View /> <span id="submissions-count"></span>
+            <div class="flex flex-row items-center">
+              <span id="submissions-count"></span>
+              <span>submissions</span>
+              <form ws-send>
+                <button class="btn btn-primary">Next</button>
+              </form>
             </div>
           </div>
         </div>
