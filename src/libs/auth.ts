@@ -37,6 +37,7 @@ export function setAuthCookies(cookie: any, session: Session) {
 // Main function
 const debug = false
 export async function checkAccessToken(cookie: any): Promise<AuthResult> {
+  console.log('checkAccessToken')
   if (!cookie.refresh_token.value) {
     return { error: 'Refresh token is required' }
   }

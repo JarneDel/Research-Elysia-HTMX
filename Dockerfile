@@ -1,16 +1,16 @@
 FROM oven/bun:latest as bun
 
-WORKDIR /app
 
 COPY package.json /app/package.json
 COPY bun.lockb /app/bun.lockb
+WORKDIR /app
 
 RUN bun install
 
-COPY . /app
-
+COPY / /app
 
 RUN bun run build
+RUN bun build ./src/index.ts --outdir=./build --minify --target=bun --sourcemap=external
 RUN bun ./build.ts
 
 FROM oven/bun as production

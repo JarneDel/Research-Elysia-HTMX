@@ -1,27 +1,12 @@
 version: '3'
 services:
-  redis:
-    image: redis:latest
-    expose:
-      - '6379'
-    networks:
-      - backend
-    healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
-
   api:
-    image: jarnedel.registry.jetbrains.space/p/main/containers/api:latest
+    image: jarnedel.registry.jetbrains.space/p/main/containers/api:0.0.3
     build:
       context: ../
       dockerfile: Dockerfile
     ports:
-      - '3000:3000'
-    depends_on:
-      - redis
-    networks:
-      - backend
+      - '8080:80'
     env_file:
       - ../.env.production.local
 
-networks:
-  backend:

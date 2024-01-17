@@ -4,7 +4,7 @@ import { setAnonymousSessionCookie } from '@/libs/publicAuth.ts'
 
 export const isUser = async (ctx: any) => {
   const { cookie, set } = ctx
-  const result = await checkAccessToken(cookie)
+  const result = await ctx.checkAccessToken(cookie)
   ctx.authResult = result
   if (result.error) {
     set.headers['HX-Redirect'] = '/auth/sign-in'

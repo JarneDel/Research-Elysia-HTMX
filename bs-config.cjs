@@ -3,7 +3,10 @@
 // File: bs-config.js
 
 module.exports = {
-  proxy: 'localhost:3000', // your server address
+  proxy: {
+    target: 'http://localhost:3000', // our express server
+    ws: true, // enables websockets
+  },
   files: ['src/**/*.*'], // watch your frontend files
   ignore: ['node_modules'],
   reloadDelay: 1000,

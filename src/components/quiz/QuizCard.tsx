@@ -6,6 +6,8 @@ interface props {
 export const QuizCard = (props: props) => {
   const { quiz, nowPresenting } = props
 
+  console.log({ nowPresenting })
+
   return (
     <div class="card max-w-96 bg-base-200 min-w-64">
       <div class="card-body">
@@ -29,6 +31,21 @@ export const QuizCard = (props: props) => {
             >
               Present
             </button>
+          )}
+          {isPresenting(nowPresenting, quiz.id) && (
+            <a
+              href={`/present/${
+                nowPresenting.find(item => item.quiz_id === quiz.id).id
+              }`}
+              class="btn btn-accent"
+              hx-get={`/present/${
+                nowPresenting.find(item => item.quiz_id === quiz.id)?.id
+              }`}
+              hx-push-url="true"
+              hx-target="main"
+            >
+              Go
+            </a>
           )}
           {quiz.isDraft && (
             <button
