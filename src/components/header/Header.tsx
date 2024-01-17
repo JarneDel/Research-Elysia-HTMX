@@ -41,15 +41,17 @@ export const Header = (props: props) => (
         </li>
       ))}
     </ul>
-    <form class="flex-1 flex flex-row items-center justify-center gap-2">
-      {/*todo: make this work*/}
+    <form
+      class="flex-1 flex flex-row items-center justify-center gap-2"
+      hx-get="/api/public-quiz/join"
+      hx-target="main"
+    >
       <input
         type="text"
         class="input"
+        name="code"
         aria-label="Join a quiz by code"
         placeholder="Join a quiz"
-        // oninput="this.setAttribute('value', this.value)"
-        value=""
       />
       <button type="submit" class="btn btn-primary">
         join
