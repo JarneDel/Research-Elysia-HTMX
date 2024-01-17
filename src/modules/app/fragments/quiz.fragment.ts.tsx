@@ -1,5 +1,5 @@
 import { Elysia, t } from 'elysia'
-import { AddAnswer, Answer } from '@/components/quiz/CreateQuiz.tsx'
+import { AddAnswer, EditAnswer } from '@/components/quiz/CreateQuiz.tsx'
 import { Cookie } from '@/types/cookie.type.ts'
 
 export const quiz = (app: Elysia) =>
@@ -15,7 +15,7 @@ export const quiz = (app: Elysia) =>
 
           return (
             <>
-              <Answer
+              <EditAnswer
                 id={nextAnswer}
                 placeholder={'Add answer' + (nextAnswer + 1)}
                 isDeletable={true}

@@ -25,7 +25,7 @@ export const AddAnswer = () => (
   </li>
 )
 
-export const Answer = ({
+export const EditAnswer = ({
   id,
   placeholder,
   isDeletable = false,
@@ -68,6 +68,32 @@ export const Answer = ({
     )}
   </li>
 )
+
+interface AnswerProps {
+  index: number
+  value: string
+  namePrefix?: string
+  type: 'present' | 'submit'
+}
+
+export const Answer = (props: AnswerProps) => {
+  const { index, value, namePrefix } = props
+  return (
+    <li class="flex w-full bg-base-300 p-2 rounded-box gap-4 relative items-center">
+      <AnswerIcon id={index} size={96} />
+      <div safe class="text-3xl font-medium ">
+        {value}
+      </div>
+      {props.type === 'submit' && (
+        <input
+          type="checkbox"
+          name={`${namePrefix}-${index}`}
+          class="checkbox checkbox-lg mt-auto checkbox-success absolute top-2 right-2"
+        />
+      )}
+    </li>
+  )
+}
 
 export const AnswerIcon = (props: { id: number; size: number }) => {
   const { id } = props

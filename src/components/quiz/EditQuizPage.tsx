@@ -1,4 +1,4 @@
-import { AddAnswer, Answer } from '@/components/quiz/CreateQuiz.tsx'
+import { AddAnswer, EditAnswer } from '@/components/quiz/CreateQuiz.tsx'
 import { MediaUpload } from '@/components/quiz/MediaUpload.tsx'
 import {
   NextButton,
@@ -56,7 +56,7 @@ export const EditQuizPage = (params: params) => {
               <ViewMedia
                 mediaURL={page.media_url}
                 quizId={quizId}
-                page={params.pageNumber}
+                pageNumber={params.pageNumber}
                 modalId="media_modal"
                 allowDelete={true}
               />
@@ -66,13 +66,13 @@ export const EditQuizPage = (params: params) => {
           <ul class="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:grid-rows-3 ">
             {(!page || page?.answers.length == 0) && (
               <>
-                <Answer id={0} placeholder="Add answer 1" />
-                <Answer id={1} placeholder="Add answer 2" />
+                <EditAnswer id={0} placeholder="Add answer 1" />
+                <EditAnswer id={1} placeholder="Add answer 2" />
                 <AddAnswer />
               </>
             )}
             {page?.answers.map((answer: string, index: number) => (
-              <Answer
+              <EditAnswer
                 id={index}
                 placeholder={'Add answer' + (index + 1)}
                 value={answer}

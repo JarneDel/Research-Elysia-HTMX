@@ -4,7 +4,7 @@
     <inspection_tool class="HtmlUnknownAttribute" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="myValues">
         <value>
-          <list size="16">
+          <list size="19">
             <item index="0" class="java.lang.String" itemvalue="hx-post" />
             <item index="1" class="java.lang.String" itemvalue="hx-target" />
             <item index="2" class="java.lang.String" itemvalue="hx-swap" />
@@ -21,6 +21,9 @@
             <item index="13" class="java.lang.String" itemvalue="hx-ext" />
             <item index="14" class="java.lang.String" itemvalue="ws-connect" />
             <item index="15" class="java.lang.String" itemvalue="ws-send" />
+            <item index="16" class="java.lang.String" itemvalue="hx-on:htmx" />
+            <item index="17" class="java.lang.String" itemvalue="hx-on" />
+            <item index="18" class="java.lang.String" itemvalue="hx-on-htmx-wsBeforeMessage" />
           </list>
         </value>
       </option>

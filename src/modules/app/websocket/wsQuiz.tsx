@@ -1,4 +1,9 @@
-import { Elysia, t } from 'elysia'
+import { Elysia, RouteSchema, t } from 'elysia'
+import { getQuestion } from '@/components/presentation/Question.tsx'
+import {
+  Username,
+  UsernameContainer,
+} from '@/components/presentation/Username.tsx'
 import { supabase } from '@/libs'
 import { checkAccessToken } from '@/libs/auth.ts'
 
@@ -7,42 +12,45 @@ export const wsQuiz = (app: Elysia) =>
     body: t.Object(
       {
         quizId: t.Optional(t.String()),
+        presentQuizId: t.Optional(t.String()),
         setUsername: t.Optional(t.String()),
-        HEADERS: t.Optional(t.Object({}, { additionalProperties: true })),
+        'start-presenting': t.Optional(t.String()),
+        HEADERS: t.Object(
+          {
+            'HX-Current-URL': t.String(),
+          },
+          { additionalProperties: true },
+        ),
       },
       {
         additionalProperties: true,
       },
     ),
 
-    open: ws => {
-      console.log('websocket opened')
-    },
-    message: (ws, message) => {
-      const cookie = ws.data.cookie
-      console.log('websocket message', message, cookie)
+    open: async ws => {},
+    // REMEMBER YOU CAN'T PUBLISH TO YOURSELF
+    message: async (ws, message) => {
+      console.log(message)
+      const user = await anyAuth(ws.data.cookie)
+      await handleSetUsernameMessage(ws, user, message)
+      if (message['presentQuizId']) {
+        const quizId = getQuizId(message.HEADERS['HX-Current-URL'])
+        if (!quizId) return
+        ws.subscribe(quizId)
+      }
 
-      if (message['setUsername']) {
-        handleSetUsername(ws, message['setUsername']).then(r => {
-          console.log(r)
-          if (message.quizId) {
-            ws.subscribe(message.quizId)
-            ws.publish(
-              message.quizId,
-              <>
-                <div id="user_joined_id" safe>
-                  {r?.username}
-                </div>
-              </>,
-            )
-          }
-        })
+      if (message['start-presenting'] == '') {
+        console.log('start-presenting')
+        const quizId = getQuizId(message.HEADERS['HX-Current-URL'])
+        if (!quizId || !user.userId || user.type !== 'authenticated') return
+        ws.send(await getQuestion(quizId, 1, user.userId))
+
+        // ws.send() // send page 1 template
       }
     },
   })
 
-const handleSetUsername = async (ws: any, username: string) => {
-  const user = await anyAuth(ws.data.cookie)
+const handleSetUsername = async (user: anyAuthResult, username: string) => {
   if (user.type === 'unauthorized') {
     return
   }
@@ -76,12 +84,12 @@ const handleSetUsername = async (ws: any, username: string) => {
   return usernameData
 }
 
-const anyAuth = async (
-  cookie: any,
-): Promise<{
+export interface anyAuthResult {
   userId?: string
   type: 'anonymous' | 'authenticated' | 'unauthorized'
-}> => {
+}
+
+const anyAuth = async (cookie: any): Promise<anyAuthResult> => {
   if (!cookie.refresh_token) {
     if (cookie['anon_user'].value) {
       return {
@@ -107,5 +115,45 @@ const anyAuth = async (
   return {
     userId: result.user?.id,
     type: result.user ? 'authenticated' : 'unauthorized',
+  }
+}
+
+const getQuizId = (url: string): string | undefined => {
+  const urlObj = new URL(url)
+  const pathname = urlObj.pathname
+  const parts = pathname.split('/')
+  return parts.pop()
+}
+
+const publishAndSend = (
+  ws: any,
+  message: RouteSchema['response'],
+  channel: string,
+) => {
+  console.log('publishing', channel, message)
+  ws.publish(channel, message)
+  ws.send(message)
+}
+
+const handleSetUsernameMessage = async (
+  ws: any,
+  user: anyAuthResult,
+  message: any,
+) => {
+  if (message['setUsername']) {
+    const result = await handleSetUsername(user, message['setUsername'])
+    const quizId = getQuizId(message.HEADERS['HX-Current-URL'])
+    if (!quizId) return
+    ws.subscribe(quizId)
+
+    publishAndSend(
+      ws,
+      <>
+        <UsernameContainer id="connected-users" hx-swap-oob="beforeend">
+          <Username username={result?.username} />
+        </UsernameContainer>
+      </>,
+      quizId,
+    )
   }
 }
