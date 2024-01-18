@@ -11,6 +11,12 @@ export const wsQuiz = (app: Elysia) =>
   app.ws('/ws', {
     body: t.Object(
       {
+        'quiz-answer-0': t.Optional(t.String()),
+        'quiz-answer-1': t.Optional(t.String()),
+        'quiz-answer-2': t.Optional(t.String()),
+        'quiz-answer-3': t.Optional(t.String()),
+        'quiz-answer-4': t.Optional(t.String()),
+        'quiz-answer-5': t.Optional(t.String()),
         quizId: t.Optional(t.String()),
         presentQuizId: t.Optional(t.String()),
         setUsername: t.Optional(t.String()),
@@ -30,22 +36,35 @@ export const wsQuiz = (app: Elysia) =>
     open: async ws => {},
     // REMEMBER YOU CAN'T PUBLISH TO YOURSELF
     message: async (ws, message) => {
+      const activeQuizId = getQuizId(message.HEADERS['HX-Current-URL'])
+      if (!activeQuizId) return
+
       console.log(message)
       const user = await anyAuth(ws.data.cookie)
       await handleSetUsernameMessage(ws, user, message)
       if (message['presentQuizId']) {
-        const quizId = getQuizId(message.HEADERS['HX-Current-URL'])
-        if (!quizId) return
-        ws.subscribe(quizId)
+        ws.isSubscribed(activeQuizId) || ws.subscribe(activeQuizId)
       }
 
       if (message['start-presenting'] == '') {
         console.log('start-presenting')
-        const quizId = getQuizId(message.HEADERS['HX-Current-URL'])
-        if (!quizId || !user.userId || user.type !== 'authenticated') return
-        ws.send(await getQuestion(quizId, 1, user.userId))
+        if (!activeQuizId || !user.userId || user.type !== 'authenticated')
+          return
+        const dataToSend = await getQuestion(activeQuizId, 1, user.userId)
+        if (dataToSend.error) {
+          console.error(dataToSend.error) // TODO: handle error
+          return
+        }
+        ws.send(dataToSend.presenterTemplate)
+        ws.publish(activeQuizId, dataToSend.participantTemplate)
+      }
 
-        // ws.send() // send page 1 template
+      for (const key of Object.keys(message)) {
+        if (key.startsWith('quiz-answer')) {
+          await validateAnswer(key, (message as any)[key], activeQuizId)
+
+          ws.publish(activeQuizId, message)
+        }
       }
     },
   })
@@ -156,4 +175,18 @@ const handleSetUsernameMessage = async (
       quizId,
     )
   }
+}
+
+const validateAnswer = async (key: string, value: any, quizId: string) => {
+  const answerIndex = key.split('-').pop()
+
+  const { data: questionData, error } = await supabase
+    .from('active_quiz')
+    .select(
+      `id, current_page_id(
+      id, correct_answers
+    )`,
+    )
+    .eq('id', quizId)
+    .single()
 }

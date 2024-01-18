@@ -72,25 +72,37 @@ export const EditAnswer = ({
 interface AnswerProps {
   index: number
   value: string
-  namePrefix?: string
-  type: 'present' | 'submit'
 }
 
 export const Answer = (props: AnswerProps) => {
-  const { index, value, namePrefix } = props
+  const { index, value } = props
   return (
     <li class="flex w-full bg-base-300 p-2 rounded-box gap-4 relative items-center">
       <AnswerIcon id={index} size={96} />
       <div safe class="text-3xl font-medium ">
         {value}
       </div>
-      {props.type === 'submit' && (
-        <input
-          type="checkbox"
-          name={`${namePrefix}-${index}`}
-          class="checkbox checkbox-lg mt-auto checkbox-success absolute top-2 right-2"
-        />
-      )}
+    </li>
+  )
+}
+
+interface AnswerParticipantProps {
+  index: number
+  value: string
+  namePrefix: string
+}
+export const AnswerParticipant = (props: AnswerParticipantProps) => {
+  return (
+    <li class="w-full bg-base-300 p-2 rounded-box relative focus-visible:outline-offset-4 focus-visible:outline-2 hover:bg-secondary/70 hover:text-secondary-content transition-colors duration-300">
+      <button
+        name={props.namePrefix + '-' + props.index}
+        class="flex w-full gap-4 items-center"
+      >
+        <AnswerIcon id={props.index} size={96} />
+        <div safe class="text-3xl font-medium ">
+          {props.value}
+        </div>
+      </button>
     </li>
   )
 }
@@ -105,7 +117,7 @@ export const AnswerIcon = (props: { id: number; size: number }) => {
       // height={props.size}
       viewBox="0 0 24 24"
       fill={color}
-      class={`rounded h-12 w-12 sm:h-24 sm:w-24 flex-shrink-0 `}
+      class={`rounded-box h-12 w-12 sm:h-24 sm:w-24 flex-shrink-0 `}
     >
       <path stroke="none" d="M0 0h24v24H0z" />
       {/*Filled rectangle white*/}

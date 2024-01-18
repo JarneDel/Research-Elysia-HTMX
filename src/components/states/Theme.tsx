@@ -51,7 +51,8 @@ export const ThemeSwitcher = () => {
       </div>
       <ul
         tabindex="0"
-        class="dropdown-content z-[1] p-2 shadow-2xl bg-base-300 rounded-box w-52 overflow-scroll max-h-96 mt-4"
+        class="dropdown-content z-[1] p-2 shadow-2xl bg-base-300
+        rounded-box w-52 overflow-scroll max-h-96 mt-4"
       >
         {themes.map(theme => (
           <li>

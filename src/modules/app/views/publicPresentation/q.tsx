@@ -84,53 +84,57 @@ export const q = (app: Elysia) =>
 
                 return (
                   <div hx-ext="ws" ws-connect="/ws">
-                    <div class="navbar">
-                      <div class="navbar-start">{quiz?.name}</div>
-                      <div class="navbar-end">{data.id}</div>
-                    </div>
-                    <div class="body grid place-items-center h-full">
-                      <form
-                        id="username"
-                        ws-send
-                        hx-include="#quiz_id"
-                        class="flex flex-row justify-center items-center"
-                      >
-                        {/*Hidden input for adding quiz_id to request*/}
-                        <input
-                          type="hidden"
-                          name="quizId"
-                          id="quiz_id"
-                          value={params.id}
-                        />
-                        <input
-                          name="setUsername"
-                          class="input input-primary"
-                          type="text"
-                          value={username ?? undefined}
-                        />
-                        {username || (
-                          <button type="submit" class=" ml-2 btn btn-success">
-                            <Success />
-                          </button>
-                        )}
-                      </form>
-                    </div>
-                    <div class="fixed bottom-0 right-2 text-neutral-500 w-max">
-                      {authResult().user?.id && (
-                        <span>
-                          <span class="mr-2">Logged in as</span>
-                          <span class="font-bold">
-                            {authResult().user?.email}
+                    <div id="lobby">
+                      <div class="navbar">
+                        <div class="navbar-start">{quiz?.name}</div>
+                        <div class="navbar-end">{data.id}</div>
+                      </div>
+                      <div class="body grid place-items-center h-full">
+                        <form
+                          id="username"
+                          ws-send
+                          hx-include="#quiz_id"
+                          class="flex flex-row justify-center items-center"
+                        >
+                          {/*Hidden input for adding quiz_id to request*/}
+                          <input
+                            type="hidden"
+                            name="quizId"
+                            id="quiz_id"
+                            value={params.id}
+                          />
+                          <input
+                            name="setUsername"
+                            class="input input-primary"
+                            type="text"
+                            value={username ?? undefined}
+                          />
+                          {username || (
+                            <button type="submit" class=" ml-2 btn btn-success">
+                              <Success />
+                            </button>
+                          )}
+                        </form>
+                      </div>
+                      <div class="fixed bottom-0 right-2 text-neutral-500 w-max">
+                        {authResult().user?.id && (
+                          <span>
+                            <span class="mr-2">Logged in as</span>
+                            <span class="font-bold">
+                              {authResult().user?.email}
+                            </span>
                           </span>
-                        </span>
-                      )}
-                      {anonUserResult() && (
-                        <span>
-                          <span class="mr-2">Logged in as</span>
-                          <span class="font-bold">{anonUserResult()}</span>
-                        </span>
-                      )}
+                        )}
+                        {anonUserResult() && (
+                          <span>
+                            <span class="mr-2">Logged in as</span>
+                            <span class="font-bold">{anonUserResult()}</span>
+                          </span>
+                        )}
+                      </div>
                     </div>
+                    {/*Game will be mounted here*/}
+                    <div id="game"></div>
                   </div>
                 )
               },
