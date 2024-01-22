@@ -57,6 +57,22 @@ export const Question = (props: QuestionProps) => {
                       </form>
                     </>
                   )}
+                  {!props.hasNextPage && (
+                    <>
+                      <input
+                        type="hidden"
+                        name="end-quiz"
+                        value="true"
+                        ws-send
+                        hx-trigger="load delay:20s"
+                      />
+                      <form ws-send hx-trigger="submit">
+                        <button class="btn btn-primary" name="end-quiz">
+                          End Quiz
+                        </button>
+                      </form>
+                    </>
+                  )}
                 </div>
               </div>
             </>
