@@ -24,7 +24,7 @@ export const Layout = (props: LayoutProps) => {
           ></link>
           <title>{title}</title>
           {/*important to load first*/}
-          <script src="/public/htmx@1.9.10.min.js"></script>
+          <script src="/public/htmx@1.9.9.min.js"></script>
           <script src="/public/htmx-ws.js"></script>
 
           <script defer src="/public/useTheme.js" />

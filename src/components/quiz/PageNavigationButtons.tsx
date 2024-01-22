@@ -10,7 +10,7 @@ interface NextButtonProps {
 export const NextButton = (props: NextButtonProps) => {
   const { quizId, pageNumber, page } = props
 
-  const notEmptyLength = page.answers.filter(
+  const notEmptyLength = page?.answers.filter(
     (answer: any) => answer !== '',
   ).length
 

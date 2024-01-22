@@ -11,11 +11,11 @@ interface params {
   pageNumber: string
   quizId: string
   page: any
-  quiz: any
 }
 
 export const EditQuizPage = (params: params) => {
-  const { quizId, pageNumber, page, quiz } = params
+  const { quizId, pageNumber, page } = params
+  console.log(params, 'params')
   return (
     <>
       <div safe id="question_number" hx-swap-oob="innerHTML">
@@ -31,13 +31,14 @@ export const EditQuizPage = (params: params) => {
         >
           <div class="tooltip w-full my-3" data-tip="Question">
             <label class="form-control">
-              <input
+              <textarea
                 name="title"
-                type="text"
                 class="page-title input input-primary input-bordered text-center input-lg font-bold bg-base-200"
-                value={page?.question}
                 placeholder="start typing your question"
-              />
+                maxlength="250"
+              >
+                {page?.question}
+              </textarea>
             </label>
           </div>
           <div
@@ -85,11 +86,13 @@ export const EditQuizPage = (params: params) => {
         </div>
         <div class="flex justify-between items-center mt-5">
           <PreviousButton quizId={quizId} pageNumber={pageNumber} />
-          <QuizValidation
-            answers={page.answers}
-            correct_answers={page.correct_answers}
-            question={page.question}
-          />
+          {page && (
+            <QuizValidation
+              answers={page.answers}
+              correct_answers={page.correct_answers}
+              question={page.question}
+            />
+          )}
           <NextButton quizId={quizId} pageNumber={pageNumber} page={page} />
         </div>
       </div>

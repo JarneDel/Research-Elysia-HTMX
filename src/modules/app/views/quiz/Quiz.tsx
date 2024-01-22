@@ -146,6 +146,7 @@ export const quiz = (app: Elysia) =>
                   // send without quizEditor when hx-request is present
                   const { user } = authResult()
                   if (!user) return
+                  console.log('requesting page')
 
                   const { status, data, error } = await quizWithPage(
                     params.id,
@@ -161,17 +162,16 @@ export const quiz = (app: Elysia) =>
                     )
                   }
                   const pageData = data?.page[0]
-
                   const pageEditorHTML = (
                     <EditQuizPage
                       pageNumber={params.page}
                       quizId={params.id}
                       page={pageData}
-                      quiz={data}
                     />
                   )
 
                   if (headers['hx-request'] != undefined) {
+                    console.log('requesting page without quizEditor')
                     return pageEditorHTML
                   }
                   // initialize with quizEditor
@@ -190,9 +190,12 @@ export const quiz = (app: Elysia) =>
                   query: t.Object({
                     quiz: t.Optional(t.String()),
                   }),
-                  headers: t.Object({
-                    'hx-request': t.Optional(t.String()),
-                  }),
+                  headers: t.Object(
+                    {
+                      'hx-request': t.Optional(t.String()),
+                    },
+                    { additionalProperties: true },
+                  ),
                 },
               )
 

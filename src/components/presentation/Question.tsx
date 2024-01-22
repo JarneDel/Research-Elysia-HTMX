@@ -1,19 +1,20 @@
 import { Answer, AnswerParticipant } from '@/components/quiz/CreateQuiz.tsx'
 import { ViewMedia } from '@/components/quiz/ViewMedia.tsx'
-import { supabase } from '@/libs'
 import {
+  changeActiveQuizPage,
+  getPageWithQuiz,
   getSingleActiveQuizWithPageAndQuiz,
-  startActiveQuiz,
 } from '@/repository/activeQuiz.database.ts'
 
 export interface QuestionProps {
-  mediaURL: string
+  mediaURL?: string
   answers: string[]
   question: string
   quizName?: string
   code?: string
   mode: 'present' | 'participant'
   pageNumber?: number
+  hasNextPage?: boolean
 }
 
 export const Question = (props: QuestionProps) => {
@@ -40,23 +41,44 @@ export const Question = (props: QuestionProps) => {
               </div>
               <div class="text-2xl navbar-center">{props.question}</div>
               <div class="navbar-end ">
-                <div class="flex flex-row items-center">
+                <div
+                  class="flex flex-row items-center"
+                  hx-on="htmx:wsBeforeMessage=alert('hi')"
+                >
                   <span id="submissions-count"></span>
-                  <span>submissions</span>
-                  <form ws-send>
-                    <button class="btn btn-primary">Next</button>
-                  </form>
+                  {props.hasNextPage && (
+                    <>
+                      <input
+                        type="hidden"
+                        name="next-question"
+                        value="true"
+                        ws-send
+                        hx-trigger="load delay:20s"
+                      />
+                      <form ws-send hx-trigger="submit">
+                        <button class="btn btn-primary" name="next-question">
+                          Next
+                        </button>
+                      </form>
+                    </>
+                  )}
                 </div>
               </div>
             </>
           )}
         </div>
-        <div class="container mt-4">
-          <ViewMedia
-            allowDelete={false}
-            mediaURL={props.mediaURL}
-            modalId="present_page_modal"
-          />
+        {props.mode === 'present' && (
+          //   horizontal countdown bar full width
+          <div class="progress-bar"></div>
+        )}
+        <div class="container mt-4" id="game-body">
+          {props.mediaURL && (
+            <ViewMedia
+              allowDelete={false}
+              mediaURL={props.mediaURL}
+              modalId="present_page_modal"
+            />
+          )}
           <ul class="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:grid-rows-3 mt-4 ">
             {props.answers.map((question, index) => {
               if (props.mode === 'present')
@@ -120,34 +142,21 @@ export const getQuestion = async (
   const page = quiz.page.filter(page => page.page === pageNumber).pop()
   console.log({ page })
 
-  const result = await startActiveQuiz(quizId, page?.id)
+  const result = await changeActiveQuizPage(quizId, page?.id)
   console.log({ result })
 
-  const { data: question, error: questionError } = await supabase
-    .from('page')
-    .select(
-      `
-      id,
-      question, 
-      answers,
-      correct_answers,
-      page,
-      media_url,
-      quiz(
-        id,
-        created_by
-      )
-      
-    `,
-    )
-    .eq('quiz.created_by', userId)
-    .eq('page', pageNumber)
-    .eq('quiz', quiz.id)
-    .single()
+  const { data: question, error: questionError } = await getPageWithQuiz(
+    quiz.id,
+    pageNumber,
+    userId,
+  )
 
-  console.log(question, 'question', questionError)
+  const hasNextPage =
+    quiz.page.filter(page => page.page > pageNumber).length > 0
+
+  console.log(hasNextPage)
+
   if (questionError || !question) {
-    console.error(questionError)
     return {
       error: questionError?.message,
       participantTemplate: <></>,
@@ -162,6 +171,7 @@ export const getQuestion = async (
       code={quizId}
       quizName={quiz.name}
       mode="present"
+      hasNextPage={hasNextPage}
     />
   )
   const participantTemplate = (

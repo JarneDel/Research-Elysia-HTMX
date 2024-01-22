@@ -89,6 +89,10 @@ export const q = (app: Elysia) =>
                         <div class="navbar-start">{quiz?.name}</div>
                         <div class="navbar-end">{data.id}</div>
                       </div>
+                      <form ws-send hx-trigger="load">
+                        <input type="hidden" name="connect" value={data.id} />
+                      </form>
+
                       <div class="body grid place-items-center h-full">
                         <form
                           id="username"

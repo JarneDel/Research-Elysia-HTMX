@@ -1,4 +1,5 @@
 import { Elysia, t } from 'elysia'
+import QRCode from 'qrcode'
 import { Presentation } from '@/components/presentation/Presentation.tsx'
 import { supabase } from '@/libs'
 import { AuthResult, checkAccessToken } from '@/libs/auth.ts'
@@ -60,11 +61,19 @@ export const quizPresentation = (app: Elysia) =>
                 .eq('user_id', authResult().user?.id)
                 .single()
 
+              console.log(process.env.PUBLIC_URL)
+              const url = process.env.PUBLIC_URL || 'http://localhost:3000'
+
+              const qrCode = await QRCode.toDataURL(url + '/q/' + params.id, {
+                errorCorrectionLevel: 'H',
+              })
+
               return (
                 <>
                   <Presentation
                     activeQuiz={data}
                     userId={user.id}
+                    qrCode={qrCode}
                   ></Presentation>
                 </>
               )

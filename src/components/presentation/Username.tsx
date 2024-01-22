@@ -16,7 +16,7 @@ export interface usernameContainerProps {
 
 export const UsernameContainer = (props: usernameContainerProps) => (
   <div
-    class="flex gap-4 flex-row flex-wrap max-w-3xl justify-center items-center mx-auto full-height"
+    class="flex gap-4 flex-row flex-wrap max-w-3xl justify-center items-center mx-auto"
     hx-swap-oob={props['hx-swap-oob']}
     id={props.id}
   >

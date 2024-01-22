@@ -1,23 +1,29 @@
-import { Elysia, RouteSchema, t } from 'elysia'
+import { Elysia, t } from 'elysia'
 import { getQuestion } from '@/components/presentation/Question.tsx'
+import { anyAuth } from '@/modules/app/websocket/auth.tsx'
 import {
-  Username,
-  UsernameContainer,
-} from '@/components/presentation/Username.tsx'
-import { supabase } from '@/libs'
-import { checkAccessToken } from '@/libs/auth.ts'
+  getQuizCode,
+  reconnectToQuiz,
+} from '@/modules/app/websocket/generic.tsx'
+import {
+  handleSetUsernameMessage,
+  validateAnswer,
+} from '@/modules/app/websocket/participant.tsx'
+import { activeQuizPageDetails } from '@/repository/activeQuiz.database.ts'
+import { fixOneToOne } from '@/repository/databaseArrayFix.ts'
 
 export const wsQuiz = (app: Elysia) =>
   app.ws('/ws', {
     body: t.Object(
       {
+        connect: t.Optional(t.String()),
         'quiz-answer-0': t.Optional(t.String()),
         'quiz-answer-1': t.Optional(t.String()),
         'quiz-answer-2': t.Optional(t.String()),
         'quiz-answer-3': t.Optional(t.String()),
         'quiz-answer-4': t.Optional(t.String()),
         'quiz-answer-5': t.Optional(t.String()),
-        quizId: t.Optional(t.String()),
+        'next-question': t.Optional(t.Unknown()),
         presentQuizId: t.Optional(t.String()),
         setUsername: t.Optional(t.String()),
         'start-presenting': t.Optional(t.String()),
@@ -33,17 +39,39 @@ export const wsQuiz = (app: Elysia) =>
       },
     ),
 
-    open: async ws => {},
+    open: async ws => {
+      console.log('open')
+    },
     // REMEMBER YOU CAN'T PUBLISH TO YOURSELF
     message: async (ws, message) => {
-      const activeQuizId = getQuizId(message.HEADERS['HX-Current-URL'])
+      const activeQuizId = getQuizCode(message.HEADERS['HX-Current-URL'])
+      const user = await anyAuth(ws.data.cookie)
+
       if (!activeQuizId) return
 
-      console.log(message)
-      const user = await anyAuth(ws.data.cookie)
+      console.log(user.type)
+
       await handleSetUsernameMessage(ws, user, message)
+      await reconnectToQuiz(ws, message, user, activeQuizId)
       if (message['presentQuizId']) {
+        if (!user.userId || user.type !== 'authenticated') return
+        // todo: check ownership
         ws.isSubscribed(activeQuizId) || ws.subscribe(activeQuizId)
+        ws.isSubscribed(activeQuizId + '-presenter') ||
+          ws.subscribe(activeQuizId + '-presenter')
+
+        // check if quiz is being presented
+        const { data: activeQuiz, error } =
+          await activeQuizPageDetails(activeQuizId)
+        if (activeQuiz?.current_page_id) {
+          const page = fixOneToOne(activeQuiz.current_page_id).page
+          const dataToSend = await getQuestion(activeQuizId, page, user.userId)
+          if (dataToSend.error) {
+            console.error(dataToSend.error) // TODO: handle error
+            return
+          }
+          ws.send(dataToSend.presenterTemplate)
+        }
       }
 
       if (message['start-presenting'] == '') {
@@ -59,134 +87,34 @@ export const wsQuiz = (app: Elysia) =>
         ws.publish(activeQuizId, dataToSend.participantTemplate)
       }
 
+      if (message['next-question'] == '') {
+        // send results
+
+        console.log('next-question')
+        if (!activeQuizId || !user.userId || user.type !== 'authenticated')
+          return
+        const currentQuestion = await activeQuizPageDetails(activeQuizId)
+        if (!currentQuestion.data) return
+        const page = fixOneToOne(currentQuestion.data.current_page_id).page
+        const dataToSend = await getQuestion(
+          activeQuizId,
+          page + 1,
+          user.userId,
+        )
+        if (dataToSend.error) {
+          console.error(dataToSend.error) // TODO: handle error
+          return
+        }
+        ws.send(dataToSend.presenterTemplate)
+        ws.publish(activeQuizId, dataToSend.participantTemplate)
+      }
+
       for (const key of Object.keys(message)) {
         if (key.startsWith('quiz-answer')) {
-          await validateAnswer(key, (message as any)[key], activeQuizId)
+          ws.send(await validateAnswer(key, activeQuizId, user))
 
-          ws.publish(activeQuizId, message)
+          ws.publish(activeQuizId + '-presenter', 'submitted')
         }
       }
     },
   })
-
-const handleSetUsername = async (user: anyAuthResult, username: string) => {
-  if (user.type === 'unauthorized') {
-    return
-  }
-
-  console.log(user.type, user.userId)
-
-  // check if user exists
-  const { data: userData, error } = await supabase
-    .from('user_detail')
-    .select('id, username')
-    .eq(user.type === 'authenticated' ? 'user_id' : 'anon_user_id', user.userId)
-    .single()
-
-  if (error && error.code !== 'PGRST116') console.info(error)
-
-  const { data: usernameData, error: usernameError } = await supabase
-    .from('user_detail')
-    .upsert({
-      id: userData?.id,
-      username,
-      anon_user_id: user.type === 'anonymous' ? user.userId : null,
-      user_id: user.type === 'authenticated' ? user.userId : null,
-    })
-    .select('id, username')
-    .single()
-
-  if (usernameError) {
-    console.error(usernameError)
-    return
-  }
-  return usernameData
-}
-
-export interface anyAuthResult {
-  userId?: string
-  type: 'anonymous' | 'authenticated' | 'unauthorized'
-}
-
-const anyAuth = async (cookie: any): Promise<anyAuthResult> => {
-  if (!cookie.refresh_token) {
-    if (cookie['anon_user'].value) {
-      return {
-        userId: cookie['anon_user'].value,
-        type: 'anonymous',
-      }
-    }
-  }
-
-  const result = await checkAccessToken(cookie)
-  if (result.error) {
-    if (cookie['anon_user'].value) {
-      return {
-        userId: cookie['anon_user'].value,
-        type: 'anonymous',
-      }
-    } else {
-      return {
-        type: 'unauthorized',
-      }
-    }
-  }
-  return {
-    userId: result.user?.id,
-    type: result.user ? 'authenticated' : 'unauthorized',
-  }
-}
-
-const getQuizId = (url: string): string | undefined => {
-  const urlObj = new URL(url)
-  const pathname = urlObj.pathname
-  const parts = pathname.split('/')
-  return parts.pop()
-}
-
-const publishAndSend = (
-  ws: any,
-  message: RouteSchema['response'],
-  channel: string,
-) => {
-  console.log('publishing', channel, message)
-  ws.publish(channel, message)
-  ws.send(message)
-}
-
-const handleSetUsernameMessage = async (
-  ws: any,
-  user: anyAuthResult,
-  message: any,
-) => {
-  if (message['setUsername']) {
-    const result = await handleSetUsername(user, message['setUsername'])
-    const quizId = getQuizId(message.HEADERS['HX-Current-URL'])
-    if (!quizId) return
-    ws.subscribe(quizId)
-
-    publishAndSend(
-      ws,
-      <>
-        <UsernameContainer id="connected-users" hx-swap-oob="beforeend">
-          <Username username={result?.username} />
-        </UsernameContainer>
-      </>,
-      quizId,
-    )
-  }
-}
-
-const validateAnswer = async (key: string, value: any, quizId: string) => {
-  const answerIndex = key.split('-').pop()
-
-  const { data: questionData, error } = await supabase
-    .from('active_quiz')
-    .select(
-      `id, current_page_id(
-      id, correct_answers
-    )`,
-    )
-    .eq('id', quizId)
-    .single()
-}

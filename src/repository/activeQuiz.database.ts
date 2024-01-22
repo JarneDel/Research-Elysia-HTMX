@@ -19,7 +19,42 @@ export const activeQuizDetails = async (quizId: string) => {
     .single()
 }
 
-export const startActiveQuiz = async (quizId: string, pageId: number) => {
+export const activeQuizPageDetails = async (quizId: string) => {
+  return supabase
+    .from('active_quiz')
+    .select(
+      `
+      id,
+      created_at,
+      current_page_id (id, page)
+    `,
+    )
+    .eq('id', quizId)
+    .single()
+}
+
+export const activeQuizAllFields = async (quizId: string) => {
+  return supabase
+    .from('active_quiz')
+    .select(
+      `
+      id,
+      created_at,
+      current_page_id (id, page, question, answers, correct_answers, media_url),
+      quiz_id (
+        id,
+        name,
+        description,
+        page (id, page)
+      )
+    `,
+    )
+    .eq('id', quizId)
+    .not('current_page_id', 'is', null)
+    .single()
+}
+
+export const changeActiveQuizPage = async (quizId: string, pageId: number) => {
   return supabase
     .from('active_quiz')
     .update([{ current_page_id: pageId }])
