@@ -15,7 +15,13 @@
     "typecheck": "tsc --noEmit && rm tsconfig.tsbuildinfo",
     "serve": "browser-sync start --config bs-config.cjs",
     "---DOCS": "",
-    "docs:generate": "nodemon -e 'ts, tsx' -x \"sleep 1 && curl -s http://localhost:3000/docs/json > ./docs/swagger.json\""
+    "docs:generate": "nodemon -e 'ts, tsx' -x \"sleep 1 && curl -s http://localhost:3000/docs/json > ./docs/swagger.json\"",
+    "---DOCKER:DEPLOY": "",
+    "deploy:docker": "docker compose -f ./infra/docker-compose-production.yml up -d",
+    "deploy:docker:build": "docker compose -f ./infra/docker-compose-production.yml build",
+    "deploy:docker:stop": "docker compose -f ./infra/docker-compose-production.yml down",
+    "deploy:docker:logs": "docker compose -f ./infra/docker-compose-production.yml logs -f",
+    "deploy:docker:push": "docker compose -f ./infra/docker-compose-production.yml push"
   },
   "dependencies": {
     "@elysiajs/html": "^0.8.0",
