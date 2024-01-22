@@ -110,7 +110,7 @@ export class Participant {
    * @param answerIndexString
    * @param quizId
    */
-  async validateAnswer(answerIndexString: string, quizId: string) {
+  private async validateAnswer(answerIndexString: string, quizId: string) {
     if (!this.user.userId || this.user.type === 'unauthorized') return
     const answerIndex = answerIndexString.split('-').pop()
     if (!answerIndex) return
@@ -200,6 +200,16 @@ export class Participant {
           mode="participant"
         />,
       )
+    }
+  }
+
+  async handleAnswer(quizCode: string) {
+    for (const key of Object.keys(this.msg)) {
+      if (key.startsWith('quiz-answer')) {
+        this.ws.send(await this.validateAnswer(key, quizCode))
+
+        this.ws.publish(quizCode + '-presenter', 'submitted')
+      }
     }
   }
 }

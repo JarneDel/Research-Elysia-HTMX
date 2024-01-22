@@ -114,12 +114,12 @@ interface getQuestionReturn {
 }
 
 export const getQuestion = async (
-  quizId: string,
+  quizCode: string,
   pageNumber: number,
   userId: string,
 ): Promise<getQuestionReturn> => {
   const { data: activeQuiz, error } =
-    await getSingleActiveQuizWithPageAndQuiz(quizId)
+    await getSingleActiveQuizWithPageAndQuiz(quizCode)
   console.log({ activeQuiz, error })
 
   if (error || !activeQuiz) {
@@ -142,7 +142,7 @@ export const getQuestion = async (
   const page = quiz.page.filter(page => page.page === pageNumber).pop()
   console.log({ page })
 
-  const result = await changeActiveQuizPage(quizId, page?.id)
+  const result = await changeActiveQuizPage(quizCode, page?.id)
   console.log({ result })
 
   const { data: question, error: questionError } = await getPageWithQuiz(
@@ -168,7 +168,7 @@ export const getQuestion = async (
       mediaURL={question.media_url}
       answers={question.answers}
       question={question.question}
-      code={quizId}
+      code={quizCode}
       quizName={quiz.name}
       mode="present"
       hasNextPage={hasNextPage}
@@ -179,7 +179,7 @@ export const getQuestion = async (
       mediaURL={question.media_url}
       answers={question.answers}
       question={question.question}
-      code={quizId}
+      code={quizCode}
       quizName={quiz.name}
       mode="participant"
     />

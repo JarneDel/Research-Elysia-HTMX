@@ -12,8 +12,11 @@ export class Presenter {
     this.msg = msg
     this.user = user
   }
-  async isPresenter() {
-    return this.user.type === 'authenticated'
+
+  isAuthenticatedAndValid(quizCode: string): boolean {
+    return Boolean(
+      quizCode && this.user.userId && this.user.type === 'authenticated',
+    )
   }
 
   async presentQuiz(quizCode: string) {
@@ -35,6 +38,34 @@ export class Presenter {
         }
         this.ws.send(dataToSend.presenterTemplate)
       }
+    }
+  }
+  async startPresentingQuiz(quizCode: string) {
+    if (this.msg['start-presenting'] == '') {
+      if (!this.isAuthenticatedAndValid(quizCode) || !this.user.userId) return
+      const dataToSend = await getQuestion(quizCode, 1, this.user.userId)
+      if (dataToSend.error) {
+        console.error(dataToSend.error) // TODO: handle error
+        return
+      }
+      this.ws.send(dataToSend.presenterTemplate)
+      this.ws.publish(quizCode, dataToSend.participantTemplate)
+    }
+  }
+  async handleNextQuestion(quizCode: string) {
+    if (this.msg['next-question'] == '') {
+      if (!quizCode || !this.user.userId || this.user.type !== 'authenticated')
+        return
+      const currentQuestion = await activeQuizPageDetails(quizCode)
+      if (!currentQuestion.data) return
+      const page = fixOneToOne(currentQuestion.data.current_page_id).page
+      const dataToSend = await getQuestion(quizCode, page + 1, this.user.userId)
+      if (dataToSend.error) {
+        console.error(dataToSend.error, 'presenter.handleNextQuestion') // TODO: handle error
+        return
+      }
+      this.ws.send(dataToSend.presenterTemplate)
+      this.ws.publish(quizCode, dataToSend.participantTemplate)
     }
   }
 }

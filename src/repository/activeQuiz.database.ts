@@ -61,7 +61,7 @@ export const changeActiveQuizPage = async (quizId: string, pageId: number) => {
     .eq('id', quizId)
 }
 
-export const getSingleActiveQuizWithPageAndQuiz = async (quizId: string) => {
+export const getSingleActiveQuizWithPageAndQuiz = async (quizCode: string) => {
   return (
     supabase
       .from('active_quiz')
@@ -77,7 +77,7 @@ export const getSingleActiveQuizWithPageAndQuiz = async (quizId: string) => {
       )
     `,
       )
-      .eq('id', quizId)
+      .eq('id', quizCode)
       // .filter('current_page_id', 'is.null', true)
       .single()
   )
