@@ -1,14 +1,9 @@
 import { Elysia, t } from 'elysia'
 import { getQuestion } from '@/components/presentation/Question.tsx'
 import { anyAuth } from '@/modules/app/websocket/auth.tsx'
-import {
-  getQuizCode,
-  reconnectToQuiz,
-} from '@/modules/app/websocket/generic.tsx'
-import {
-  handleSetUsernameMessage,
-  validateAnswer,
-} from '@/modules/app/websocket/participant.tsx'
+import { getQuizCode } from '@/modules/app/websocket/generic.tsx'
+import { Participant } from '@/modules/app/websocket/participant.tsx'
+import { Presenter } from '@/modules/app/websocket/presenter.tsx'
 import { activeQuizPageDetails } from '@/repository/activeQuiz.database.ts'
 import { fixOneToOne } from '@/repository/databaseArrayFix.ts'
 
@@ -44,76 +39,53 @@ export const wsQuiz = (app: Elysia) =>
     },
     // REMEMBER YOU CAN'T PUBLISH TO YOURSELF
     message: async (ws, message) => {
-      const activeQuizId = getQuizCode(message.HEADERS['HX-Current-URL'])
+      const quizCode = getQuizCode(message.HEADERS['HX-Current-URL'])
       const user = await anyAuth(ws.data.cookie)
 
-      if (!activeQuizId) return
+      if (!quizCode) return
 
       console.log(user.type)
+      const participant = new Participant(ws, message, user)
+      const presenter = new Presenter(ws, message, user)
 
-      await handleSetUsernameMessage(ws, user, message)
-      await reconnectToQuiz(ws, message, user, activeQuizId)
-      if (message['presentQuizId']) {
-        if (!user.userId || user.type !== 'authenticated') return
-        // todo: check ownership
-        ws.isSubscribed(activeQuizId) || ws.subscribe(activeQuizId)
-        ws.isSubscribed(activeQuizId + '-presenter') ||
-          ws.subscribe(activeQuizId + '-presenter')
-
-        // check if quiz is being presented
-        const { data: activeQuiz, error } =
-          await activeQuizPageDetails(activeQuizId)
-        if (activeQuiz?.current_page_id) {
-          const page = fixOneToOne(activeQuiz.current_page_id).page
-          const dataToSend = await getQuestion(activeQuizId, page, user.userId)
-          if (dataToSend.error) {
-            console.error(dataToSend.error) // TODO: handle error
-            return
-          }
-          ws.send(dataToSend.presenterTemplate)
-        }
-      }
+      await participant.handleSetUsernameMessage()
+      await participant.reconnectToQuiz(quizCode)
+      await presenter.presentQuiz(quizCode)
 
       if (message['start-presenting'] == '') {
         console.log('start-presenting')
-        if (!activeQuizId || !user.userId || user.type !== 'authenticated')
-          return
-        const dataToSend = await getQuestion(activeQuizId, 1, user.userId)
+        if (!quizCode || !user.userId || user.type !== 'authenticated') return
+        const dataToSend = await getQuestion(quizCode, 1, user.userId)
         if (dataToSend.error) {
           console.error(dataToSend.error) // TODO: handle error
           return
         }
         ws.send(dataToSend.presenterTemplate)
-        ws.publish(activeQuizId, dataToSend.participantTemplate)
+        ws.publish(quizCode, dataToSend.participantTemplate)
       }
 
       if (message['next-question'] == '') {
         // send results
 
         console.log('next-question')
-        if (!activeQuizId || !user.userId || user.type !== 'authenticated')
-          return
-        const currentQuestion = await activeQuizPageDetails(activeQuizId)
+        if (!quizCode || !user.userId || user.type !== 'authenticated') return
+        const currentQuestion = await activeQuizPageDetails(quizCode)
         if (!currentQuestion.data) return
         const page = fixOneToOne(currentQuestion.data.current_page_id).page
-        const dataToSend = await getQuestion(
-          activeQuizId,
-          page + 1,
-          user.userId,
-        )
+        const dataToSend = await getQuestion(quizCode, page + 1, user.userId)
         if (dataToSend.error) {
           console.error(dataToSend.error) // TODO: handle error
           return
         }
         ws.send(dataToSend.presenterTemplate)
-        ws.publish(activeQuizId, dataToSend.participantTemplate)
+        ws.publish(quizCode, dataToSend.participantTemplate)
       }
 
       for (const key of Object.keys(message)) {
         if (key.startsWith('quiz-answer')) {
-          ws.send(await validateAnswer(key, activeQuizId, user))
+          ws.send(await participant.validateAnswer(key, quizCode))
 
-          ws.publish(activeQuizId + '-presenter', 'submitted')
+          ws.publish(quizCode + '-presenter', 'submitted')
         }
       }
     },
