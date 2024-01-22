@@ -7,7 +7,10 @@ import {
 import { WaitingForOthers } from '@/components/presentation/WaitingForOthers.tsx'
 import { LoadingDot } from '@/components/states/loadingIndicator.tsx'
 import { supabase } from '@/libs'
-import { anyAuthResult } from '@/modules/app/websocket/auth.tsx'
+import {
+  anyAuthResult,
+  SuccessfulAuthResult,
+} from '@/modules/app/websocket/auth.tsx'
 import { getQuizCode } from '@/modules/app/websocket/generic.tsx'
 import { activeQuizAllFields } from '@/repository/activeQuiz.database.ts'
 import { getAnswersForUser, setAnswer } from '@/repository/answers.database.ts'
@@ -16,12 +19,19 @@ import { fixOneToOne } from '@/repository/databaseArrayFix.ts'
 export class Participant {
   ws: any
   msg: any
-  user: anyAuthResult
+  user: SuccessfulAuthResult
 
   constructor(ws: any, msg: any, user: anyAuthResult) {
     this.ws = ws
     this.msg = msg
-    this.user = user
+    if (user.type === 'unauthorized')
+      throw new Error('user is not authenticated')
+    if (!user.userId) throw new Error('user is not authenticated')
+
+    this.user = {
+      userId: user.userId,
+      type: user.type,
+    }
   }
 
   /**
@@ -32,10 +42,6 @@ export class Participant {
    * @returns id, username
    */
   private async handleSetUsername(username: string) {
-    if (this.user.type === 'unauthorized') {
-      return
-    }
-
     // check if user exists
     const { data: userData, error } = await supabase
       .from('user_detail')
@@ -111,7 +117,6 @@ export class Participant {
    * @param quizId
    */
   private async validateAnswer(answerIndexString: string, quizId: string) {
-    if (!this.user.userId || this.user.type === 'unauthorized') return
     const answerIndex = answerIndexString.split('-').pop()
     if (!answerIndex) return
     const { data: questionData, error } = await supabase
@@ -152,7 +157,6 @@ export class Participant {
     const message = this.msg
     if (message.connect) {
       // reconnect to quiz
-      if (!this.user.userId || this.user.type == 'unauthorized') return
       console.log('reconnecting to quiz')
       // check if answered already
 

@@ -5,6 +5,16 @@ export interface anyAuthResult {
   type: 'anonymous' | 'authenticated' | 'unauthorized'
 }
 
+export interface SuccessfulAuthResult {
+  userId: string
+  type: 'anonymous' | 'authenticated'
+}
+
+export interface AuthenticatedAuthResult {
+  userId: string
+  type: 'authenticated'
+}
+
 /**
  * Check if the user is authenticated or anonymous
  * @param cookie

@@ -1,10 +1,5 @@
 import { Answer, AnswerParticipant } from '@/components/quiz/CreateQuiz.tsx'
 import { ViewMedia } from '@/components/quiz/ViewMedia.tsx'
-import {
-  changeActiveQuizPage,
-  getPageWithQuiz,
-  getSingleActiveQuizWithPageAndQuiz,
-} from '@/repository/activeQuiz.database.ts'
 
 export interface QuestionProps {
   mediaURL?: string
@@ -111,82 +106,4 @@ interface getQuestionReturn {
   presenterTemplate: JSX.Element
   participantTemplate: JSX.Element
   error?: string
-}
-
-export const getQuestion = async (
-  quizCode: string,
-  pageNumber: number,
-  userId: string,
-): Promise<getQuestionReturn> => {
-  const { data: activeQuiz, error } =
-    await getSingleActiveQuizWithPageAndQuiz(quizCode)
-  console.log({ activeQuiz, error })
-
-  if (error || !activeQuiz) {
-    console.error(error)
-    return {
-      error: error?.message,
-      participantTemplate: <></>,
-      presenterTemplate: <></>,
-    }
-  }
-
-  // @ts-expect-error postgress returns a single object but typescript thinks it's an array
-  const quiz = activeQuiz['quiz_id'] as {
-    id: any
-    description: any
-    name: any
-    page: { id: any; page: any }[]
-  }
-
-  const page = quiz.page.filter(page => page.page === pageNumber).pop()
-  console.log({ page })
-
-  const result = await changeActiveQuizPage(quizCode, page?.id)
-  console.log({ result })
-
-  const { data: question, error: questionError } = await getPageWithQuiz(
-    quiz.id,
-    pageNumber,
-    userId,
-  )
-
-  const hasNextPage =
-    quiz.page.filter(page => page.page > pageNumber).length > 0
-
-  console.log(hasNextPage)
-
-  if (questionError || !question) {
-    return {
-      error: questionError?.message,
-      participantTemplate: <></>,
-      presenterTemplate: <></>,
-    }
-  }
-  const presenterTemplate = (
-    <Question
-      mediaURL={question.media_url}
-      answers={question.answers}
-      question={question.question}
-      code={quizCode}
-      quizName={quiz.name}
-      mode="present"
-      hasNextPage={hasNextPage}
-    />
-  )
-  const participantTemplate = (
-    <Question
-      mediaURL={question.media_url}
-      answers={question.answers}
-      question={question.question}
-      code={quizCode}
-      quizName={quiz.name}
-      mode="participant"
-    />
-  )
-
-  return {
-    presenterTemplate,
-    participantTemplate,
-  }
 }

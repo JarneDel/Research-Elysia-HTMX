@@ -43,13 +43,16 @@ export const wsQuiz = (app: Elysia) =>
 
       // participant and presenter classes for handling messages
       const participant = new Participant(ws, message, user)
-      const presenter = new Presenter(ws, message, user)
 
       await participant.handleSetUsernameMessage()
       await participant.reconnectToQuiz(quizCode)
       await participant.handleAnswer(quizCode)
-      await presenter.presentQuiz(quizCode)
-      await presenter.startPresentingQuiz(quizCode)
-      await presenter.handleNextQuestion(quizCode)
+
+      if (user.type === 'authenticated' && user.userId) {
+        const presenter = new Presenter(ws, message, user)
+        await presenter.presentQuiz(quizCode)
+        await presenter.startPresentingQuiz(quizCode)
+        await presenter.handleNextQuestion(quizCode)
+      }
     },
   })
