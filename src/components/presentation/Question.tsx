@@ -45,13 +45,13 @@ export const Question = (props: QuestionProps) => {
                     <>
                       <input
                         type="hidden"
-                        name="next-question"
+                        name="after-answer"
                         value="true"
                         ws-send
                         hx-trigger="load delay:20s"
                       />
                       <form ws-send hx-trigger="submit">
-                        <button class="btn btn-primary" name="next-question">
+                        <button class="btn btn-primary" name="after-answer">
                           Next
                         </button>
                       </form>
@@ -68,7 +68,7 @@ export const Question = (props: QuestionProps) => {
                       />
                       <form ws-send hx-trigger="submit">
                         <button class="btn btn-primary" name="end-quiz">
-                          End Quiz
+                          Finish
                         </button>
                       </form>
                     </>

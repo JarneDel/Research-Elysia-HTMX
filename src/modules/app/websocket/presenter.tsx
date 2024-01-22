@@ -22,9 +22,11 @@ export class Presenter {
   ws: any
   msg: any
   user: AuthenticatedAuthResult
-  constructor(ws: any, msg: any, user: anyAuthResult) {
+  quizCode: string
+  constructor(ws: any, msg: any, user: anyAuthResult, quizCode: string) {
     this.ws = ws
     this.msg = msg
+    this.quizCode = quizCode
     if (user.type !== 'authenticated')
       throw new Error('user is not authenticated')
     if (!user.userId) throw new Error('user is not authenticated')
@@ -34,44 +36,42 @@ export class Presenter {
     }
   }
 
-  async presentQuiz(quizCode: string) {
-    if (this.msg['presentQuizId']) {
-      this.ws.isSubscribed(quizCode) || this.ws.subscribe(quizCode)
-      this.ws.isSubscribed(quizCode + '-presenter') ||
-        this.ws.subscribe(quizCode + '-presenter')
-
-      // check if quiz is being presented
-      const { data: activeQuiz, error } = await activeQuizPageDetails(quizCode)
-      if (activeQuiz?.current_page_id) {
-        const page = fixOneToOne(activeQuiz.current_page_id).page
-        const dataToSend = await this.getQuestion(quizCode, page)
-        if (dataToSend.error) {
-          console.error(dataToSend.error) // TODO: handle error
-          return
-        }
-        this.ws.send(dataToSend.presenterTemplate)
-      } else {
-        await this.reloadStartPresentingPage(quizCode)
-      }
-    }
-  }
-  async startPresentingQuiz(quizCode: string) {
-    if (this.msg['start-presenting'] == '') {
-      const dataToSend = await this.getQuestion(quizCode, 1)
+  async presentQuiz() {
+    if (!this.msg['presentQuizId']) return
+    this.ws.isSubscribed(this.quizCode) || this.ws.subscribe(this.quizCode)
+    this.ws.isSubscribed(this.quizCode + '-presenter') ||
+      this.ws.subscribe(this.quizCode + '-presenter')
+    const { data: activeQuiz, error } = await activeQuizPageDetails(
+      this.quizCode,
+    )
+    if (activeQuiz?.current_page_id) {
+      const page = fixOneToOne(activeQuiz.current_page_id).page
+      const dataToSend = await this.getQuestion(page)
       if (dataToSend.error) {
         console.error(dataToSend.error) // TODO: handle error
         return
       }
       this.ws.send(dataToSend.presenterTemplate)
-      this.ws.publish(quizCode, dataToSend.participantTemplate)
+    } else {
+      await this.reloadStartPresentingPage()
     }
   }
+  async startPresentingQuiz() {
+    if (this.msg['start-presenting'] != '') return
+    const dataToSend = await this.getQuestion(1)
+    if (dataToSend.error) {
+      console.error(dataToSend.error) // TODO: handle error
+      return
+    }
+    this.ws.send(dataToSend.presenterTemplate)
+    this.ws.publish(this.quizCode, dataToSend.participantTemplate)
+  }
 
-  private async reloadStartPresentingPage(quizCode: string) {
+  private async reloadStartPresentingPage() {
     const participatingUsers = await supabase
       .from('user_detail')
       .select('username, participating_quiz_list')
-      .contains('participating_quiz_list', [quizCode])
+      .contains('participating_quiz_list', [this.quizCode])
     console.log(participatingUsers, 'presenter.reloadStartPresentingPage')
     this.ws.send(
       <>
@@ -84,41 +84,41 @@ export class Presenter {
     )
   }
 
-  async handleNextQuestion(quizCode: string) {
+  async handleNextQuestion() {
     if (
-      this.msg['next-question'] == '' ||
-      this.msg['next-question'] == 'true'
-    ) {
-      console.log('presenter.handleNextQuestion')
-      const currentQuestion = await activeQuizPageDetails(quizCode)
-      if (!currentQuestion.data) return
-      const page = fixOneToOne(currentQuestion.data.current_page_id).page
-      const dataToSend = await this.getQuestion(quizCode, page + 1)
-      if (dataToSend.error) {
-        console.error(dataToSend.error, 'presenter.handleNextQuestion') // TODO: handle error
-        return
-      }
-      this.ws.send(dataToSend.presenterTemplate)
-      this.ws.publish(quizCode, dataToSend.participantTemplate)
+      !(this.msg['next-question'] == '' || this.msg['next-question'] == 'true')
+    )
+      return
+    console.log('presenter.handleNextQuestion')
+    const currentQuestion = await activeQuizPageDetails(this.quizCode)
+    if (!currentQuestion.data) return
+    const page = fixOneToOne(currentQuestion.data.current_page_id).page
+    const dataToSend = await this.getQuestion(page + 1)
+    if (dataToSend.error) {
+      console.error(dataToSend.error, 'presenter.handleNextQuestion') // TODO: handle error
+      return
     }
+    this.ws.send(dataToSend.presenterTemplate)
+    this.ws.publish(this.quizCode, dataToSend.participantTemplate)
   }
 
-  async handleEndQuiz(quizCode: string) {
-    if (this.msg['end-quiz'] == '' || this.msg['end-quiz'] == 'true') {
-      console.log('presenter.handleEndQuiz')
-      const currentQuestion = await activeQuizPageDetails(quizCode)
-      if (!currentQuestion.data) return
-      const page = fixOneToOne(currentQuestion.data.current_page_id).page
-      await endActiveQuiz(quizCode)
-    }
+  async handleEndQuiz() {
+    if (!(this.msg['end-quiz'] == '' || this.msg['end-quiz'] == 'true')) return
+    console.log('presenter.handleEndQuiz')
+    const currentQuestion = await activeQuizPageDetails(this.quizCode)
+    if (!currentQuestion.data) return
+    const page = fixOneToOne(currentQuestion.data.current_page_id).page
+    await endActiveQuiz(this.quizCode)
   }
 
-  private async getQuestion(
-    quizCode: string,
-    pageNumber: number,
-  ): Promise<getQuestionReturn> {
+  async afterAnswer() {
+    if (!(this.msg['after-answer'] == '' || this.msg['after-answer'] == 'true'))
+      return
+  }
+
+  private async getQuestion(pageNumber: number): Promise<getQuestionReturn> {
     const { data: activeQuiz, error } =
-      await getSingleActiveQuizWithPageAndQuiz(quizCode)
+      await getSingleActiveQuizWithPageAndQuiz(this.quizCode)
 
     if (error || !activeQuiz) {
       console.error(error, "presenter.getQuestion can't get active quiz")
@@ -129,21 +129,16 @@ export class Presenter {
       }
     }
 
-    // @ts-expect-error postgress returns a single object but typescript thinks it's an array
-    const quiz = activeQuiz['quiz_id'] as {
-      id: any
-      description: any
-      name: any
-      page: { id: any; page: any }[]
-    }
+    const quiz = fixOneToOne(activeQuiz['quiz_id'])
 
     const page = quiz.page.filter(page => page.page === pageNumber).pop()
     options.verbose && console.log({ page }, 'presenter.getQuestion.page')
 
-    const result = await changeActiveQuizPage(quizCode, page?.id)
+    const result = await changeActiveQuizPage(this.quizCode, page?.id)
     options.verbose &&
       console.log({ result }, 'presenter.getQuestion.changeActiveQuizPage')
 
+    console.log(quiz.id, pageNumber)
     const { data: question, error: questionError } = await getPageWithQuiz(
       quiz.id,
       pageNumber,
@@ -156,6 +151,7 @@ export class Presenter {
     console.log('presenter.getQuestion.hasNextPage', hasNextPage)
 
     if (questionError || !question) {
+      console.log(questionError, 'presenter.getQuestion can not get question')
       return {
         error: questionError?.message,
         participantTemplate: <></>,
@@ -167,7 +163,7 @@ export class Presenter {
         mediaURL={question.media_url}
         answers={question.answers}
         question={question.question}
-        code={quizCode}
+        code={this.quizCode}
         quizName={quiz.name}
         mode="present"
         hasNextPage={hasNextPage}
@@ -180,7 +176,7 @@ export class Presenter {
         answers={question.answers}
         question={question.question}
         pageNumber={question.page}
-        code={quizCode}
+        code={this.quizCode}
         quizName={quiz.name}
         mode="participant"
       />

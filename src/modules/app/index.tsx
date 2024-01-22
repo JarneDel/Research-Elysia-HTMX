@@ -9,7 +9,7 @@ import { q } from '@/modules/app/views/publicPresentation/q.tsx'
 import { quiz } from '@/modules/app/views/quiz/Quiz.tsx'
 import { quizPresentation } from '@/modules/app/views/quizPresentation/quizPresentation.tsx'
 import { Cookie } from '@/types/cookie.type.ts'
-import { wsQuiz } from './websocket/wsQuiz'
+import { wss } from './websocket/wss.tsx'
 
 export const app = (app: Elysia) =>
   app
@@ -20,7 +20,7 @@ export const app = (app: Elysia) =>
     .use(q)
     .use(fragments)
     .use(sanitizeDerive)
-    .use(wsQuiz)
+    .use(wss)
     .use(quizPresentation)
     .guard(
       {

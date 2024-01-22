@@ -4,7 +4,7 @@ import { getQuizCode } from '@/modules/app/websocket/generic.tsx'
 import { Participant } from '@/modules/app/websocket/participant.tsx'
 import { Presenter } from '@/modules/app/websocket/presenter.tsx'
 
-export const wsQuiz = (app: Elysia) =>
+export const wss = (app: Elysia) =>
   app.ws('/ws', {
     body: t.Object(
       {
@@ -16,6 +16,7 @@ export const wsQuiz = (app: Elysia) =>
         'quiz-answer-4': t.Optional(t.String()),
         'quiz-answer-5': t.Optional(t.String()),
         'next-question': t.Optional(t.Unknown()),
+        'after-answer': t.Optional(t.Unknown()),
         'end-quiz': t.Optional(t.Unknown()),
         presentQuizId: t.Optional(t.String()),
         setUsername: t.Optional(t.String()),
@@ -55,11 +56,12 @@ export const wsQuiz = (app: Elysia) =>
       await participant.handleAnswer()
 
       if (user.type === 'authenticated' && user.userId) {
-        const presenter = new Presenter(ws, message, user)
-        await presenter.presentQuiz(quizCode)
-        await presenter.startPresentingQuiz(quizCode)
-        await presenter.handleNextQuestion(quizCode)
-        await presenter.handleEndQuiz(quizCode)
+        const presenter = new Presenter(ws, message, user, quizCode)
+        await presenter.presentQuiz()
+        await presenter.startPresentingQuiz()
+        await presenter.afterAnswer()
+        await presenter.handleNextQuestion()
+        await presenter.handleEndQuiz()
       }
     },
   })
