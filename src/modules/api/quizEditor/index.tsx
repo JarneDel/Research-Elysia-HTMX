@@ -404,7 +404,7 @@ export const quizEditorApi = (app: Elysia) =>
               if (result.error) {
                 return <Alert severity="error">Something went wrong</Alert>
               }
-              set.headers['HX-Redirect'] = '/q/present/'
+              set.headers['HX-Redirect'] = '/present/' + id
             })
             .get('/quiz/:id/publish', async ({ params, authResult }) => {
               console.log('publishing quiz')
