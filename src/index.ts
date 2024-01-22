@@ -5,6 +5,17 @@ import { checkEnv } from '@/libs/env.ts'
 import { api } from '@/modules/api'
 import { app as App } from '@/modules/app'
 
+export const options = {
+  verbose: false,
+}
+
+// get arguments from command line
+const args = Bun.argv
+if (args.includes('--verbose')) {
+  console.log('Verbose mode enabled')
+  options.verbose = true
+}
+
 const port = process.env.PORT || 80
 checkEnv()
 
