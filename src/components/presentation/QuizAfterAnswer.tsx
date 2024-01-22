@@ -13,6 +13,16 @@ export function QuizAfterAnswer(props: QuizAfterAnswerProps) {
   return (
     <>
       {/*todo: replace header*/}
+      <div id="quiz-bar-end" class="navbar-end">
+        <div class="flex flex-row items-center">
+          <form ws-send hx-trigger="submit">
+            <button class="btn btn-primary" name="next-question">
+              Next question
+            </button>
+          </form>
+        </div>
+      </div>
+      <div id="quiz-progress-bar"></div>
       <ul
         id="answers-container"
         class="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:grid-rows-3 mt-4 replace-transition "

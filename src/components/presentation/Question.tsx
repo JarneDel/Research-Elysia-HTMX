@@ -35,11 +35,8 @@ export const Question = (props: QuestionProps) => {
               <div class="text-2xl navbar-center">
                 Question {props.pageNumber}
               </div>
-              <div class="navbar-end ">
-                <div
-                  class="flex flex-row items-center"
-                  hx-on="htmx:wsBeforeMessage=alert('hi')"
-                >
+              <div class="navbar-end" id="quiz-bar-end">
+                <div class="flex flex-row items-center">
                   <span id="submissions-count"></span>
                   {props.hasNextPage && (
                     <>
@@ -52,20 +49,13 @@ export const Question = (props: QuestionProps) => {
                       />
                       <form ws-send hx-trigger="submit">
                         <button class="btn btn-primary" name="after-answer">
-                          Next
+                          Results
                         </button>
                       </form>
                     </>
                   )}
                   {!props.hasNextPage && (
                     <>
-                      <input
-                        type="hidden"
-                        name="end-quiz"
-                        value="true"
-                        ws-send
-                        hx-trigger="load delay:20s"
-                      />
                       <form ws-send hx-trigger="submit">
                         <button class="btn btn-primary" name="end-quiz">
                           Finish
@@ -80,7 +70,7 @@ export const Question = (props: QuestionProps) => {
         </div>
         {props.mode === 'present' && (
           //   horizontal countdown bar full width
-          <div class="progress-bar"></div>
+          <div class="progress-bar" id="quiz-progress-bar"></div>
         )}
         <div class="container mt-4 " id="game-body">
           <div class="hero bg-base-200 rounded-box mb-4">
@@ -106,12 +96,6 @@ export const Question = (props: QuestionProps) => {
               else
                 return (
                   <form ws-send>
-                    {/*<input type="hidden" name="quizId" value={props.code} />*/}
-                    {/*<input*/}
-                    {/*  type="hidden"*/}
-                    {/*  name="questionId"*/}
-                    {/*  value={props.pageNumber?.toString()}*/}
-                    {/*/>*/}
                     <AnswerParticipant
                       index={index}
                       value={question}
