@@ -26,6 +26,7 @@ export const activeQuizPageDetails = async (quizId: string) => {
       `
       id,
       created_at,
+      has_ended,
       current_page_id (id, page)
     `,
     )
@@ -33,7 +34,14 @@ export const activeQuizPageDetails = async (quizId: string) => {
     .single()
 }
 
-export const activeQuizAllFields = async (quizId: string) => {
+export const endActiveQuiz = async (quizCode: string) => {
+  return supabase
+    .from('active_quiz')
+    .update([{ has_ended: true }])
+    .eq('id', quizCode)
+}
+
+export const activeQuizAllFields = async (quizCode: string) => {
   return supabase
     .from('active_quiz')
     .select(
@@ -49,7 +57,7 @@ export const activeQuizAllFields = async (quizId: string) => {
       )
     `,
     )
-    .eq('id', quizId)
+    .eq('id', quizCode)
     .not('current_page_id', 'is', null)
     .single()
 }

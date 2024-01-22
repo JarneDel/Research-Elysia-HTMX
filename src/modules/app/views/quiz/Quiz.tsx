@@ -213,6 +213,7 @@ export const quiz = (app: Elysia) =>
                       .from('active_quiz')
                       .select('quiz_id, id')
                       .eq('user_id', account().user?.id)
+                      .eq('has_ended', false)
                   console.log('found quizzes', data?.length)
                   console.log('now presenting', nowPresenting)
                   return (

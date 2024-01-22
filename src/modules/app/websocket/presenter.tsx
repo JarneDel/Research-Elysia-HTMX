@@ -1,11 +1,18 @@
 import { Question } from '@/components/presentation/Question.tsx'
 import {
+  Username,
+  UsernameContainer,
+} from '@/components/presentation/Username.tsx'
+import { options } from '@/index.ts'
+import { supabase } from '@/libs'
+import {
   anyAuthResult,
   AuthenticatedAuthResult,
 } from '@/modules/app/websocket/auth.tsx'
 import {
   activeQuizPageDetails,
   changeActiveQuizPage,
+  endActiveQuiz,
   getPageWithQuiz,
   getSingleActiveQuizWithPageAndQuiz,
 } from '@/repository/activeQuiz.database.ts'
@@ -43,6 +50,8 @@ export class Presenter {
           return
         }
         this.ws.send(dataToSend.presenterTemplate)
+      } else {
+        await this.reloadStartPresentingPage(quizCode)
       }
     }
   }
@@ -57,8 +66,30 @@ export class Presenter {
       this.ws.publish(quizCode, dataToSend.participantTemplate)
     }
   }
+
+  private async reloadStartPresentingPage(quizCode: string) {
+    const participatingUsers = await supabase
+      .from('user_detail')
+      .select('username, participating_quiz_list')
+      .contains('participating_quiz_list', [quizCode])
+    console.log(participatingUsers, 'presenter.reloadStartPresentingPage')
+    this.ws.send(
+      <>
+        <UsernameContainer id="connected-users" hx-swap-oob="beforeend">
+          {participatingUsers.data?.map((user: any) => (
+            <Username username={user.username} />
+          ))}
+        </UsernameContainer>
+      </>,
+    )
+  }
+
   async handleNextQuestion(quizCode: string) {
-    if (this.msg['next-question'] == '') {
+    if (
+      this.msg['next-question'] == '' ||
+      this.msg['next-question'] == 'true'
+    ) {
+      console.log('presenter.handleNextQuestion')
       const currentQuestion = await activeQuizPageDetails(quizCode)
       if (!currentQuestion.data) return
       const page = fixOneToOne(currentQuestion.data.current_page_id).page
@@ -72,6 +103,16 @@ export class Presenter {
     }
   }
 
+  async handleEndQuiz(quizCode: string) {
+    if (this.msg['end-quiz'] == '' || this.msg['end-quiz'] == 'true') {
+      console.log('presenter.handleEndQuiz')
+      const currentQuestion = await activeQuizPageDetails(quizCode)
+      if (!currentQuestion.data) return
+      const page = fixOneToOne(currentQuestion.data.current_page_id).page
+      await endActiveQuiz(quizCode)
+    }
+  }
+
   private async getQuestion(
     quizCode: string,
     pageNumber: number,
@@ -80,7 +121,7 @@ export class Presenter {
       await getSingleActiveQuizWithPageAndQuiz(quizCode)
 
     if (error || !activeQuiz) {
-      console.error(error)
+      console.error(error, "presenter.getQuestion can't get active quiz")
       return {
         error: error?.message,
         participantTemplate: <></>,
@@ -97,10 +138,11 @@ export class Presenter {
     }
 
     const page = quiz.page.filter(page => page.page === pageNumber).pop()
-    console.log({ page })
+    options.verbose && console.log({ page }, 'presenter.getQuestion.page')
 
     const result = await changeActiveQuizPage(quizCode, page?.id)
-    console.log({ result })
+    options.verbose &&
+      console.log({ result }, 'presenter.getQuestion.changeActiveQuizPage')
 
     const { data: question, error: questionError } = await getPageWithQuiz(
       quiz.id,
@@ -111,7 +153,7 @@ export class Presenter {
     const hasNextPage =
       quiz.page.filter(page => page.page > pageNumber).length > 0
 
-    console.log(hasNextPage)
+    console.log('presenter.getQuestion.hasNextPage', hasNextPage)
 
     if (questionError || !question) {
       return {

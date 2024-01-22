@@ -64,6 +64,9 @@ export class Participant {
     if (error && error.code !== 'PGRST116')
       console.info(error, 'not user detail')
 
+    const quizSet = new Set(userData?.participating_quiz_list || [])
+    quizSet.add(this.quizCode)
+
     const { data: usernameData, error: usernameError } = await supabase
       .from('user_detail')
       .upsert({
@@ -71,10 +74,7 @@ export class Participant {
         username,
         anon_user_id: this.user.type === 'anonymous' ? this.user.userId : null,
         user_id: this.user.type === 'authenticated' ? this.user.userId : null,
-        participating_quiz_list: [
-          this.quizCode,
-          ...(userData?.participating_quiz_list || []),
-        ],
+        participating_quiz_list: Array.from(quizSet),
       })
       .select('id, username')
       .single()

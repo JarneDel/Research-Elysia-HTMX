@@ -57,8 +57,6 @@ export const q = (app: Elysia) =>
               '/:id',
               async ({ params, authResult, anonUserResult }) => {
                 const { data, error } = await activeQuizDetails(params.id)
-                console.log(data, 'data')
-                console.log(error, 'error')
                 if (!data) {
                   // todo: style this
                   return <div>Quiz not found</div>
