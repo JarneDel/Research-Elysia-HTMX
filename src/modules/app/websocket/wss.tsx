@@ -18,6 +18,7 @@ export const wss = (app: Elysia) =>
         'next-question': t.Optional(t.Unknown()),
         'after-answer': t.Optional(t.Unknown()),
         'end-quiz': t.Optional(t.Unknown()),
+        'after-answer-participant': t.Optional(t.Unknown()),
         presentQuizId: t.Optional(t.String()),
         setUsername: t.Optional(t.String()),
         'start-presenting': t.Optional(t.String()),
@@ -42,7 +43,6 @@ export const wss = (app: Elysia) =>
       if (!quizCode) return
 
       const user = await anyAuth(ws.data.cookie)
-
       console.log(
         Object.keys(message).filter(key => key !== 'HEADERS'),
         '/ws.messageKeys',
@@ -54,6 +54,7 @@ export const wss = (app: Elysia) =>
       await participant.handleSetUsernameMessage()
       await participant.reconnectToQuiz()
       await participant.handleAnswer()
+      await participant.handleNextQuestion()
 
       if (user.type === 'authenticated' && user.userId) {
         const presenter = new Presenter(ws, message, user, quizCode)

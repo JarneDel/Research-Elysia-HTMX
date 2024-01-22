@@ -1,3 +1,4 @@
+import { ElysiaWS } from 'elysia/ws'
 import { Question } from '@/components/presentation/Question.tsx'
 import { QuestionReconnect } from '@/components/presentation/QuestionReconnect.tsx'
 import {
@@ -5,14 +6,20 @@ import {
   UsernameContainer,
 } from '@/components/presentation/Username.tsx'
 import { WaitingForOthers } from '@/components/presentation/WaitingForOthers.tsx'
+import { CorrectAnswer } from '@/components/states/correctAnswer.tsx'
 import { LoadingDot } from '@/components/states/loadingIndicator.tsx'
+import { NoAnswer } from '@/components/states/noAnswer.tsx'
+import { WrongAnswer } from '@/components/states/wrongAnswer.tsx'
 import { options } from '@/index.ts'
 import { supabase } from '@/libs'
 import {
   anyAuthResult,
   SuccessfulAuthResult,
 } from '@/modules/app/websocket/auth.tsx'
-import { activeQuizAllFields } from '@/repository/activeQuiz.database.ts'
+import {
+  activeQuizAllFields,
+  getActiveQuizMinimal,
+} from '@/repository/activeQuiz.database.ts'
 import { getAnswersForUser, setAnswer } from '@/repository/answers.database.ts'
 import { fixOneToOne } from '@/repository/databaseArrayFix.ts'
 
@@ -24,7 +31,7 @@ interface ParticipantProps {
 }
 
 export class Participant {
-  ws: any
+  ws: ElysiaWS<any>
   msg: any
   user: SuccessfulAuthResult
   quizCode: string
@@ -144,7 +151,14 @@ export class Participant {
     if (!questionData || !questionData.current_page_id) return
     const currentPage = fixOneToOne(questionData?.current_page_id)
 
-    const isCorrect = currentPage.correct_answers.includes(answerIndex)
+    const isCorrect = currentPage.correct_answers.includes(Number(answerIndex))
+    console.log(
+      isCorrect,
+      'participant.validateAnswer.isCorrect',
+      answerIndex,
+      currentPage.correct_answers,
+    )
+
     const result = await setAnswer({
       activeQuizId: quizId,
       isCorrect,
@@ -170,6 +184,8 @@ export class Participant {
     if (message.connect) {
       // reconnect to quiz
       console.log('reconnecting to quiz')
+      this.ws.isSubscribed(this.quizCode) || this.ws.subscribe(this.quizCode) // subscribe to quiz if not already subscribed
+
       // check if answered already
 
       // check account
@@ -260,5 +276,35 @@ export class Participant {
         this.ws.publish(this.quizCode + '-presenter', 'submitted')
       }
     }
+  }
+
+  async handleNextQuestion() {
+    const afterAnswer = this.msg['after-answer-participant']
+    if (!afterAnswer) return
+
+    const activeQuizMinimal = await getActiveQuizMinimal(this.quizCode)
+    if (!activeQuizMinimal.data) return
+
+    // check if answer is correct
+    const userAnswers = await getAnswersForUser(
+      this.quizCode,
+      activeQuizMinimal.data.current_page_id,
+      this.user.userId,
+      this.user.type,
+    )
+    if (!userAnswers.data) return
+    const firstAnswer = userAnswers.data[0]
+    if (!firstAnswer) {
+      // todo: store in database that user did not answer
+      return this.ws.send(<NoAnswer />)
+    }
+    switch (firstAnswer.is_correct) {
+      case true:
+        return this.ws.send(<CorrectAnswer />)
+      case false:
+        return this.ws.send(<WrongAnswer />)
+    }
+
+    console.log(userAnswers.data, 'participant.handleNextQuestion.userAnswers')
   }
 }

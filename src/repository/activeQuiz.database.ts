@@ -19,6 +19,22 @@ export const activeQuizDetails = async (quizId: string) => {
     .single()
 }
 
+export async function getActiveQuizMinimal(quizId: string) {
+  return supabase
+    .from('active_quiz')
+    .select(
+      `
+      id,
+      created_at,
+      has_ended,
+      quiz_id,
+      current_page_id
+    `,
+    )
+    .eq('id', quizId)
+    .single()
+}
+
 export const activeQuizPageDetails = async (quizId: string) => {
   return supabase
     .from('active_quiz')

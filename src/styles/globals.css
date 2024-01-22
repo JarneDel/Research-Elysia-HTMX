@@ -61,7 +61,6 @@
 
 }
 
-
 @keyframes fade-in {
   from {
     opacity: 0;
@@ -104,4 +103,27 @@
 }
 
 
+
+
+
+.animate-fade-rotate-in {
+     animation: fade-rotate-in 0.5s ease-in-out both;
+}
+
+
+@keyframes fade-rotate-in {
+  0% {
+    opacity: 0;
+    transform: rotate(-90deg);
+    scale: 0.5;
+  }
+  80% {
+    scale: 1.2;
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(0deg);
+    scale: 1;
+  }
+}
 

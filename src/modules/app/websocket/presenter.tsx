@@ -1,3 +1,4 @@
+import { ElysiaWS } from 'elysia/ws'
 import { Question } from '@/components/presentation/Question.tsx'
 import {
   Username,
@@ -19,7 +20,7 @@ import {
 import { fixOneToOne } from '@/repository/databaseArrayFix.ts'
 
 export class Presenter {
-  ws: any
+  ws: ElysiaWS<any>
   msg: any
   user: AuthenticatedAuthResult
   quizCode: string
@@ -114,6 +115,23 @@ export class Presenter {
   async afterAnswer() {
     if (!(this.msg['after-answer'] == '' || this.msg['after-answer'] == 'true'))
       return
+
+    console.log('presenter.afterAnswer')
+    // send if answer is correct to all participants
+    this.ws.publish(
+      this.quizCode,
+      <>
+        <div id="game">
+          <input
+            type="hidden"
+            name="after-answer-participant"
+            value="true"
+            ws-send
+            hx-trigger="load"
+          />
+        </div>
+      </>,
+    )
   }
 
   private async getQuestion(pageNumber: number): Promise<getQuestionReturn> {
