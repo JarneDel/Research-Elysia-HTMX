@@ -129,6 +129,7 @@ export class Presenter {
         quizName={quiz.name}
         mode="present"
         hasNextPage={hasNextPage}
+        pageNumber={question.page}
       />
     )
     const participantTemplate = (
@@ -136,6 +137,7 @@ export class Presenter {
         mediaURL={question.media_url}
         answers={question.answers}
         question={question.question}
+        pageNumber={question.page}
         code={quizCode}
         quizName={quiz.name}
         mode="participant"

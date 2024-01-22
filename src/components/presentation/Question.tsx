@@ -13,8 +13,6 @@ export interface QuestionProps {
 }
 
 export const Question = (props: QuestionProps) => {
-  // const { quizId, pageNumber } = props
-
   return (
     <>
       <div id="lobby" hx-swap-oob="true"></div>
@@ -23,7 +21,7 @@ export const Question = (props: QuestionProps) => {
           {props.mode === 'participant' && (
             <>
               <div class="text-2xl flex-1 flex">
-                <span class="mx-auto">{props.question}</span>
+                <span class="mx-auto">Question {props.pageNumber}</span>
               </div>
             </>
           )}
@@ -34,7 +32,9 @@ export const Question = (props: QuestionProps) => {
                 <span>{props.quizName}</span>
                 <span class="px-4 font-mono font-medium">{props.code}</span>
               </div>
-              <div class="text-2xl navbar-center">{props.question}</div>
+              <div class="text-2xl navbar-center">
+                Question {props.pageNumber}
+              </div>
               <div class="navbar-end ">
                 <div
                   class="flex flex-row items-center"
@@ -66,7 +66,13 @@ export const Question = (props: QuestionProps) => {
           //   horizontal countdown bar full width
           <div class="progress-bar"></div>
         )}
-        <div class="container mt-4" id="game-body">
+        <div class="container mt-4 " id="game-body">
+          <div class="hero bg-base-200 rounded-box mb-4">
+            <div class="text-2xl hero-content text-center font-medium">
+              {props.question}
+            </div>
+          </div>
+
           {props.mediaURL && (
             <ViewMedia
               allowDelete={false}
@@ -100,10 +106,4 @@ export const Question = (props: QuestionProps) => {
       </div>
     </>
   )
-}
-
-interface getQuestionReturn {
-  presenterTemplate: JSX.Element
-  participantTemplate: JSX.Element
-  error?: string
 }

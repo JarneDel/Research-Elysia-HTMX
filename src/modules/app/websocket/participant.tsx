@@ -202,6 +202,7 @@ export class Participant {
           code={activeQuizId}
           quizName={quiz.name}
           mode="participant"
+          pageNumber={question.page}
         />,
       )
     }
