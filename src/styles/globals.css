@@ -106,6 +106,7 @@
 
 
 
+
 .animate-fade-rotate-in {
      animation: fade-rotate-in 0.5s ease-in-out both;
 }
@@ -125,5 +126,37 @@
     transform: rotate(0deg);
     scale: 1;
   }
+}
+
+.animate-pop {
+    animation: pop 0.2s ease-in-out both;
+}
+
+.replace-transition {
+  view-transition-name: replace;
+}
+::view-transition-old(replace) {
+  animation: 0.2s ease-in-out both fade-out;
+}
+
+::view-transition-new(replace) {
+  animation: 0.2s ease-in-out both fade-in;
+}
+
+
+
+
+@keyframes pop {
+    0% {
+        transform: scale(0.8);
+    }
+    75% {
+        transform: scale(1.08);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+
 }
 

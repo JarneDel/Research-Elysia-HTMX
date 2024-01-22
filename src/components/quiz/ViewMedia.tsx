@@ -12,7 +12,7 @@ export interface props {
 export const ViewMedia = (props: props) => {
   return (
     <>
-      <div class="flex justify-center items-center w-full relative">
+      <div class="flex justify-center items-center w-full relative transition-colors duration-1000">
         <div class="indicator max-h-96">
           {props.allowDelete && (
             <button

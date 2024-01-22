@@ -43,7 +43,7 @@ export const activeQuizPageDetails = async (quizId: string) => {
       id,
       created_at,
       has_ended,
-      current_page_id (id, page)
+      current_page_id (id, page, question, answers, correct_answers, media_url)
     `,
     )
     .eq('id', quizId)

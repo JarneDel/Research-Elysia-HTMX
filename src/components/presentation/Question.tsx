@@ -96,7 +96,10 @@ export const Question = (props: QuestionProps) => {
               modalId="present_page_modal"
             />
           )}
-          <ul class="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:grid-rows-3 mt-4 ">
+          <ul
+            class="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:grid-rows-3 mt-4"
+            id="answers-container"
+          >
             {props.answers.map((question, index) => {
               if (props.mode === 'present')
                 return <Answer index={index} value={question} />

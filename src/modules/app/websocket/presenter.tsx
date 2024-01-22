@@ -1,5 +1,6 @@
 import { ElysiaWS } from 'elysia/ws'
 import { Question } from '@/components/presentation/Question.tsx'
+import { QuizAfterAnswer } from '@/components/presentation/QuizAfterAnswer.tsx'
 import {
   Username,
   UsernameContainer,
@@ -132,6 +133,18 @@ export class Presenter {
         </div>
       </>,
     )
+    // send overview to presenter
+    const currentQuestion = await activeQuizPageDetails(this.quizCode)
+    if (!currentQuestion.data) return
+    const page = fixOneToOne(currentQuestion.data.current_page_id)
+
+    const answers = page.answers.map((answer: string, index: number) => ({
+      answer: answer,
+      isCorrect: page.correct_answers.includes(index),
+      count: 0,
+    }))
+
+    this.ws.send(<QuizAfterAnswer answers={answers} />)
   }
 
   private async getQuestion(pageNumber: number): Promise<getQuestionReturn> {
