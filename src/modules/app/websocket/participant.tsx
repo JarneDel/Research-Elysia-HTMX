@@ -6,27 +6,37 @@ import {
 } from '@/components/presentation/Username.tsx'
 import { WaitingForOthers } from '@/components/presentation/WaitingForOthers.tsx'
 import { LoadingDot } from '@/components/states/loadingIndicator.tsx'
+import { options } from '@/index.ts'
 import { supabase } from '@/libs'
 import {
   anyAuthResult,
   SuccessfulAuthResult,
 } from '@/modules/app/websocket/auth.tsx'
-import { getQuizCode } from '@/modules/app/websocket/generic.tsx'
 import { activeQuizAllFields } from '@/repository/activeQuiz.database.ts'
 import { getAnswersForUser, setAnswer } from '@/repository/answers.database.ts'
 import { fixOneToOne } from '@/repository/databaseArrayFix.ts'
+
+interface ParticipantProps {
+  ws: any
+  msg: any
+  user: anyAuthResult
+  quizCode: string
+}
 
 export class Participant {
   ws: any
   msg: any
   user: SuccessfulAuthResult
+  quizCode: string
 
-  constructor(ws: any, msg: any, user: anyAuthResult) {
+  constructor(participantProps: ParticipantProps) {
+    const { ws, msg, user, quizCode } = participantProps
     this.ws = ws
     this.msg = msg
     if (user.type === 'unauthorized')
       throw new Error('user is not authenticated')
     if (!user.userId) throw new Error('user is not authenticated')
+    this.quizCode = quizCode
 
     this.user = {
       userId: user.userId,
@@ -38,14 +48,13 @@ export class Participant {
    * Set the username for the user
    * 1. Check if the user exists
    * 2. upsert the user with the username
-   * @param username
    * @returns id, username
    */
   private async handleSetUsername(username: string) {
     // check if user exists
     const { data: userData, error } = await supabase
       .from('user_detail')
-      .select('id, username')
+      .select('id, username, participating_quiz_list')
       .eq(
         this.user.type === 'authenticated' ? 'user_id' : 'anon_user_id',
         this.user.userId,
@@ -62,6 +71,10 @@ export class Participant {
         username,
         anon_user_id: this.user.type === 'anonymous' ? this.user.userId : null,
         user_id: this.user.type === 'authenticated' ? this.user.userId : null,
+        participating_quiz_list: [
+          this.quizCode,
+          ...(userData?.participating_quiz_list || []),
+        ],
       })
       .select('id, username')
       .single()
@@ -82,12 +95,11 @@ export class Participant {
     if (message['setUsername']) {
       console.log(message)
       const result = await this.handleSetUsername(message['setUsername'])
-      const quizCode = getQuizCode(message.HEADERS['HX-Current-URL'])
-      if (!quizCode) return
-      this.ws.subscribe(quizCode)
+      console.log(result, 'participant.handleSetUsernameMessage')
+      this.ws.subscribe(this.quizCode)
 
       this.ws.publish(
-        quizCode + '-presenter',
+        this.quizCode + '-presenter',
         <>
           <UsernameContainer id="connected-users" hx-swap-oob="beforeend">
             <Username username={result?.username} />
@@ -153,17 +165,43 @@ export class Participant {
    * 4. if not, show question
    * 5. TODO: if quiz has ended, show quiz ended
    */
-  async reconnectToQuiz(activeQuizId: string) {
+  async reconnectToQuiz() {
     const message = this.msg
     if (message.connect) {
       // reconnect to quiz
       console.log('reconnecting to quiz')
       // check if answered already
 
-      const page = await activeQuizAllFields(activeQuizId)
+      // check account
+      const { data: userData, error } = await supabase
+        .from('user_detail')
+        .select('id, username, participating_quiz_list')
+        .eq(
+          this.user.type === 'authenticated' ? 'user_id' : 'anon_user_id',
+          this.user.userId,
+        )
+        .single()
+
+      if (!userData?.participating_quiz_list?.includes(this.quizCode)) {
+        return
+      }
+
+      const page = await activeQuizAllFields(this.quizCode)
       if (page.error?.code === 'PGRST116') {
         console.log('quiz not in progress')
-        return
+        // return waiting for others to join quiz screen
+
+        return this.ws.send(
+          <>
+            <div
+              id="username"
+              class="flex flex-col justify-center items-center double-header-height"
+            >
+              <LoadingDot />
+              <div class="text-center">Waiting for the quiz to start...</div>
+            </div>
+          </>,
+        )
       }
 
       if (!page.data) {
@@ -172,10 +210,11 @@ export class Participant {
       }
       const question = fixOneToOne(page.data.current_page_id)
       const quiz = fixOneToOne(page.data.quiz_id)
-      console.log(page.data, 'question')
+      options.verbose &&
+        console.log('participant.reconnectToQuiz.question', page.data)
 
       const answer = await getAnswersForUser(
-        activeQuizId,
+        this.quizCode,
         question.id,
         this.user.userId,
         this.user.type,
@@ -192,14 +231,19 @@ export class Participant {
         )
         return
       }
-      console.log(answer, 'answers found')
+      options.verbose &&
+        console.log(
+          'participant.reconnectToQuiz.answer',
+          answer,
+          'answers found',
+        )
 
       this.ws.send(
         <Question
           mediaURL={question.media_url}
           answers={question.answers}
           question={question.question}
-          code={activeQuizId}
+          code={this.quizCode}
           quizName={quiz.name}
           mode="participant"
           pageNumber={question.page}
@@ -208,12 +252,12 @@ export class Participant {
     }
   }
 
-  async handleAnswer(quizCode: string) {
+  async handleAnswer() {
     for (const key of Object.keys(this.msg)) {
       if (key.startsWith('quiz-answer')) {
-        this.ws.send(await this.validateAnswer(key, quizCode))
+        this.ws.send(await this.validateAnswer(key, this.quizCode))
 
-        this.ws.publish(quizCode + '-presenter', 'submitted')
+        this.ws.publish(this.quizCode + '-presenter', 'submitted')
       }
     }
   }
