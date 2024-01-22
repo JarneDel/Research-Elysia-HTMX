@@ -70,11 +70,11 @@ export const auth = (app: Elysia) =>
       .get(
         '/sign-out',
         async ({ cookie, set, headers }) => {
-          cookie.refresh_token.remove({
+          cookie.refresh_token?.remove({
             path: '/',
             sameSite: 'lax',
           })
-          cookie.access_token.remove({
+          cookie.access_token?.remove({
             path: '/',
             sameSite: 'lax',
           })
