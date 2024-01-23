@@ -3,6 +3,7 @@ import QRCode from 'qrcode'
 import { Presentation } from '@/components/presentation/Presentation.tsx'
 import { supabase } from '@/libs'
 import { AuthResult, checkAccessToken } from '@/libs/auth.ts'
+import { StreamRepository } from '@/repository/stream.repository.ts'
 import { Cookie } from '@/types/cookie.type.ts'
 
 export const quizPresentation = (app: Elysia) =>
@@ -68,8 +69,18 @@ export const quizPresentation = (app: Elysia) =>
                 errorCorrectionLevel: 'H',
               })
 
+              const streamRepository = new StreamRepository(params.id)
+              await streamRepository.createStreamCredentialForActiveQuiz()
+
               return (
                 <>
+                  <script>
+                    {`
+                    streamOptions.streamUrl = '${streamRepository.recordingUrl}'
+                    streamOptions.streamId = '${streamRepository.streamId}'
+                    console.log(streamOptions, "streamOptions")
+                  `}
+                  </script>
                   <Presentation
                     activeQuiz={data}
                     userId={user.id}

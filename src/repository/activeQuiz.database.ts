@@ -12,6 +12,11 @@ export const activeQuizDetails = async (quizId: string) => {
         id,
         name,
         description
+      ),
+      stream (
+        stream_id,
+        playback,
+        recording
       )
     `,
     )

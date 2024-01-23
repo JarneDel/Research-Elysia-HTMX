@@ -1,6 +1,14 @@
 let isPresenting = false
 let presentingId
 
+const streamOptions = {
+  playbackUrl: '',
+  streamUrl: '',
+  streamId: '',
+  isWatching: false,
+  isPresenting: false,
+}
+
 window.addEventListener('locationchange', function () {
   console.log('location changed!')
   initiateWHIPClient()
@@ -19,22 +27,6 @@ const checkIsViewingUrl = () => {
   if (window.location.pathname.startsWith('/q/')) {
     return true
   }
-}
-
-const getStreamCredentials = async () => {
-  // const url = window.location.origin + '/api/stream/credentials'
-  // console.log(url)
-  // const credentials = await fetch(url).then(res => res.json())
-  // return credentials.result.webRTC.url
-  return 'https://customer-c1a5pb3dkvv02xq1.cloudflarestream.com/edb5a2f98425979b12ef967840c866a4k58f77c879eb38d893007c0ab2ba25442/webRTC/publish'
-}
-
-const getViewCredentials = async () => {
-  // const url = window.location.origin + '/api/stream/credentials'
-  // console.log(url)
-  // const credentials = await fetch(url).then(res => res.json())
-  // return credentials.result.webRTCPlayback.url
-  return 'https://customer-c1a5pb3dkvv02xq1.cloudflarestream.com/58f77c879eb38d893007c0ab2ba25442/webRTC/play'
 }
 
 const getWebcamStream = async () => {
@@ -294,26 +286,76 @@ async function waitToCompleteICEGathering(peerConnection) {
 
 //iife
 async function initiateWHIPClient() {
-  if (checkIsPresentingUrl()) {
+  if (checkIsPresentingUrl() && !streamOptions.isPresenting) {
     console.log('presenting url')
-    // const stream = await getWebcamStream()
-    // console.log(stream)
-
-    const url = await getStreamCredentials()
+    await waitForStreamUrl()
     const videoElement = document.getElementById('input-video')
-
-    const client = new WHIPClient(url, videoElement)
-    console.log(client)
-  } else if (checkIsViewingUrl()) {
+    new WHIPClient(streamOptions.streamUrl, videoElement)
+    streamOptions.isPresenting = true
+  } else if (checkIsViewingUrl() && !streamOptions.isWatching) {
     console.log('viewing url')
-    const url = await getViewCredentials()
+    await waitForPlaybackUrl()
+    const url = streamOptions.playbackUrl
     const videoElement = document.getElementById('output-video')
-    const client = new WHEPClient(url, videoElement)
-    console.log(client)
+    new WHEPClient(url, videoElement)
+    streamOptions.isPresenting = true
   }
+}
+
+async function waitForPlaybackUrl() {
+  return new Promise(resolve => {
+    setTimeout(function () {
+      console.log('waiting for playback url')
+      if (streamOptions.playbackUrl && streamOptions.playbackUrl !== '') {
+        console.log('got playback url')
+        resolve(streamOptions.playbackUrl)
+      }
+    }, 1000)
+  })
+}
+async function waitForStreamUrl() {
+  return new Promise(resolve => {
+    setTimeout(function () {
+      console.log('waiting for stream url')
+      if (streamOptions.streamUrl && streamOptions.streamUrl !== '') {
+        console.log('got stream url')
+        resolve(streamOptions.streamUrl)
+      }
+    }, 1000)
+  })
+}
+
+async function stopStream(url) {}
+async function stopWatching(url) {}
+
+async function watchStream(url) {}
+
+const observeUrlChange = () => {
+  let oldHref = document.location.href
+  const body = document.querySelector('body')
+  const observer = new MutationObserver(mutations => {
+    if (oldHref !== document.location.href) {
+      oldHref = document.location.href
+      /* Changed ! your code here */
+      initiateWHIPClient()
+      if (!checkIsPresentingUrl()) {
+        if (streamOptions.isPresenting) {
+          stopStream()
+        }
+      }
+      if (!checkIsViewingUrl()) {
+        if (streamOptions.isWatching) {
+          stopWatching()
+        }
+      }
+    }
+  })
+  observer.observe(body, { childList: true, subtree: true })
 }
 
 document.addEventListener('DOMContentLoaded', event => {
   console.log('loaded')
+
+  observeUrlChange()
   initiateWHIPClient()
 })

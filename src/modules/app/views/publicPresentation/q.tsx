@@ -4,6 +4,7 @@ import { supabase } from '@/libs'
 import { AuthResult, checkAccessToken } from '@/libs/auth.ts'
 import { setAnonymousSessionCookie } from '@/libs/publicAuth.ts'
 import { activeQuizDetails } from '@/repository/activeQuiz.database.ts'
+import { fixOneToOne } from '@/repository/databaseArrayFix.ts'
 import { Cookie } from '@/types/cookie.type.ts'
 
 export const q = (app: Elysia) =>
@@ -79,68 +80,84 @@ export const q = (app: Elysia) =>
                   const result = await getUsername('id', anonUserResult())
                   username = result.data?.username
                 }
+                const stream = fixOneToOne(data.stream)
+                console.log(data)
+                if (!stream) console.warn('No stream found')
 
                 return (
-                  <div hx-ext="ws" ws-connect="/ws">
-                    <div id="video">
-                      <video id="output-video" autoplay controls />
-                    </div>
-                    <div id="lobby">
-                      <div class="navbar">
-                        <div class="navbar-start">{quiz?.name}</div>
-                        <div class="navbar-end">{data.id}</div>
+                  <>
+                    <div hx-ext="ws" ws-connect="/ws">
+                      <div id="video">
+                        <video id="output-video" autoplay controls muted />
                       </div>
-                      <form ws-send hx-trigger="load">
-                        <input type="hidden" name="connect" value={data.id} />
-                      </form>
-
-                      <div class="body grid place-items-center h-full">
-                        <form
-                          id="username"
-                          ws-send
-                          hx-include="#quiz_id"
-                          class="flex flex-row justify-center items-center"
-                        >
-                          {/*Hidden input for adding quiz_id to request*/}
-                          <input
-                            type="hidden"
-                            name="quizId"
-                            id="quiz_id"
-                            value={params.id}
-                          />
-                          <input
-                            name="setUsername"
-                            class="input input-primary"
-                            type="text"
-                            value={username ?? undefined}
-                          />
-                          {username || (
-                            <button type="submit" class=" ml-2 btn btn-success">
-                              <Success />
-                            </button>
-                          )}
+                      <div id="lobby">
+                        <div class="navbar">
+                          <div class="navbar-start">{quiz?.name}</div>
+                          <div class="navbar-end">{data.id}</div>
+                        </div>
+                        <form ws-send hx-trigger="load">
+                          <input type="hidden" name="connect" value={data.id} />
                         </form>
-                      </div>
-                      <div class="fixed bottom-0 right-2 text-neutral-500 w-max">
-                        {authResult().user?.id && (
-                          <span>
-                            <span class="mr-2">Logged in as</span>
-                            <span class="font-bold">
-                              {authResult().user?.email}
+
+                        <div class="body grid place-items-center h-full">
+                          <form
+                            id="username"
+                            ws-send
+                            hx-include="#quiz_id"
+                            class="flex flex-row justify-center items-center"
+                          >
+                            {/*Hidden input for adding quiz_id to request*/}
+                            <input
+                              type="hidden"
+                              name="quizId"
+                              id="quiz_id"
+                              value={params.id}
+                            />
+                            <input
+                              name="setUsername"
+                              class="input input-primary"
+                              type="text"
+                              value={username ?? undefined}
+                            />
+                            {username || (
+                              <button
+                                type="submit"
+                                class=" ml-2 btn btn-success"
+                              >
+                                <Success />
+                              </button>
+                            )}
+                          </form>
+                        </div>
+                        <div class="fixed bottom-0 right-2 text-neutral-500 w-max">
+                          {authResult().user?.id && (
+                            <span>
+                              <span class="mr-2">Logged in as</span>
+                              <span class="font-bold">
+                                {authResult().user?.email}
+                              </span>
                             </span>
-                          </span>
-                        )}
-                        {anonUserResult() && (
-                          <span>
-                            <span class="mr-2">Logged in as</span>
-                            <span class="font-bold">{anonUserResult()}</span>
-                          </span>
-                        )}
+                          )}
+                          {anonUserResult() && (
+                            <span>
+                              <span class="mr-2">Logged in as</span>
+                              <span class="font-bold">{anonUserResult()}</span>
+                            </span>
+                          )}
+                        </div>
                       </div>
+                      {/*Game will be mounted here*/}
+                      <div id="game"></div>
                     </div>
-                    {/*Game will be mounted here*/}
-                    <div id="game"></div>
-                  </div>
+                    {stream && (
+                      <script>
+                        {`
+                    streamOptions.playbackUrl = '${stream.playback}'
+                    streamOptions.streamId = '${stream.stream_id}'
+                  `}
+                      </script>
+                    )}
+                  </>
                 )
               },
               {
