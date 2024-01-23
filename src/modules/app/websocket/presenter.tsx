@@ -1,16 +1,10 @@
 import { ElysiaWS } from 'elysia/ws'
 import { Question } from '@/components/presentation/Question.tsx'
 import { QuizAfterAnswer } from '@/components/presentation/QuizAfterAnswer.tsx'
-import {
-  Username,
-  UsernameContainer,
-} from '@/components/presentation/Username.tsx'
+import { Username, UsernameContainer } from '@/components/presentation/Username.tsx'
 import { options } from '@/index.ts'
 import { supabase } from '@/libs'
-import {
-  anyAuthResult,
-  AuthenticatedAuthResult,
-} from '@/modules/app/websocket/auth.tsx'
+import { anyAuthResult, AuthenticatedAuthResult } from '@/modules/app/websocket/auth.tsx'
 import {
   activeQuizPageDetails,
   activeQuizPageDetailsWithNextPage,
@@ -20,12 +14,16 @@ import {
   getSingleActiveQuizWithPageAndQuiz,
 } from '@/repository/activeQuiz.database.ts'
 import { fixOneToOne } from '@/repository/databaseArrayFix.ts'
+import { ScoreboardRepository } from '@/repository/scoreboard.repository.ts'
+import { Scoreboard } from '@/components/scoreboard/Scoreboard.tsx'
 
 export class Presenter {
   ws: ElysiaWS<any>
   msg: any
   user: AuthenticatedAuthResult
   quizCode: string
+  private scoreboardRepository: ScoreboardRepository
+
   constructor(ws: any, msg: any, user: anyAuthResult, quizCode: string) {
     this.ws = ws
     this.msg = msg
@@ -37,6 +35,7 @@ export class Presenter {
       userId: user.userId,
       type: 'authenticated',
     }
+    this.scoreboardRepository = new ScoreboardRepository(quizCode)
   }
 
   async presentQuiz() {
@@ -112,6 +111,13 @@ export class Presenter {
     if (!currentQuestion.data) return
     const page = fixOneToOne(currentQuestion.data.current_page_id).page
     await endActiveQuiz(this.quizCode)
+
+    this.scoreboardRepository.calculateScores().then(() => {
+      this.scoreboardRepository.getTopScores(10).then((scores) => {
+        this.ws.send(<Scoreboard data={scores} />
+      })
+    })
+
   }
 
   async afterAnswer() {
