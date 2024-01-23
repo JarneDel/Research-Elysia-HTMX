@@ -13,6 +13,7 @@ import {
 } from '@/modules/app/websocket/auth.tsx'
 import {
   activeQuizPageDetails,
+  activeQuizPageDetailsWithNextPage,
   changeActiveQuizPage,
   endActiveQuiz,
   getPageWithQuiz,
@@ -134,7 +135,9 @@ export class Presenter {
       </>,
     )
     // send overview to presenter
-    const currentQuestion = await activeQuizPageDetails(this.quizCode)
+    const currentQuestion = await activeQuizPageDetailsWithNextPage(
+      this.quizCode,
+    )
     if (!currentQuestion.data) return
     const page = fixOneToOne(currentQuestion.data.current_page_id)
 
@@ -143,8 +146,14 @@ export class Presenter {
       isCorrect: page.correct_answers.includes(index),
       count: 0,
     }))
+    const quiz = fixOneToOne(currentQuestion.data.quiz_id)
+    const pageNumber = page.page
+    const hasNextPage =
+      quiz.page.filter(page => page.page > pageNumber).length > 0
 
-    this.ws.send(<QuizAfterAnswer answers={answers} />)
+    this.ws.send(
+      <QuizAfterAnswer answers={answers} hasNextPage={hasNextPage} />,
+    )
   }
 
   private async getQuestion(pageNumber: number): Promise<getQuestionReturn> {

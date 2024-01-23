@@ -38,31 +38,20 @@ export const Question = (props: QuestionProps) => {
               <div class="navbar-end" id="quiz-bar-end">
                 <div class="flex flex-row items-center">
                   <span id="submissions-count"></span>
-                  {props.hasNextPage && (
-                    <>
-                      <input
-                        type="hidden"
-                        name="after-answer"
-                        value="true"
-                        ws-send
-                        hx-trigger="load delay:20s"
-                      />
-                      <form ws-send hx-trigger="submit">
-                        <button class="btn btn-primary" name="after-answer">
-                          Results
-                        </button>
-                      </form>
-                    </>
-                  )}
-                  {!props.hasNextPage && (
-                    <>
-                      <form ws-send hx-trigger="submit">
-                        <button class="btn btn-primary" name="end-quiz">
-                          Finish
-                        </button>
-                      </form>
-                    </>
-                  )}
+                  <>
+                    <input
+                      type="hidden"
+                      name="after-answer"
+                      value="true"
+                      ws-send
+                      hx-trigger="load delay:20s"
+                    />
+                    <form ws-send hx-trigger="submit">
+                      <button class="btn btn-primary" name="after-answer">
+                        Results
+                      </button>
+                    </form>
+                  </>
                 </div>
               </div>
             </>

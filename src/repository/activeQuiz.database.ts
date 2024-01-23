@@ -50,6 +50,24 @@ export const activeQuizPageDetails = async (quizId: string) => {
     .single()
 }
 
+export const activeQuizPageDetailsWithNextPage = async (quizId: string) => {
+  return supabase
+    .from('active_quiz')
+    .select(
+      `
+      id,
+      created_at,
+      has_ended,
+      current_page_id (id, page, question, answers, correct_answers, media_url),
+      quiz_id (
+        page (id, page)
+      )
+    `,
+    )
+    .eq('id', quizId)
+    .single()
+}
+
 export const endActiveQuiz = async (quizCode: string) => {
   return supabase
     .from('active_quiz')

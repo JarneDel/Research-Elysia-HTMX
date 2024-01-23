@@ -6,6 +6,7 @@ export interface QuizAfterAnswerProps {
     isCorrect: boolean
     count: number
   }[]
+  hasNextPage?: boolean
 }
 
 export function QuizAfterAnswer(props: QuizAfterAnswerProps) {
@@ -15,11 +16,22 @@ export function QuizAfterAnswer(props: QuizAfterAnswerProps) {
       {/*todo: replace header*/}
       <div id="quiz-bar-end" class="navbar-end">
         <div class="flex flex-row items-center">
-          <form ws-send hx-trigger="submit">
-            <button class="btn btn-primary" name="next-question">
-              Next question
-            </button>
-          </form>
+          {props.hasNextPage && (
+            <form ws-send hx-trigger="submit">
+              <button class="btn btn-primary" name="next-question">
+                Next question
+              </button>
+            </form>
+          )}
+          {!props.hasNextPage && (
+            <>
+              <form ws-send hx-trigger="submit">
+                <button class="btn btn-primary" name="end-quiz">
+                  Finish
+                </button>
+              </form>
+            </>
+          )}
         </div>
       </div>
       <div id="quiz-progress-bar"></div>
