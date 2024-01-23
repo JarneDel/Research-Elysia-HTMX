@@ -159,9 +159,10 @@ export const quizEditorApi = (app: Elysia) =>
               async ({ body, params, authResult }) => {
                 // todo: error handling
                 const { user } = authResult()
+                if (!user) return
                 const { data } = await quizWithPage(
                   params.id,
-                  user?.id!,
+                  user.id,
                   params.page,
                 )
 
