@@ -7,7 +7,7 @@ export class ScoreboardRepository {
     this.quizCode = quizCode
   }
 
-  public async createScoreboard() {
+  public async calculateScores() {
     const result = await supabase
       .from('answers')
       .select(`id, anon, user, answer, score, is_correct, page (id, page)`)
@@ -56,8 +56,63 @@ export class ScoreboardRepository {
       }
     })
 
-    supabase.from('score').insert(scoreArray)
+    const insertResult = await supabase.from('score').insert(scoreArray)
+    console.log(insertResult)
+    return insertResult
+  }
 
-    return scores
+  public async getTopScores(count: number) {
+    console.log(count, this.quizCode)
+    const result = await supabase
+      .from('score')
+      .select(
+        'id, anon_user, user, score, correct_answers, wrong_answers, quiz_code',
+      )
+      .limit(count)
+      .order('score', { ascending: false })
+      .eq('quiz_code', this.quizCode)
+
+    console.log(result)
+    const users = result.data?.map(score => score.anon_user ?? score.user)
+    const anonUsers = result.data?.map(score => score.anon_user)
+
+    const userDetails = await supabase
+      .from('user_detail')
+      .select('user_id, username')
+      .in('user_id', users ?? [])
+
+    const anonUserDetails = await supabase
+      .from('user_detail')
+      .select('anon_user_id, username')
+      .in('anon_user_id', anonUsers ?? [])
+
+    const userMap = new Map<string, string>()
+    userDetails.data?.forEach(user => {
+      userMap.set(user.user_id, user.username)
+    })
+    anonUserDetails.data?.forEach(user => {
+      userMap.set(user.anon_user_id, user.username)
+    })
+
+    const finalResult = result.data?.map(score => {
+      console.log(
+        score.user,
+        score.anon_user,
+        userMap,
+        userMap.get(score.user ?? score.anon_user),
+      )
+      const user = userMap.get(score.anon_user ?? score.user)
+
+      return {
+        id: score.id,
+        user,
+        score: score.score,
+        correct_answers: score.correct_answers,
+        wrong_answers: score.wrong_answers,
+        quiz_code: score.quiz_code,
+      }
+    })
+    console.log(finalResult)
+    return finalResult
   }
 }
