@@ -10,6 +10,7 @@ export const Presentation = (props: props) => {
   return (
     <>
       <div ws-connect="/ws" hx-ext="ws">
+        <video id="video" autoplay></video>
         <div id="lobby" class="container relative">
           <input
             type="hidden"

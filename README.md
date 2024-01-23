@@ -39,3 +39,11 @@ docker run -d -p 6379:6379 redis
 ```bash
 bun dev
 ```
+
+
+```bash
+curl -X POST \
+-H "Authorization: Bearer QyFo_maa6jdgoZ5LRLX6En_4gR3k22LIirjVu3Gw" \
+https://api.cloudflare.com/client/v4/accounts/b39625d9de23956fbb840ecb2c111dd9/stream/live_inputs
+
+```

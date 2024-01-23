@@ -1,10 +1,17 @@
 import { ElysiaWS } from 'elysia/ws'
 import { Question } from '@/components/presentation/Question.tsx'
 import { QuizAfterAnswer } from '@/components/presentation/QuizAfterAnswer.tsx'
-import { Username, UsernameContainer } from '@/components/presentation/Username.tsx'
+import {
+  Username,
+  UsernameContainer,
+} from '@/components/presentation/Username.tsx'
+import { Scoreboard } from '@/components/scoreboard/Scoreboard.tsx'
 import { options } from '@/index.ts'
 import { supabase } from '@/libs'
-import { anyAuthResult, AuthenticatedAuthResult } from '@/modules/app/websocket/auth.tsx'
+import {
+  anyAuthResult,
+  AuthenticatedAuthResult,
+} from '@/modules/app/websocket/auth.tsx'
 import {
   activeQuizPageDetails,
   activeQuizPageDetailsWithNextPage,
@@ -15,7 +22,6 @@ import {
 } from '@/repository/activeQuiz.database.ts'
 import { fixOneToOne } from '@/repository/databaseArrayFix.ts'
 import { ScoreboardRepository } from '@/repository/scoreboard.repository.ts'
-import { Scoreboard } from '@/components/scoreboard/Scoreboard.tsx'
 
 export class Presenter {
   ws: ElysiaWS<any>
@@ -112,12 +118,25 @@ export class Presenter {
     const page = fixOneToOne(currentQuestion.data.current_page_id).page
     await endActiveQuiz(this.quizCode)
 
+    this.ws.send(
+      <>
+        <div id="game">
+          <span class="loading loading-dots loading-lg" id="loader"></span>
+          <div id="scoreboard"></div>
+        </div>
+      </>,
+    )
+
     this.scoreboardRepository.calculateScores().then(() => {
-      this.scoreboardRepository.getTopScores(10).then((scores) => {
-        this.ws.send(<Scoreboard data={scores} />
+      this.scoreboardRepository.getTopScores(10).then(scores => {
+        this.ws.send(
+          <>
+            <div id="loader"></div>
+            <Scoreboard data={scores!} />
+          </>,
+        )
       })
     })
-
   }
 
   async afterAnswer() {
