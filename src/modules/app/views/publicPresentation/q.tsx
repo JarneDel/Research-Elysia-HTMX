@@ -82,6 +82,9 @@ export const q = (app: Elysia) =>
 
                 return (
                   <div hx-ext="ws" ws-connect="/ws">
+                    <div id="video">
+                      <video id="output-video" autoplay controls />
+                    </div>
                     <div id="lobby">
                       <div class="navbar">
                         <div class="navbar-start">{quiz?.name}</div>

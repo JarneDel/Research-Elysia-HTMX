@@ -9,6 +9,7 @@ console.log(account_identifier, cloudflare_api_key, cloudflare_email)
 export const stream = (app: Elysia) =>
   app.group('/stream', app =>
     app.get('/credentials', async ctx => {
+      console.log('credentials')
       const result = await fetch(
         `https://api.cloudflare.com/client/v4/accounts/${account_identifier}/stream/live_inputs`,
         {
