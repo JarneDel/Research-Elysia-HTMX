@@ -3,7 +3,12 @@ export interface props {
 }
 
 export const Username = (props: props) => (
-  <div safe class={`rounded-box py-2 px-4 bg-primary/50 h-max`}>
+  <div
+    safe
+    class={
+      `rounded-box py-2 px-4 h-max text-xl font-medium` + ' ' + randomColor()
+    }
+  >
     {props.username}
   </div>
 )
@@ -24,16 +29,15 @@ export const UsernameContainer = (props: usernameContainerProps) => (
   </div>
 )
 
-// const randomColor = () => {
-//   const colors = [
-//     'bg-primary text-primary-content',
-//     'bg-secondary text-secondary-content',
-//     'bg-accent text-accent-content',
-//     'bg-neutral text-neutral-content',
-//     'bg-success text-success-content',
-//     'bg-warning text-warning-content',
-//     'bg-error text-error-content',
-//   ]
-//
-//   return colors[Math.floor(Math.random() * colors.length)]
-// }
+const randomColor = () => {
+  const colors = [
+    'bg-primary/70 text-primary-content',
+    'bg-secondary/70 text-secondary-content',
+    'bg-accent/70 text-accent-content',
+    'bg-success/70 text-success-content',
+    'bg-warning/70 text-warning-content',
+    'bg-error/70 text-error-content',
+  ]
+
+  return colors[Math.floor(Math.random() * colors.length)]
+}
