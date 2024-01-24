@@ -17,17 +17,62 @@ export const Question = (props: QuestionProps) => {
     <>
       <div
         id="presentation-header-start"
-        class="navbar-start font-bold px-4 flex flex-row gap-4 justify-start items-center"
+        class="navbar-start px-4 flex flex-row gap-4 justify-start items-center"
       >
-        <div>{props.quizName}</div>
-        <div class="font-medium">{props.code}</div>
+        <h1 class="text-lg font-bold">
+          <a href="/" hx-get="/" hx-push-url="true" hx-target="body">
+            QuizX
+          </a>
+        </h1>
+        <div class="font-medium">{props.quizName}</div>
       </div>
 
-      <div id="presentation-header-center" class="navbar-center">
+      <div
+        id="presentation-header-center"
+        class="navbar-center flex flex-row items-center"
+      >
         {props.mode === 'present' && (
-          <span class="text-2xl">Question {props.pageNumber}</span>
+          <>
+            <span class="text-2xl">Question {props.pageNumber}</span>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="lucide lucide-dot"
+            >
+              <circle cx="12.1" cy="12.1" r="1" />
+            </svg>
+            <div class="font-medium text-lgs">#{props.code}</div>
+          </>
         )}
       </div>
+
+      {props.mode === 'participant' && (
+        <div id="game-header-center" class="navbar-center">
+          <span class="text-2xl">Question {props.pageNumber}</span>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="lucide lucide-dot"
+          >
+            <circle cx="12.1" cy="12.1" r="1" />
+          </svg>
+          <div class="font-medium text-lgs">#{props.code}</div>
+        </div>
+      )}
 
       <div id="quiz-control" class="flex flex-row gap4">
         {props.mode === 'present' && (
@@ -54,16 +99,6 @@ export const Question = (props: QuestionProps) => {
 
       <div id="lobby" hx-swap-oob="true"></div>
       <div id="game">
-        {props.mode === 'participant' && (
-          <div class="flex  navbar bg-base-300/60 relative">
-            <>
-              <div class="text-2xl flex-1 flex">
-                <span class="mx-auto">Question {props.pageNumber}</span>
-              </div>
-            </>
-          </div>
-        )}
-
         {props.mode === 'present' && (
           //   horizontal countdown bar full width
           <div class="progress-bar" id="quiz-progress-bar"></div>

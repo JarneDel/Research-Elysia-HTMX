@@ -1,5 +1,5 @@
 export const VideoStreamingToggle = () => (
-  <div class="tooltip" data-tip="toggle webcam">
+  <div class="tooltip tooltip-bottom" data-tip="toggle webcam">
     <label class="swap btn btn-circle swap-indeterminate">
       <input
         type="checkbox"

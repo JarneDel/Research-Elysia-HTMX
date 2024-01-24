@@ -1,5 +1,6 @@
 import { Elysia, t } from 'elysia'
 import { Success } from '@/components/icons/StatusIcons.tsx'
+import { ThemeSwitcher } from '@/components/states/Theme.tsx'
 import { MovableResizableDiv } from '@/components/video/MovableResizableDiv.tsx'
 import { supabase } from '@/libs'
 import { AuthResult, checkAccessToken } from '@/libs/auth.ts'
@@ -87,15 +88,38 @@ export const q = (app: Elysia) =>
 
                 return (
                   <>
+                    <div hx-swap-oob id="main-header"></div>
                     <div hx-ext="ws" ws-connect="/ws">
+                      <div id="game-header" class="navbar bg-base-200/70 px-6">
+                        <div
+                          id="game-header-start"
+                          class="navbar-start flex flex-row gap-4"
+                        >
+                          <h1 class="text-lg font-bold">
+                            <a href="/" hx-boost hx-target="body">
+                              QuizX
+                            </a>
+                          </h1>
+                          <div>{quiz?.name}</div>
+                        </div>
+                        <div id="game-header-center" class="navbar-center">
+                          {data.id}
+                        </div>
+                        <div
+                          id="game-header-end"
+                          class="navbar-end flex flex-row gap-4"
+                        >
+                          <ThemeSwitcher />
+                          <div id="streaming-controls">
+                            {/*  todo: video player controls (mute and show)*/}
+                          </div>
+                        </div>
+                      </div>
+
                       <MovableResizableDiv id="video">
                         <video id="output-video" autoplay controls muted />
                       </MovableResizableDiv>
-                      <div id="lobby">
-                        <div class="navbar">
-                          <div class="navbar-start">{quiz?.name}</div>
-                          <div class="navbar-end">{data.id}</div>
-                        </div>
+                      <div id="lobby" class="double-header-height">
                         <form ws-send hx-trigger="load">
                           <input type="hidden" name="connect" value={data.id} />
                         </form>
@@ -107,15 +131,34 @@ export const q = (app: Elysia) =>
                             hx-include="#quiz_id"
                             class="flex flex-row justify-center items-center"
                           >
-                            <input
-                              name="setUsername"
-                              class="input input-primary"
-                              type="text"
-                              value={username ?? undefined}
-                            />
-                            <button type="submit" class=" ml-2 btn btn-success">
-                              <Success />
-                            </button>
+                            <label class="form-control w-full max-w-xs">
+                              <div class="label">
+                                <div class="label-text">
+                                  Enter your username
+                                </div>
+                              </div>
+                              <input
+                                name="setUsername"
+                                class="input input-primary"
+                                placeholder="Username"
+                                type="text"
+                                value={username ?? undefined}
+                              />
+                              <div class="label">
+                                <div class="label-text-alt"></div>
+                                <div class="label-text-alt">
+                                  Enter username to join quiz
+                                </div>
+                              </div>
+                            </label>
+                            <div class="tooltip" data-tip="join quiz">
+                              <button
+                                type="submit"
+                                class=" ml-2 btn btn-success"
+                              >
+                                <Success />
+                              </button>
+                            </div>
                           </form>
                         </div>
                         <div class="fixed bottom-0 right-2 text-neutral-500 w-max">
@@ -154,6 +197,9 @@ export const q = (app: Elysia) =>
                   description: 'Quiz page for users to join quiz',
                   tags: ['join', 'user'],
                 },
+                params: t.Object({
+                  id: t.String(),
+                }),
               },
             ),
         ),

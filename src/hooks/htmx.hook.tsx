@@ -8,12 +8,33 @@ export const initHtmx = (app: Elysia): Elysia =>
     if (path.includes('/public')) return undefined
 
     const isHtmx = headers['hx-request']
-    if (isHtmx == 'true') return undefined
+    if (isHtmx == 'true') {
+      const currentUrl = headers['hx-current-url']
+      if (
+        currentUrl &&
+        (currentUrl.includes('/q/') || currentUrl.includes('/present/'))
+      ) {
+        console.log('adding back header')
+        return (
+          <>
+            <Header />
+            <main class="bg-base-100 text-base-content">
+              {response as JSX.Element}
+            </main>
+          </>
+        )
+      }
+      return undefined
+    }
     if (!response) return undefined
     set.headers['content-type'] = 'text/html'
     console.log('wrapping with layout,', path)
 
-    if (path.includes('/auth')) {
+    if (
+      path.includes('/auth') ||
+      path.includes('/q/') ||
+      path.includes('/present/')
+    ) {
       return <Layout>{response as JSX.Element} </Layout>
     }
 

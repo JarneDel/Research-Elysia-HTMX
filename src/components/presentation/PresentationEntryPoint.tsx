@@ -16,11 +16,20 @@ export interface props {
 export const PresentationEntryPoint = (props: props) => {
   return (
     <>
+      <div hx-swap-oob="true" id="main-header"></div>
       <div ws-connect="/ws" hx-ext="ws">
         <StreamingPreview />
         <div id="presentation-header" class="navbar bg-base-300/60 px-2">
-          <div id="presentation-header-start" class="navbar-start">
-            {props.quiz.name}
+          <div
+            id="presentation-header-start"
+            class="navbar-start flex flex-row gap-4"
+          >
+            <h1 class="text-lg font-bold">
+              <a hx-push-url="true" hx-get="/" hx-target="body">
+                QuizX
+              </a>
+            </h1>
+            <div>{props.quiz.name}</div>
           </div>
           <div id="presentation-header-center" class="navbar-center">
             {props.activeQuiz.id}

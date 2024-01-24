@@ -20,7 +20,7 @@ export const headerLinks = [
 ]
 
 export const Header = (props: props) => (
-  <div class="navbar  bg-base-300">
+  <div class="navbar  bg-base-300" id="main-header">
     <div class="flex-none px-2 mx-2">
       <span class="text-lg font-bold">
         <a href="/">QuizX</a>

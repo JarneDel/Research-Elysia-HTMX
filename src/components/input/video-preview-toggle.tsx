@@ -1,7 +1,7 @@
 export const VideoPreviewToggle = () => {
   return (
     <div
-      class="tooltip hidden"
+      class="tooltip hidden tooltip-bottom"
       data-tip="toggle preview"
       id="video-preview-toggle"
     >
