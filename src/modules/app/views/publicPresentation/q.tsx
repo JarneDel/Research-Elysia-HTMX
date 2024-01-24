@@ -1,5 +1,6 @@
 import { Elysia, t } from 'elysia'
 import { Success } from '@/components/icons/StatusIcons.tsx'
+import { MovableResizableDiv } from '@/components/video/MovableResizableDiv.tsx'
 import { supabase } from '@/libs'
 import { AuthResult, checkAccessToken } from '@/libs/auth.ts'
 import { setAnonymousSessionCookie } from '@/libs/publicAuth.ts'
@@ -87,9 +88,9 @@ export const q = (app: Elysia) =>
                 return (
                   <>
                     <div hx-ext="ws" ws-connect="/ws">
-                      <div id="video">
+                      <MovableResizableDiv id="video">
                         <video id="output-video" autoplay controls muted />
-                      </div>
+                      </MovableResizableDiv>
                       <div id="lobby">
                         <div class="navbar">
                           <div class="navbar-start">{quiz?.name}</div>
@@ -106,27 +107,15 @@ export const q = (app: Elysia) =>
                             hx-include="#quiz_id"
                             class="flex flex-row justify-center items-center"
                           >
-                            {/*Hidden input for adding quiz_id to request*/}
-                            <input
-                              type="hidden"
-                              name="quizId"
-                              id="quiz_id"
-                              value={params.id}
-                            />
                             <input
                               name="setUsername"
                               class="input input-primary"
                               type="text"
                               value={username ?? undefined}
                             />
-                            {username || (
-                              <button
-                                type="submit"
-                                class=" ml-2 btn btn-success"
-                              >
-                                <Success />
-                              </button>
-                            )}
+                            <button type="submit" class=" ml-2 btn btn-success">
+                              <Success />
+                            </button>
                           </form>
                         </div>
                         <div class="fixed bottom-0 right-2 text-neutral-500 w-max">

@@ -1,6 +1,10 @@
 let isPresenting = false
 let presentingId
 
+/**
+ * Set the stream options in a script tag of htmx response, then the video client will pick it up
+ * @type {{streamUrl: string, streamId: string, isPresenting: boolean, playbackUrl: string, isWatching: boolean}}
+ */
 const streamOptions = {
   playbackUrl: '',
   streamUrl: '',
