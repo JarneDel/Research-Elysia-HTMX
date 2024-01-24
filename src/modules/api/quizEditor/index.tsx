@@ -2,7 +2,6 @@ import { PostgrestSingleResponse } from '@supabase/supabase-js'
 import { Elysia, t } from 'elysia'
 import ShortUniqueId from 'short-unique-id'
 import { Alert } from '@/components/errors/Alerts.tsx'
-import { Success } from '@/components/icons/StatusIcons.tsx'
 import { MediaUpload } from '@/components/quiz/MediaUpload.tsx'
 import { NextButton } from '@/components/quiz/PageNavigationButtons.tsx'
 import { QuizCard } from '@/components/quiz/QuizCard.tsx'
@@ -85,18 +84,10 @@ export const quizEditorApi = (app: Elysia) =>
                       </Alert>
                     )
                   }
-                  return (
-                    <>
-                      <div
-                        class="alert alert-success"
-                        hx-trigger="load delay:1s once"
-                        hx-get={'/quiz/' + quiz.data[0]?.id + '/edit'}
-                      >
-                        <Success />
-                        <span>Quiz created, redirecting..</span>
-                      </div>
-                    </>
-                  )
+                  set.headers['HX-Redirect'] =
+                    '/quiz/' + quiz.data[0]?.id + '/edit'
+                  set.headers['HX-Push-URL'] = 'true'
+                  return
                 } else {
                   return (
                     <Alert severity="error">
@@ -281,7 +272,7 @@ export const quizEditorApi = (app: Elysia) =>
                 return (
                   <div
                     id="media"
-                    class="container max-w-2xl mx-auto border-accent border-2 rounded-md p-2 mb-3"
+                    class="container max-w-2xl mx-auto border-accent rounded-md p-2 mb-3"
                   >
                     <ViewMedia
                       quizId={params.id}
@@ -407,28 +398,56 @@ export const quizEditorApi = (app: Elysia) =>
               }
               set.headers['HX-Redirect'] = '/present/' + id
             })
-            .get('/quiz/:id/publish', async ({ params, authResult }) => {
-              console.log('publishing quiz')
-              const { data, error } = await supabase
-                .from('quiz')
-                .update({
-                  isDraft: false,
-                })
-                .eq('id', params.id)
-                .eq('created_by', authResult().user?.id)
-                .select()
-                .single()
+            .get(
+              '/quiz/:id/publish',
+              async ({ params, authResult, headers }) => {
+                console.log('publishing quiz')
+                const { data, error } = await supabase
+                  .from('quiz')
+                  .update({
+                    isDraft: false,
+                  })
+                  .eq('id', params.id)
+                  .eq('created_by', authResult().user?.id)
+                  .select()
+                  .single()
 
-              const { data: nowPresenting } = await supabase
-                .from('active_quiz')
-                .select()
-                .eq('user_id', authResult().user?.id)
-                .eq('quiz_id', params.id)
+                const { data: nowPresenting } = await supabase
+                  .from('active_quiz')
+                  .select()
+                  .eq('user_id', authResult().user?.id)
+                  .eq('quiz_id', params.id)
 
-              return (
-                <QuizCard quiz={data} nowPresenting={nowPresenting || []} />
-              )
-            }),
+                console.log(headers['hx-current-url'], 'current url')
+                if (headers['hx-current-url'].endsWith('/edit')) {
+                  return (
+                    <>
+                      <a
+                        class="btn btn-primary"
+                        hx-push-url="true"
+                        hx-get={`/api/quiz/${params.id}/start`}
+                        href={`/api/quiz/${params.id}/start`}
+                      >
+                        Present quiz
+                      </a>
+                    </>
+                  )
+                }
+
+                return (
+                  <QuizCard quiz={data} nowPresenting={nowPresenting || []} />
+                )
+              },
+              {
+                headers: t.Object({
+                  'hx-current-url': t.String(),
+                }),
+                detail: {
+                  description: 'Publish a quiz',
+                  tags: ['Quiz'],
+                },
+              },
+            ),
       ),
   )
 
