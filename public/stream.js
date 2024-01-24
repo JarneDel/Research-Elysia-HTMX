@@ -361,8 +361,27 @@ const toggleStream = async e => {
   console.log(e.target.checked, 'checked')
   if (e.target.checked) {
     await startStream()
+    document.querySelector('#video-preview-toggle').classList.remove('hidden')
+    document.querySelector('#stream-container').classList.remove('hidden')
+    document.querySelector('#video-preview-toggle input').checked = true
   } else {
     await stopStreaming()
+    document.querySelector('#video-preview-toggle').classList.add('hidden')
+    document.querySelector('#video-preview-toggle input').checked = false
+    document.querySelector('#stream-container').classList.add('hidden')
+  }
+}
+
+/**
+ * * @param e {Event<HTMLInputElement>}
+ * @returns {Promise<void>}
+ */
+const toggleVideoPreview = e => {
+  const videoPreview = document.querySelector('#stream-container')
+  if (e.target.checked) {
+    videoPreview.classList.remove('hidden')
+  } else {
+    videoPreview.classList.add('hidden')
   }
 }
 

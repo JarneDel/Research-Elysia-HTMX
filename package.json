@@ -21,6 +21,7 @@
     "deploy:docker:build": "docker compose -f ./infra/docker-compose-production.yml build",
     "deploy:docker:stop": "docker compose -f ./infra/docker-compose-production.yml down",
     "deploy:docker:logs": "docker compose -f ./infra/docker-compose-production.yml logs -f",
+    "predeploy:docker:push": "docker compose -f ./infra/docker-compose-production.yml build",
     "deploy:docker:push": "docker compose -f ./infra/docker-compose-production.yml push"
   },
   "dependencies": {

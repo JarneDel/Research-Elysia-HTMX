@@ -1,4 +1,8 @@
 function dragElement(ele) {
+  if (typeof ele === 'string') {
+    ele = { id: ele }
+  }
+
   let element = document.getElementById(ele.id)
   watchResize(element)
 
@@ -8,9 +12,9 @@ function dragElement(ele) {
     pos2 = 0,
     pos3 = 0,
     pos4 = 0
-  if (document.getElementById(ele.id + '-header')) {
+  if (document.querySelector('#' + ele.id + '-header')) {
     // if present, the header is where you move the DIV from:
-    document.getElementById(ele.id + '-header').onmousedown = dragMouseDown
+    document.querySelector('#' + ele.id + '-header').onmousedown = dragMouseDown
   } else {
     element.onmousedown = dragMouseDown
   }
