@@ -40,7 +40,6 @@ docker run -d -p 6379:6379 redis
 bun dev
 ```
 
-
 ```bash
 curl -X POST \
 -H "Authorization: Bearer QyFo_maa6jdgoZ5LRLX6En_4gR3k22LIirjVu3Gw" \

@@ -14,8 +14,6 @@
     height: calc(100vh - 9rem);
   }
 
-
-
   .my-indicator {
     display: none;
   }
@@ -28,17 +26,17 @@
     display: inline;
   }
 
-  .progress-bar{
+  .progress-bar {
     /*border-radius: var(--rounded-box);*/
     height: 0.5rem;
     width: 100%;
     /*@apply bg-gray-200;*/
-    background-color: oklch(var(--bc)/.2);
+    background-color: oklch(var(--bc) / 0.2);
   }
-  .progress-bar::after{
+  .progress-bar::after {
     content: '';
     display: block;
-    height: .5rem;
+    height: 0.5rem;
     width: 100%;
     background-color: oklch(var(--p));
     animation: progress 20s ease-in-out;
@@ -50,7 +48,6 @@
   /*}*/
 }
 
-
 @keyframes progress {
   0% {
     width: 100%;
@@ -58,7 +55,6 @@
   100% {
     width: 0;
   }
-
 }
 
 @keyframes fade-in {
@@ -85,32 +81,25 @@
   }
 }
 
-
 ::view-transition-old(slide-it) {
-  animation: 600ms cubic-bezier(0.4, 0, 1, 1) both fade-out,
-  600ms cubic-bezier(0.4, 0, 0.2, 1) both slide-to-left;
+  animation:
+    600ms cubic-bezier(0.4, 0, 1, 1) both fade-out,
+    600ms cubic-bezier(0.4, 0, 0.2, 1) both slide-to-left;
 }
-
 
 ::view-transition-new(slide-it) {
-  animation: 420ms cubic-bezier(0, 0, 0.2, 1) 90ms both fade-in,
-  600ms cubic-bezier(0.4, 0, 0.2, 1) both slide-from-right;
+  animation:
+    420ms cubic-bezier(0, 0, 0.2, 1) 90ms both fade-in,
+    600ms cubic-bezier(0.4, 0, 0.2, 1) both slide-from-right;
 }
-
 
 .simple-view-transition {
   view-transition-name: slide-it;
 }
 
-
-
-
-
-
 .animate-fade-rotate-in {
-     animation: fade-rotate-in 0.5s ease-in-out both;
+  animation: fade-rotate-in 0.5s ease-in-out both;
 }
-
 
 @keyframes fade-rotate-in {
   0% {
@@ -129,7 +118,7 @@
 }
 
 .animate-pop {
-    animation: pop 0.2s ease-in-out both;
+  animation: pop 0.2s ease-in-out both;
 }
 
 .replace-transition {
@@ -143,20 +132,15 @@
   animation: 0.2s ease-in-out both fade-in;
 }
 
-
-
-
 @keyframes pop {
-    0% {
-        transform: scale(0.8);
-    }
-    75% {
-        transform: scale(1.08);
-    }
+  0% {
+    transform: scale(0.8);
+  }
+  75% {
+    transform: scale(1.08);
+  }
 
-    100% {
-        transform: scale(1);
-    }
-
+  100% {
+    transform: scale(1);
+  }
 }
-

@@ -12,7 +12,7 @@
     "moduleResolution": "Bundler",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
     },
     "resolveJsonModule": true,
     "types": ["bun-types"], // add Bun global
@@ -22,7 +22,7 @@
     "noEmit": true,
 
     /* JavaScript Support */
-//    "allowJs": true,
+    //    "allowJs": true,
 
     /* Editor Support */
 
@@ -53,6 +53,6 @@
     /* Command Line */
 
     /* Watch Options */
-//    "plugins": [{ "name": "@kitajs/ts-html-plugin" }]
-  }
+    //    "plugins": [{ "name": "@kitajs/ts-html-plugin" }]
+  },
 }

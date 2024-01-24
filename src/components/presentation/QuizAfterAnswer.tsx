@@ -13,26 +13,23 @@ export function QuizAfterAnswer(props: QuizAfterAnswerProps) {
   console.log(props)
   return (
     <>
-      {/*todo: replace header*/}
-      <div id="quiz-bar-end" class="navbar-end">
-        <div class="flex flex-row items-center">
-          {props.hasNextPage && (
+      <div id="quiz-control" class="flex flex-row ">
+        {props.hasNextPage && (
+          <form ws-send hx-trigger="submit">
+            <button class="btn btn-primary" name="next-question">
+              Next question
+            </button>
+          </form>
+        )}
+        {!props.hasNextPage && (
+          <>
             <form ws-send hx-trigger="submit">
-              <button class="btn btn-primary" name="next-question">
-                Next question
+              <button class="btn btn-primary" name="end-quiz">
+                Finish
               </button>
             </form>
-          )}
-          {!props.hasNextPage && (
-            <>
-              <form ws-send hx-trigger="submit">
-                <button class="btn btn-primary" name="end-quiz">
-                  Finish
-                </button>
-              </form>
-            </>
-          )}
-        </div>
+          </>
+        )}
       </div>
       <div id="quiz-progress-bar"></div>
       <ul

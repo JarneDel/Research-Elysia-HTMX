@@ -15,48 +15,55 @@ export interface QuestionProps {
 export const Question = (props: QuestionProps) => {
   return (
     <>
+      <div
+        id="presentation-header-start"
+        class="navbar-start font-bold px-4 flex flex-row gap-4 justify-start items-center"
+      >
+        <div>{props.quizName}</div>
+        <div class="font-medium">{props.code}</div>
+      </div>
+
+      <div id="presentation-header-center" class="navbar-center">
+        {props.mode === 'present' && (
+          <span class="text-2xl">Question {props.pageNumber}</span>
+        )}
+      </div>
+
+      <div id="quiz-control" class="flex flex-row gap4">
+        {props.mode === 'present' && (
+          <div class="flex flex-row items-center">
+            <span id="submissions-count"></span>
+            <>
+              <input
+                type="hidden"
+                name="after-answer"
+                id={'after-answer-' + props.pageNumber}
+                value="true"
+                ws-send
+                hx-trigger="load delay:20s"
+              />
+              <form ws-send hx-trigger="submit">
+                <button class="btn btn-primary" name="after-answer">
+                  Results
+                </button>
+              </form>
+            </>
+          </div>
+        )}
+      </div>
+
       <div id="lobby" hx-swap-oob="true"></div>
       <div id="game">
-        <div class="flex  navbar bg-base-300/60 relative">
-          {props.mode === 'participant' && (
+        {props.mode === 'participant' && (
+          <div class="flex  navbar bg-base-300/60 relative">
             <>
               <div class="text-2xl flex-1 flex">
                 <span class="mx-auto">Question {props.pageNumber}</span>
               </div>
             </>
-          )}
+          </div>
+        )}
 
-          {props.mode === 'present' && (
-            <>
-              <div class="navbar-start font-bold px-4">
-                <span>{props.quizName}</span>
-                <span class="px-4 font-mono font-medium">{props.code}</span>
-              </div>
-              <div class="text-2xl navbar-center">
-                Question {props.pageNumber}
-              </div>
-              <div class="navbar-end" id="quiz-bar-end">
-                <div class="flex flex-row items-center">
-                  <span id="submissions-count"></span>
-                  <>
-                    <input
-                      type="hidden"
-                      name="after-answer"
-                      value="true"
-                      ws-send
-                      hx-trigger="load delay:20s"
-                    />
-                    <form ws-send hx-trigger="submit">
-                      <button class="btn btn-primary" name="after-answer">
-                        Results
-                      </button>
-                    </form>
-                  </>
-                </div>
-              </div>
-            </>
-          )}
-        </div>
         {props.mode === 'present' && (
           //   horizontal countdown bar full width
           <div class="progress-bar" id="quiz-progress-bar"></div>
