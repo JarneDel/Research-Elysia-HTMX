@@ -15,7 +15,7 @@ const streamOptions = {
 
 window.addEventListener('locationchange', function () {
   console.log('location changed!')
-  initiateWHIPClient()
+  initiateWHEPClient()
 })
 
 const checkIsPresentingUrl = () => {
@@ -30,19 +30,6 @@ const checkIsPresentingUrl = () => {
 const checkIsViewingUrl = () => {
   if (window.location.pathname.startsWith('/q/')) {
     return true
-  }
-}
-
-const getWebcamStream = async () => {
-  const constraints = {
-    audio: true,
-    video: true,
-  }
-
-  try {
-    return await navigator.mediaDevices.getUserMedia(constraints)
-  } catch (err) {
-    console.error(err)
   }
 }
 
@@ -289,14 +276,8 @@ async function waitToCompleteICEGathering(peerConnection) {
 }
 
 //iife
-async function initiateWHIPClient() {
-  if (checkIsPresentingUrl() && !streamOptions.isPresenting) {
-    console.log('presenting url')
-    await waitForStreamUrl()
-    const videoElement = document.getElementById('input-video')
-    new WHIPClient(streamOptions.streamUrl, videoElement)
-    streamOptions.isPresenting = true
-  } else if (checkIsViewingUrl() && !streamOptions.isWatching) {
+async function initiateWHEPClient() {
+  if (checkIsViewingUrl() && !streamOptions.isWatching) {
     console.log('viewing url')
     await waitForPlaybackUrl()
     const url = streamOptions.playbackUrl
@@ -341,7 +322,7 @@ const observeUrlChange = () => {
     if (oldHref !== document.location.href) {
       oldHref = document.location.href
       /* Changed ! your code here */
-      initiateWHIPClient()
+      initiateWHEPClient()
       if (!checkIsPresentingUrl()) {
         if (streamOptions.isPresenting) {
           stopStream()
@@ -356,10 +337,38 @@ const observeUrlChange = () => {
   })
   observer.observe(body, { childList: true, subtree: true })
 }
+/**
+ * @type {null | WHIPClient}
+ */
+let whipClient = null
+const startStream = async () => {
+  const videoElement = document.querySelector('#input-video')
+  console.log(videoElement)
+  whipClient = new WHIPClient(await waitForStreamUrl(), videoElement)
+  streamOptions.isPresenting = true
+}
+const stopStreaming = async () => {
+  if (!whipClient) return
+  await whipClient.disconnectStream()
+  whipClient = null
+}
+
+/**
+ * * @param e {Event<HTMLInputElement>}
+ * @returns {Promise<void>}
+ */
+const toggleStream = async e => {
+  console.log(e.target.checked, 'checked')
+  if (e.target.checked) {
+    await startStream()
+  } else {
+    await stopStreaming()
+  }
+}
 
 document.addEventListener('DOMContentLoaded', event => {
   console.log('loaded')
 
   observeUrlChange()
-  initiateWHIPClient()
+  initiateWHEPClient()
 })
