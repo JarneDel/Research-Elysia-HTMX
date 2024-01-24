@@ -8,7 +8,7 @@ export const MovableResizableDiv = (props: Props) => {
     <>
       <script src="/public/dragElement.js" defer></script>
       <div
-        class="absolute z-10 resize-y overflow-auto border  aspect-video  rounded-box max-w-[1280px] max-h-[740px] min-w-64 min-h-36 bg-base-100 bottom-8 right-8"
+        class="fixed z-10 resize-y overflow-auto border  aspect-video  rounded-box max-w-[1280px] max-h-[740px] min-w-64 min-h-36 bg-base-100 bottom-8 right-8"
         id={props.id}
         hx-on={`mouseenter: dragElement(${props.id})`}
         style="width: 320px; height: 180px"
