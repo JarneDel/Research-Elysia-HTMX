@@ -1,8 +1,9 @@
 import { Elysia, t } from 'elysia'
 import QRCode from 'qrcode'
-import { Presentation } from '@/components/presentation/Presentation.tsx'
+import { PresentationEntryPoint } from '@/components/presentation/PresentationEntryPoint.tsx'
 import { supabase } from '@/libs'
 import { AuthResult, checkAccessToken } from '@/libs/auth.ts'
+import { fixOneToOne } from '@/repository/databaseArrayFix.ts'
 import { StreamRepository } from '@/repository/stream.repository.ts'
 import { Cookie } from '@/types/cookie.type.ts'
 
@@ -54,13 +55,20 @@ export const quizPresentation = (app: Elysia) =>
                 id,
                 created_at,
                 current_page_id,
-                quiz_id,
+                quiz_id (id, name),
                 user_id
               `,
                 )
                 .eq('id', params.id)
                 .eq('user_id', authResult().user?.id)
                 .single()
+
+              if (error || !data) {
+                console.log(error, 'error')
+                return
+              }
+
+              const quiz = fixOneToOne(data.quiz_id)
 
               console.log(process.env.PUBLIC_URL)
               const url = process.env.PUBLIC_URL || 'http://localhost:3000'
@@ -81,11 +89,12 @@ export const quizPresentation = (app: Elysia) =>
                     console.log(streamOptions, "streamOptions")
                   `}
                   </script>
-                  <Presentation
+                  <PresentationEntryPoint
+                    quiz={quiz}
                     activeQuiz={data}
                     userId={user.id}
                     qrCode={qrCode}
-                  ></Presentation>
+                  ></PresentationEntryPoint>
                 </>
               )
             }),
