@@ -37,14 +37,26 @@ export const EditQuiz = (props: EditQuizProps) => {
         </div>
 
         <div class="flex flex-row items-center gap-2">
-          <a
-            class="btn btn-primary"
-            hx-push-url="true"
-            hx-get="/quiz/:id/present"
-            href="#"
-          >
-            Present quiz
-          </a>
+          {!quiz.isDraft && (
+            <a
+              class="btn btn-primary"
+              hx-push-url="true"
+              hx-get={`/api/quiz/${quizId}/start`}
+              href={`/api/quiz/${quizId}/start`}
+            >
+              Present quiz
+            </a>
+          )}
+          {quiz.isDraft && (
+            <a
+              hx-get={`/api/quiz/${quizId}/publish`}
+              class="btn btn-primary"
+              hx-swap="outerHTML"
+            >
+              Save
+            </a>
+          )}
+
           <div class="dropdown dropdown-end ">
             <button class="flex items-center btn">
               <svg
