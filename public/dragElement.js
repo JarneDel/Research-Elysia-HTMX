@@ -84,7 +84,7 @@ function outputSize(entries) {
     // Use requestAnimationFrame to update element size
     requestAnimationFrame(() => {
       element.style.width = `${newWidth}px`
-      element.style.height = `${height}px`
+      element.style.height = `${height + 20}px`
 
       // Set isResizing back to false after the size change has been made
       requestAnimationFrame(() => {

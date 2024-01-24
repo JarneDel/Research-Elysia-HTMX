@@ -43,7 +43,7 @@ export const EditQuizPage = (params: params) => {
           </div>
           <div
             id="media"
-            class="container max-w-2xl mx-auto border-2 rounded-md p-2 mb-3 bg-base-200"
+            class="container max-w-2xl mx-auto rounded-md p-2 mb-3 bg-base-200"
           >
             {!page?.media_url ? (
               <MediaUpload

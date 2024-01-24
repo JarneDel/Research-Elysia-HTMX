@@ -4,7 +4,6 @@ import { auth } from '@/modules/api/auth'
 import { publicQuiz } from '@/modules/api/quiz'
 import { quizEditorApi } from '@/modules/api/quizEditor'
 import { stream } from '@/modules/api/stream'
-import { test } from '@/modules/api/test'
 
 export const api = (app: Elysia) =>
   app.group('/api', app =>
@@ -13,6 +12,6 @@ export const api = (app: Elysia) =>
       .use(quizEditorApi)
       .use(quizPresentation)
       .use(publicQuiz)
-      .use(test)
+      // .use(test)
       .use(stream),
   )
