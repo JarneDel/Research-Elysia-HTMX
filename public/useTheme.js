@@ -1,20 +1,33 @@
-// If user does not have a theme preference, use system theme
-if (!localStorage.theme) {
-  if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    document.documentElement.classList.add('dark')
-  } else {
-    document.documentElement.classList.remove('dark')
-  }
+const swapTheme = theme => {
+  // add theme to data-theme on html element
+  console.log('setting theme to: ', theme)
+  document.documentElement.setAttribute('data-theme', theme)
+  // set in local storage
+  localStorage.theme = theme
 }
 
-// If user has no theme preference, update theme when system theme changes
-window
-  .matchMedia('(prefers-color-scheme: dark)')
-  .addEventListener('change', ({ matches }) => {
-    if (localStorage.theme) return
-    if (matches) {
-      document.documentElement.classList.add('dark')
+document.addEventListener('DOMContentLoaded', () => {
+  // set theme to dark or light
+  const theme = localStorage.theme
+  if (!theme) {
+    // get system theme
+    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      swapTheme('dark')
     } else {
-      document.documentElement.classList.remove('dark')
+      swapTheme('light')
     }
-  })
+  } else {
+    document.documentElement.setAttribute('data-theme', theme)
+  }
+
+  // listen to system theme changes
+  window
+    .matchMedia('(prefers-color-scheme: dark)')
+    .addEventListener('change', e => {
+      if (e.matches) {
+        swapTheme('dark')
+      } else {
+        swapTheme('light')
+      }
+    })
+})

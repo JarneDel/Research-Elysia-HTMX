@@ -62,6 +62,7 @@ export const ThemeSwitcher = () => {
               class="theme-controller btn btn-sm btn-block btn-ghost justify-start"
               aria-label={theme}
               value={theme}
+              hx-on={`change: swapTheme('${theme}');`}
             />
           </li>
         ))}

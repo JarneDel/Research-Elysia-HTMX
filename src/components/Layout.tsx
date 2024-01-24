@@ -35,6 +35,7 @@ export const Layout = (props: LayoutProps) => {
             referrerpolicy="no-referrer"
           ></script>
 
+          <script src="https://cdn.jsdelivr.net/npm/theme-change@2.0.2/index.js"></script>
           <script defer src="/public/useTheme.js" />
           {/*<script>htmx.config.globalViewTransitions = true;</script>*/}
           <link href="/public/globals.css" rel="stylesheet" />
