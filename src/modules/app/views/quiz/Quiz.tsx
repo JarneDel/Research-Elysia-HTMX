@@ -58,8 +58,8 @@ export const quiz = (app: Elysia) =>
                           hx-target="#result"
                           hx-trigger="submit"
                         >
-                          <div id="result"></div>
                           <h1 class="card-title">Create new quiz</h1>
+                          <div id="result"></div>
                           <label class="form-control">
                             <div class="label">
                               <div class="label-text">Title</div>

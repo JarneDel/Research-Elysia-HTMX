@@ -53,7 +53,11 @@ export const auth = (app: Elysia) =>
                         class="input input-bordered input-primary w-full max-w-xs"
                       />
                     </label>
-                    <a hx-push-url="true" hx-get="/auth/sign-in">
+                    <a
+                      hx-push-url="true"
+                      hx-get="/auth/sign-up"
+                      hx-target="body"
+                    >
                       <span class="link link-primary">Create an account</span>
                     </a>
 

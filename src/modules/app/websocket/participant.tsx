@@ -345,7 +345,7 @@ export class Participant {
     if (!userAnswers.data) return
     const firstAnswer = userAnswers.data[0]
     if (!firstAnswer) {
-      // todo: store in database that user did not answer
+      this.validateAnswer('-1', this.quizCode)
       return this.ws.send(<NoAnswer />)
     }
     switch (firstAnswer.is_correct) {
