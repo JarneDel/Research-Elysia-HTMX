@@ -140,11 +140,18 @@ export class Presenter {
   }
 
   async afterAnswer() {
-    if (!(this.msg['after-answer'] == '' || this.msg['after-answer'] == 'true'))
-      return
+    if (!this.msg['after-answer']) return
 
     console.log('presenter.afterAnswer')
     // send if answer is correct to all participants
+
+    // send overview to presenter
+    const currentQuestion = await activeQuizPageDetailsWithNextPage(
+      this.quizCode,
+    )
+    if (!currentQuestion.data) return
+    const page = fixOneToOne(currentQuestion.data.current_page_id)
+    if (page.page != this.msg['after-answer']) return
     this.ws.publish(
       this.quizCode,
       <>
@@ -152,20 +159,13 @@ export class Presenter {
           <input
             type="hidden"
             name="after-answer-participant"
-            value="true"
+            value={page.id}
             ws-send
             hx-trigger="load"
           />
         </div>
       </>,
     )
-    // send overview to presenter
-    const currentQuestion = await activeQuizPageDetailsWithNextPage(
-      this.quizCode,
-    )
-    if (!currentQuestion.data) return
-    const page = fixOneToOne(currentQuestion.data.current_page_id)
-
     const answers = page.answers.map((answer: string, index: number) => ({
       answer: answer,
       isCorrect: page.correct_answers.includes(index),

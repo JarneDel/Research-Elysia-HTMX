@@ -79,7 +79,7 @@ export const Answer = (props: AnswerProps) => {
   return (
     <li class="flex w-full bg-base-300 p-2 rounded-box gap-4 relative items-center">
       <AnswerIcon id={index} size={96} />
-      <div safe class="text-3xl font-medium ">
+      <div safe class="lg:text-3xl md:text-2xl text-xl font-medium ">
         {value}
       </div>
     </li>
@@ -93,13 +93,13 @@ interface AnswerParticipantProps {
 }
 export const AnswerParticipant = (props: AnswerParticipantProps) => {
   return (
-    <li class="w-full bg-base-300 p-2 rounded-box relative focus-visible:outline-offset-4 focus-visible:outline-2 hover:bg-secondary/70 hover:text-secondary-content transition-colors duration-300">
+    <li class="w-full bg-base-300 p-2 rounded-box relative focus-visible:outline-offset-4 focus-visible:outline-2 hover:bg-secondary/70 hover:text-secondary-content transition-colors duration-300 replace-transition">
       <button
         name={props.namePrefix + '-' + props.index}
         class="flex w-full gap-4 items-center"
       >
         <AnswerIcon id={props.index} size={96} />
-        <div safe class="text-3xl font-medium ">
+        <div safe class="lg:text-3xl md:text-2xl text-xl font-medium ">
           {props.value}
         </div>
       </button>

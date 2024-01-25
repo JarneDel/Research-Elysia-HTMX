@@ -34,7 +34,7 @@ export function QuizAfterAnswer(props: QuizAfterAnswerProps) {
       <div id="quiz-progress-bar"></div>
       <ul
         id="answers-container"
-        class="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:grid-rows-3 mt-4 replace-transition "
+        class="grid grid-cols-1 md:grid-cols-2 gap-4 md:grid-rows-3 mt-4 replace-transition "
       >
         {props.answers.map((answer, index) => (
           <li
@@ -46,7 +46,7 @@ export function QuizAfterAnswer(props: QuizAfterAnswerProps) {
             }
           >
             <AnswerIcon id={index} size={96} />
-            <div safe class="text-3xl font-medium ">
+            <div safe class="lg:text-3xl md:text-2xl text-xl font-medium ">
               {answer.answer}
             </div>
           </li>

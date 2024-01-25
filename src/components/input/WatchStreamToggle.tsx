@@ -1,13 +1,14 @@
 export const WatchStreamToggle = () => (
   <>
-    <div class="tooltip tooltip-bottom" data-tip="toggle webcam">
+    <div class="tooltip tooltip-left" data-tip="stream toggle">
       <label class="swap btn btn-circle swap-indeterminate">
         <input
           type="checkbox"
           id="toggle-watch-stream"
           hx-on="change: toggleWatchStream(event)"
+          checked
         />
-        <div class="swap-on">
+        <div class="swap-off">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="24"
@@ -24,7 +25,7 @@ export const WatchStreamToggle = () => (
             <rect width="14" height="12" x="2" y="6" rx="2" ry="2" />
           </svg>
         </div>
-        <div class="swap-off">
+        <div class="swap-on">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="24"

@@ -285,6 +285,13 @@ export class Participant {
     const activeQuizMinimal = await getActiveQuizMinimal(this.quizCode)
     if (!activeQuizMinimal.data) return
 
+    console.log(
+      activeQuizMinimal.data,
+      afterAnswer,
+      'participant.handleNextQuestion',
+    )
+    if (activeQuizMinimal.data.current_page_id != afterAnswer) return
+
     // check if answer is correct
     const userAnswers = await getAnswersForUser(
       this.quizCode,

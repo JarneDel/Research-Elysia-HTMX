@@ -83,12 +83,18 @@ export const Question = (props: QuestionProps) => {
                 type="hidden"
                 name="after-answer"
                 id={'after-answer-' + props.pageNumber}
-                value="true"
+                value={props.pageNumber?.toString()}
                 ws-send
                 hx-trigger="load delay:20s"
               />
               <form ws-send hx-trigger="submit">
-                <button class="btn btn-primary" name="after-answer">
+                <input
+                  type="hidden"
+                  name="after-answer"
+                  value={props.pageNumber?.toString()}
+                  ws-send
+                />
+                <button class="btn btn-primary" type="submit">
                   Results
                 </button>
               </form>
@@ -118,7 +124,7 @@ export const Question = (props: QuestionProps) => {
             />
           )}
           <ul
-            class="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:grid-rows-3 mt-4"
+            class="grid grid-cols-1 md:grid-cols-2 gap-4 md:grid-rows-3 mt-4"
             id="answers-container"
           >
             {props.answers.map((question, index) => {

@@ -80,7 +80,7 @@ function outputSize(entries) {
     const { width, height } = entry.contentRect
     // maintain a 16:9 aspect ratio
     const aspectRatio = 16 / 9
-    const newWidth = height * aspectRatio
+    const newWidth = height * aspectRatio - 32
     const element = entry.target
 
     isResizing = true
@@ -88,7 +88,7 @@ function outputSize(entries) {
     // Use requestAnimationFrame to update element size
     requestAnimationFrame(() => {
       element.style.width = `${newWidth}px`
-      element.style.height = `${height + 20}px`
+      element.style.height = `${height}px`
 
       // Set isResizing back to false after the size change has been made
       requestAnimationFrame(() => {
