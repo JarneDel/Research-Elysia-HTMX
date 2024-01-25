@@ -6,8 +6,11 @@ export const publicQuiz = (app: Elysia) =>
       '/join',
       ctx => {
         if (ctx.headers['hx-request'] === 'true') {
-          ctx.set.headers['HX-Redirect'] = '/q/' + ctx.query.code.toUpperCase()
-          ctx.set.headers['HX-Push-URL'] = '/q/' + ctx.query.code.toUpperCase()
+          // strip # and spaces from code
+          const code = ctx.query.code.toUpperCase().trim().replace('#', '')
+
+          ctx.set.headers['HX-Redirect'] = '/q/' + code
+          ctx.set.headers['HX-Push-URL'] = '/q/' + code
         } else {
           ctx.set.redirect = '/q/' + ctx.query.code.toUpperCase()
         }
