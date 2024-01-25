@@ -8,6 +8,7 @@ import {
 import { Scoreboard } from '@/components/scoreboard/Scoreboard.tsx'
 import { options } from '@/index.ts'
 import { supabase } from '@/libs'
+import { redisClient } from '@/libs/redis.ts'
 import {
   anyAuthResult,
   AuthenticatedAuthResult,
@@ -155,6 +156,13 @@ export class Presenter {
 
   async afterAnswer() {
     if (!this.msg['after-answer']) return
+
+    const lock = await redisClient.get(this.quizCode + this.msg['after-answer'])
+    if (lock) {
+      console.log('presenter.afterAnswer lock')
+      return
+    }
+    await redisClient.setEx(this.quizCode + this.msg['after-answer'], 20, '1')
 
     console.log('presenter.afterAnswer')
     // send if answer is correct to all participants

@@ -12,6 +12,7 @@ import { NoAnswer } from '@/components/states/noAnswer.tsx'
 import { WrongAnswer } from '@/components/states/wrongAnswer.tsx'
 import { options } from '@/index.ts'
 import { supabase } from '@/libs'
+import { redisClient } from '@/libs/redis.ts'
 import {
   anyAuthResult,
   SuccessfulAuthResult,
@@ -310,6 +311,19 @@ export class Participant {
   async handleNextQuestion() {
     const afterAnswer = this.msg['after-answer-participant']
     if (!afterAnswer) return
+
+    const lock = await redisClient.get(
+      this.quizCode + afterAnswer + this.user.userId,
+    )
+    if (lock) {
+      console.log('participant.handleNextQuestion lock')
+      return
+    }
+    await redisClient.setEx(
+      this.quizCode + afterAnswer + this.user.userId,
+      20,
+      '1',
+    )
 
     const activeQuizMinimal = await getActiveQuizMinimal(this.quizCode)
     if (!activeQuizMinimal.data) return
