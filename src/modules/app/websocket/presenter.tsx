@@ -135,6 +135,20 @@ export class Presenter {
             <Scoreboard data={scores!} />
           </>,
         )
+        this.ws.publish(
+          this.quizCode,
+          <>
+            <div id="game">
+              <input
+                type="hidden"
+                name="scoreboard-participant"
+                value={'true'}
+                ws-send
+                hx-trigger="load"
+              />
+            </div>
+          </>,
+        )
       })
     })
   }

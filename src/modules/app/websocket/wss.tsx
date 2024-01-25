@@ -18,6 +18,7 @@ export const wss = (app: Elysia) =>
         'next-question': t.Optional(t.Unknown()),
         'after-answer': t.Optional(t.Unknown()),
         'end-quiz': t.Optional(t.Unknown()),
+        'scoreboard-participant': t.Optional(t.Unknown()),
         'after-answer-participant': t.Optional(t.Unknown()),
         presentQuizId: t.Optional(t.String()),
         setUsername: t.Optional(t.String()),
@@ -55,6 +56,7 @@ export const wss = (app: Elysia) =>
       await participant.reconnectToQuiz()
       await participant.handleAnswer()
       await participant.handleNextQuestion()
+      await participant.handleScoreboard()
 
       if (user.type === 'authenticated' && user.userId) {
         const presenter = new Presenter(ws, message, user, quizCode)

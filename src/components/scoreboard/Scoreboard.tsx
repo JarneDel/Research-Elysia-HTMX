@@ -18,6 +18,7 @@ export const Scoreboard = (props: ScoreboardProps) => {
             <th scope="col">User</th>
             <th scope="col">Score</th>
             <th scope="col">Correct Answers</th>
+            <th scope="col">Wrong Answers</th>
           </tr>
         </thead>
         <tbody>
@@ -26,6 +27,7 @@ export const Scoreboard = (props: ScoreboardProps) => {
               <td>{row.user}</td>
               <td>{row.score}</td>
               <td>{row.correct_answers}</td>
+              <td>{row.wrong_answers}</td>
             </tr>
           ))}
         </tbody>

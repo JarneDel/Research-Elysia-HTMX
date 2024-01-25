@@ -268,6 +268,35 @@ export class Participant {
     }
   }
 
+  async handleScoreboard() {
+    if (this.msg['scoreboard-participant']) {
+      const score = await supabase
+        .from('score')
+        .select()
+        .eq('quiz_code', this.quizCode)
+        .order('score', { ascending: false })
+
+      console.log(score, 'scoreboard-participant')
+      score.data?.forEach((row, index) => {
+        if (
+          row.anon_user === this.user.userId ||
+          row.user === this.user.userId
+        ) {
+          this.ws.send(
+            <>
+              <div
+                class="flex flex-col justify-center items-center full-height"
+                id="game"
+              >
+                <div class="text-center">Your rank is {index + 1}</div>
+              </div>
+            </>,
+          )
+        }
+      })
+    }
+  }
+
   async handleAnswer() {
     for (const key of Object.keys(this.msg)) {
       if (key.startsWith('quiz-answer')) {

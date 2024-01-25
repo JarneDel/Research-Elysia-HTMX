@@ -44,6 +44,7 @@ export class ScoreboardRepository {
         scores[user]!.score += answer.score
       }
     })
+    console.log(scores)
 
     const scoreArray = Object.entries(scores).map(([key, value]) => {
       return {
@@ -55,6 +56,7 @@ export class ScoreboardRepository {
         score: value.score,
       }
     })
+    console.log(scoreArray, 'scoreArray')
 
     const insertResult = await supabase.from('score').insert(scoreArray)
     console.log(insertResult)
@@ -72,7 +74,7 @@ export class ScoreboardRepository {
       .order('score', { ascending: false })
       .eq('quiz_code', this.quizCode)
 
-    console.log(result)
+    console.log(result, 'scoreboardRepositor.getTopScores')
     const users = result.data?.map(score => score.anon_user ?? score.user)
     const anonUsers = result.data?.map(score => score.anon_user)
 
@@ -112,7 +114,7 @@ export class ScoreboardRepository {
         quiz_code: score.quiz_code,
       }
     })
-    console.log(finalResult)
+    console.log(finalResult, 'final result')
     return finalResult
   }
 }
