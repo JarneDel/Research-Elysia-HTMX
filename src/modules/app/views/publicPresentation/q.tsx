@@ -1,5 +1,7 @@
 import { Elysia, t } from 'elysia'
 import { Success } from '@/components/icons/StatusIcons.tsx'
+import { ReloadStream } from '@/components/input/ReloadStream.tsx'
+import { WatchStreamToggle } from '@/components/input/WatchStreamToggle.tsx'
 import { ThemeSwitcher } from '@/components/states/Theme.tsx'
 import { MovableResizableDiv } from '@/components/video/MovableResizableDiv.tsx'
 import { supabase } from '@/libs'
@@ -110,13 +112,19 @@ export const q = (app: Elysia) =>
                           class="navbar-end flex flex-row gap-4"
                         >
                           <ThemeSwitcher />
-                          <div id="streaming-controls">
+                          <div
+                            id="streaming-controls"
+                            class="flex flex-row items-center"
+                          >
                             {/*  todo: video player controls (mute and show)*/}
+                            <ReloadStream />
+                            <WatchStreamToggle />
                           </div>
                         </div>
                       </div>
 
                       <MovableResizableDiv id="video">
+                        <div class="loading" id="video-loading-indicator"></div>
                         <video id="output-video" autoplay controls muted />
                       </MovableResizableDiv>
                       <div id="lobby" class="double-header-height">

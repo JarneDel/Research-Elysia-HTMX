@@ -2,6 +2,10 @@ let isPresenting = false
 let presentingId
 
 /**
+ * @type {null | WHEPClient}
+ */
+let whepClient = null
+/**
  * Set the stream options in a script tag of htmx response, then the video client will pick it up
  * @type {{streamUrl: string, streamId: string, isPresenting: boolean, playbackUrl: string, isWatching: boolean}}
  */
@@ -128,6 +132,9 @@ class WHIPClient {
 
 class WHEPClient {
   constructor(endpoint, videoElement) {
+    document
+      .querySelector('#video-loading-indicator')
+      .classList.remove('hidden')
     this.endpoint = endpoint
     this.videoElement = videoElement
     this.stream = new MediaStream()
@@ -192,6 +199,46 @@ class WHEPClient {
       }
     })
     this.peerConnection.addEventListener('negotiationneeded', ev => {
+      negotiateConnectionWithClientOffer(this.peerConnection, this.endpoint)
+    })
+
+    /**
+     *
+     * @param ev {Event<RTCPeerConnectionIceEvent>}
+     */
+    this.peerConnection.oniceconnectionstatechange = ev => {
+      console.log(ev.target.iceConnectionState)
+      if (ev.target.iceConnectionState === 'connected') {
+        console.log('ice connection successful')
+        document.querySelector('#video').classList.remove('hidden')
+        document
+          .querySelector('#video-loading-indicator')
+          .classList.add('hidden')
+      }
+      if (ev.target.iceConnectionState === 'checking') {
+        console.log('ice connection checking')
+        document
+          .querySelector('#video-loading-indicator')
+          .classList.remove('hidden')
+      }
+      if (ev.target.iceConnectionState === 'failed') {
+        console.log('ice connection failed')
+        document.querySelector('#video').classList.add('hidden')
+        document
+          .querySelector('#video-loading-indicator')
+          .classList.add('hidden')
+      }
+    }
+  }
+  disconnectStream() {
+    this.peerConnection.close()
+    this.videoElement.srcObject = null
+    this.stream.getTracks().forEach(track => track.stop())
+    streamOptions.isWatching = false
+  }
+  reconnectStream() {
+    this.peerConnection.createOffer().then(offer => {
+      this.peerConnection.setLocalDescription(offer)
       negotiateConnectionWithClientOffer(this.peerConnection, this.endpoint)
     })
   }
@@ -282,8 +329,8 @@ async function initiateWHEPClient() {
     await waitForPlaybackUrl()
     const url = streamOptions.playbackUrl
     const videoElement = document.getElementById('output-video')
-    new WHEPClient(url, videoElement)
-    streamOptions.isPresenting = true
+    whepClient = new WHEPClient(url, videoElement)
+    streamOptions.isWatching = true
   }
 }
 
@@ -311,7 +358,11 @@ async function waitForStreamUrl() {
 }
 
 async function stopStream(url) {}
-async function stopWatching(url) {}
+async function stopWatching(url) {
+  whepClient.disconnectStream()
+  whepClient = null
+  streamOptions.isWatching = false
+}
 
 async function watchStream(url) {}
 
@@ -383,6 +434,31 @@ const toggleVideoPreview = e => {
   } else {
     videoPreview.classList.add('hidden')
   }
+}
+
+/**
+ * param e {Event<HTMLInputElement>}
+ */
+const toggleWatchStream = e => {
+  if (e.target.checked) {
+    console.log('start watching')
+    initiateWHEPClient()
+    document.querySelector('#video').classList.remove('hidden')
+  } else {
+    console.log('stop watching')
+    streamOptions.isWatching = false
+    stopWatching()
+    document.querySelector('#video').classList.add('hidden')
+  }
+}
+
+const reloadStream = () => {
+  console.log('reloading stream')
+  if (whepClient) {
+    whepClient.disconnectStream()
+    whepClient = null
+  }
+  initiateWHEPClient()
 }
 
 document.addEventListener('DOMContentLoaded', event => {
