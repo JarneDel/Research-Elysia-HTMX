@@ -102,9 +102,13 @@ export const q = (app: Elysia) =>
                               QuizX
                             </a>
                           </h1>
-                          <div>{quiz?.name}</div>
+                          <div class="max-sm:hidden">{quiz?.name}</div>
+                          <div class="sm:hidden">{data.id}</div>
                         </div>
-                        <div id="game-header-center" class="navbar-center">
+                        <div
+                          id="game-header-center"
+                          class="navbar-center max-sm:hidden"
+                        >
                           {data.id}
                         </div>
                         <div

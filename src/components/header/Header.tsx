@@ -25,7 +25,7 @@ export const Header = (props: props) => (
     <input id="my-drawer-3" type="checkbox" class="drawer-toggle" />
     <div class="drawer-content">
       <div class="navbar  bg-base-300" id="main-header">
-        <div class="flex-none lg:pl-2 lg:mx-2 pr-2">
+        <div class="flex-none md:pl-2 md:mx-2 pr-2">
           <label
             for="my-drawer-3"
             aria-label="open sidebar"
@@ -49,7 +49,7 @@ export const Header = (props: props) => (
             <a href="/">QuizX</a>
           </span>
         </div>
-        <ul class="menu menu-horizontal rounded-box max-lg:hidden ">
+        <ul class="menu menu-horizontal rounded-box max-md:hidden ">
           {headerLinks.map((link, index) => (
             <li>
               <a
@@ -85,12 +85,12 @@ export const Header = (props: props) => (
           hx-get="/quiz/create"
           hx-push-url="true"
           hx-target="main"
-          class="btn max-lg:hidden"
+          class="btn max-md:hidden"
         >
           Create
         </a>
-        <ThemeSwitcher extraClasses="max-lg:hidden" />
-        <HeaderMenuDropdown extraClasses="max-lg:hidden" />
+        <ThemeSwitcher extraClasses="max-md:hidden" />
+        <HeaderMenuDropdown extraClasses="max-md:hidden" />
       </div>
       {props.children}
     </div>
