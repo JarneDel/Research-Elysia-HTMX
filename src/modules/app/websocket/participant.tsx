@@ -1,4 +1,9 @@
 import { ElysiaWS } from 'elysia/ws'
+import {
+  FirstPlace,
+  SecondPlace,
+  ThirdPlace,
+} from '@/components/icons/placement.tsx'
 import { Question } from '@/components/presentation/Question.tsx'
 import { QuestionReconnect } from '@/components/presentation/QuestionReconnect.tsx'
 import {
@@ -289,7 +294,12 @@ export class Participant {
                 class="flex flex-col justify-center items-center full-height"
                 id="game"
               >
-                <div class="text-center">Your rank is {index + 1}</div>
+                {index === 0 && <FirstPlace />}
+                {index === 1 && <SecondPlace />}
+                {index === 2 && <ThirdPlace />}
+                {index > 2 && (
+                  <div class="text-center">Your rank is {index + 1}</div>
+                )}
               </div>
             </>,
           )
