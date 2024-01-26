@@ -1,6 +1,10 @@
 import { Menu } from '@/components/header/Header.tsx'
 
-export const HeaderMenuDropdown = () => {
+interface props {
+  extraClasses?: string
+}
+
+export const HeaderMenuDropdown = (props: props) => {
   const links = [
     {
       name: 'Create Quiz',
@@ -15,7 +19,7 @@ export const HeaderMenuDropdown = () => {
   ]
   return (
     <>
-      <div class="dropdown dropdown-end">
+      <div class={'dropdown dropdown-end ' + props.extraClasses}>
         <button class="btn btn-ghost">
           <Menu></Menu>
         </button>

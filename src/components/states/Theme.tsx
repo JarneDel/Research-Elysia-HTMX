@@ -1,42 +1,45 @@
-export const ThemeSwitcher = () => {
-  const themes = [
-    'system',
-    'light',
-    'dark',
-    'cupcake',
-    'bumblebee',
-    'emerald',
-    'corporate',
-    'synthwave',
-    'retro',
-    'cyberpunk',
-    'valentine',
-    'halloween',
-    'garden',
-    'forest',
-    'aqua',
-    'lofi',
-    'pastel',
-    'fantasy',
-    'wireframe',
-    'black',
-    'luxury',
-    'dracula',
-    'cmyk',
-    'autumn',
-    'business',
-    'acid',
-    'lemonade',
-    'night',
-    'coffee',
-    'winter',
-    'dim',
-    'nord',
-    'sunset',
-  ]
+interface ThemeProps {
+  extraClasses?: string
+}
+const themes = [
+  'system',
+  'light',
+  'dark',
+  'cupcake',
+  'bumblebee',
+  'emerald',
+  'corporate',
+  'synthwave',
+  'retro',
+  'cyberpunk',
+  'valentine',
+  'halloween',
+  'garden',
+  'forest',
+  'aqua',
+  'lofi',
+  'pastel',
+  'fantasy',
+  'wireframe',
+  'black',
+  'luxury',
+  'dracula',
+  'cmyk',
+  'autumn',
+  'business',
+  'acid',
+  'lemonade',
+  'night',
+  'coffee',
+  'winter',
+  'dim',
+  'nord',
+  'sunset',
+]
 
+export const ThemeSwitcher = (props: ThemeProps) => {
   return (
-    <div class="dropdown dropdown-end">
+    <div class={'dropdown dropdown-end ' + props.extraClasses}>
       <div tabindex="0" role="button" class="btn m-1">
         Theme
         <svg
@@ -68,5 +71,24 @@ export const ThemeSwitcher = () => {
         ))}
       </ul>
     </div>
+  )
+}
+
+export const ThemeSelector = (props: ThemeProps) => {
+  return (
+    <ul tabindex="0">
+      {themes.map(theme => (
+        <li>
+          <input
+            type="radio"
+            name="theme-dropdown"
+            class="theme-controller btn btn-sm btn-block btn-ghost justify-start"
+            aria-label={theme}
+            value={theme}
+            hx-on={`change: swapTheme('${theme}');`}
+          />
+        </li>
+      ))}
+    </ul>
   )
 }

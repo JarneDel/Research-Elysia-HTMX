@@ -17,10 +17,11 @@ export const initHtmx = (app: Elysia): Elysia =>
         console.log('adding back header')
         return (
           <>
-            <Header />
-            <main class="bg-base-100 text-base-content">
-              {response as JSX.Element}
-            </main>
+            <Header>
+              <main class="bg-base-100 text-base-content">
+                {response as JSX.Element}
+              </main>
+            </Header>
           </>
         )
       }
@@ -43,10 +44,11 @@ export const initHtmx = (app: Elysia): Elysia =>
     return (
       <Layout>
         {/*<Header user={authResult.user} />*/}
-        <Header />
-        <main class="bg-base-100 text-base-content">
-          {response as JSX.Element}
-        </main>
+        <Header>
+          <main class="bg-base-100 text-base-content">
+            {response as JSX.Element}
+          </main>
+        </Header>
       </Layout>
     )
   })
