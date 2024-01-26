@@ -1,50 +1,70 @@
-function dragElement(ele) {
-  if (typeof ele === 'string') {
-    ele = { id: ele }
+class DragElement {
+  constructor(ele) {
+    if (typeof ele === 'string') {
+      ele = { id: ele }
+    }
+
+    this.element = document.getElementById(ele.id)
+    this.watchResize(this.element)
+
+    this.pos1 = 0
+    this.pos2 = 0
+    this.pos3 = 0
+    this.pos4 = 0
+
+    this.element.ontouchstart = this.dragtouch.bind(this)
+
+    if (document.querySelector('#' + ele.id + '-header')) {
+      document.querySelector('#' + ele.id + '-header').onmousedown =
+        this.dragMouseDown.bind(this)
+    } else {
+      this.element.onmousedown = this.dragMouseDown.bind(this)
+    }
   }
 
-  let element = document.getElementById(ele.id)
-  watchResize(element)
+  static outputSize(entries) {
+    if (DragElement.isResizing) return
 
-  console.log(element, ele)
-  console.log('dragElement')
-  let pos1 = 0,
-    pos2 = 0,
-    pos3 = 0,
-    pos4 = 0
+    for (let entry of entries) {
+      const { width, height } = entry.contentRect
+      const aspectRatio = 16 / 9
+      const newWidth = height * aspectRatio - 32
+      const element = entry.target
 
-  element.ontouchstart = dragtouch
+      DragElement.isResizing = true
 
-  if (document.querySelector('#' + ele.id + '-header')) {
-    // if present, the header is where you move the DIV from:
-    document.querySelector('#' + ele.id + '-header').onmousedown = dragMouseDown
-  } else {
-    element.onmousedown = dragMouseDown
+      requestAnimationFrame(() => {
+        element.style.width = `${newWidth}px`
+        element.style.height = `${height}px`
+
+        requestAnimationFrame(() => {
+          DragElement.isResizing = false
+        })
+      })
+
+      console.log(`Element size: ${width}px x ${height}px`)
+    }
   }
 
-  /**
-   *
-   * @param ev {event<ontouchstart>}
-   */
-  function dragtouch(ev) {
+  dragtouch(ev) {
     ev.preventDefault()
     const touch = ev.touches[0]
-    pos3 = touch.clientX
-    pos4 = touch.clientY
-    document.ontouchend = closeDragElement
-    document.ontouchmove = elementDrag
+    this.pos3 = touch.clientX
+    this.pos4 = touch.clientY
+    document.ontouchend = this.closeDragElement.bind(this)
+    document.ontouchmove = this.elementDrag.bind(this)
   }
 
-  function dragMouseDown(e) {
+  dragMouseDown(e) {
     e = e || window.event
     e.preventDefault()
-    pos3 = e.clientX
-    pos4 = e.clientY
-    document.onmouseup = closeDragElement
-    document.onmousemove = elementDrag
+    this.pos3 = e.clientX
+    this.pos4 = e.clientY
+    document.onmouseup = this.closeDragElement.bind(this)
+    document.onmousemove = this.elementDrag.bind(this)
   }
 
-  function elementDrag(e) {
+  elementDrag(e) {
     e = e || window.event
     e.preventDefault()
     let clientX, clientY
@@ -56,83 +76,57 @@ function dragElement(ele) {
       clientX = e.clientX
       clientY = e.clientY
     }
-    pos1 = pos3 - clientX
-    pos2 = pos4 - clientY
-    pos3 = clientX
-    pos4 = clientY
+    this.pos1 = this.pos3 - clientX
+    this.pos2 = this.pos4 - clientY
+    this.pos3 = clientX
+    this.pos4 = clientY
 
-    console.log({ pos3, pos4, touches: e.touches[0], pos1, pos2 })
+    const elementWidth = this.element.offsetWidth
+    const elementHeight = this.element.offsetHeight
 
-    const elementWidth = element.offsetWidth
-    const elementHeight = element.offsetHeight
-
-    // check if element is out of screen
-    if (element.offsetTop - pos2 < 0) {
-      element.style.top = '0px'
-    } else if (element.offsetTop - pos2 + elementHeight > window.innerHeight) {
-      element.style.top = window.innerHeight - elementHeight + 'px'
+    if (this.element.offsetTop - this.pos2 < 0) {
+      this.element.style.top = '0px'
+    } else if (
+      this.element.offsetTop - this.pos2 + elementHeight >
+      window.innerHeight
+    ) {
+      this.element.style.top = window.innerHeight - elementHeight + 'px'
     } else {
-      element.style.top = element.offsetTop - pos2 + 'px'
+      this.element.style.top = this.element.offsetTop - this.pos2 + 'px'
     }
 
-    if (element.offsetLeft - pos1 < 0) {
-      element.style.left = '0px'
-    } else if (element.offsetLeft - pos1 + elementWidth > window.innerWidth) {
-      element.style.left = window.innerWidth - elementWidth + 'px'
+    if (this.element.offsetLeft - this.pos1 < 0) {
+      this.element.style.left = '0px'
+    } else if (
+      this.element.offsetLeft - this.pos1 + elementWidth >
+      window.innerWidth
+    ) {
+      this.element.style.left = window.innerWidth - elementWidth + 'px'
     } else {
-      element.style.left = element.offsetLeft - pos1 + 'px'
+      this.element.style.left = this.element.offsetLeft - this.pos1 + 'px'
     }
   }
-  function closeDragElement() {
+
+  closeDragElement() {
     document.onmouseup = null
     document.onmousemove = null
   }
-}
 
-let resizeLock = false
-/**
- * @type {null | ResizeObserver}
- */
-let resizeObserver = null
-
-/**
- * @param entries {ResizeObserverEntry[]}
- */
-
-let isResizing = false
-
-function outputSize(entries) {
-  if (isResizing) return
-
-  for (let entry of entries) {
-    const { width, height } = entry.contentRect
-    // maintain a 16:9 aspect ratio
-    const aspectRatio = 16 / 9
-    const newWidth = height * aspectRatio - 32
-    const element = entry.target
-
-    isResizing = true
-
-    // Use requestAnimationFrame to update element size
-    requestAnimationFrame(() => {
-      element.style.width = `${newWidth}px`
-      element.style.height = `${height}px`
-
-      // Set isResizing back to false after the size change has been made
-      requestAnimationFrame(() => {
-        isResizing = false
-      })
-    })
-
-    console.log(`Element size: ${width}px x ${height}px`)
+  watchResize(element) {
+    if (DragElement.resizeLock) {
+      console.log('resizeLock')
+      return
+    }
+    DragElement.resizeLock = true
+    DragElement.resizeObserver = new ResizeObserver(DragElement.outputSize)
+    DragElement.resizeObserver.observe(element)
   }
 }
-function watchResize(element) {
-  if (resizeLock) {
-    console.log('resizeLock')
-    return
-  }
-  resizeLock = true
-  resizeObserver = new ResizeObserver(outputSize)
-  resizeObserver.observe(element)
+
+DragElement.resizeLock = false
+DragElement.resizeObserver = null
+DragElement.isResizing = false
+
+function dragElement(ele) {
+  new DragElement(ele)
 }
