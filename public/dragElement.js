@@ -12,11 +12,27 @@ function dragElement(ele) {
     pos2 = 0,
     pos3 = 0,
     pos4 = 0
+
+  element.ontouchstart = dragtouch
+
   if (document.querySelector('#' + ele.id + '-header')) {
     // if present, the header is where you move the DIV from:
     document.querySelector('#' + ele.id + '-header').onmousedown = dragMouseDown
   } else {
     element.onmousedown = dragMouseDown
+  }
+
+  /**
+   *
+   * @param ev {event<ontouchstart>}
+   */
+  function dragtouch(ev) {
+    ev.preventDefault()
+    const touch = ev.touches[0]
+    pos3 = touch.clientX
+    pos4 = touch.clientY
+    document.ontouchend = closeDragElement
+    document.ontouchmove = elementDrag
   }
 
   function dragMouseDown(e) {
@@ -27,13 +43,25 @@ function dragElement(ele) {
     document.onmouseup = closeDragElement
     document.onmousemove = elementDrag
   }
+
   function elementDrag(e) {
     e = e || window.event
     e.preventDefault()
-    pos1 = pos3 - e.clientX
-    pos2 = pos4 - e.clientY
-    pos3 = e.clientX
-    pos4 = e.clientY
+    let clientX, clientY
+    if (e.type === 'touchmove') {
+      const touch = e.touches[0]
+      clientX = touch.clientX
+      clientY = touch.clientY
+    } else {
+      clientX = e.clientX
+      clientY = e.clientY
+    }
+    pos1 = pos3 - clientX
+    pos2 = pos4 - clientY
+    pos3 = clientX
+    pos4 = clientY
+
+    console.log({ pos3, pos4, touches: e.touches[0], pos1, pos2 })
 
     const elementWidth = element.offsetWidth
     const elementHeight = element.offsetHeight

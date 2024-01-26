@@ -10,7 +10,7 @@ export const MovableResizableDiv = (props: Props) => {
       <div
         class="fixed z-10 resize-y overflow-hidden border  aspect-video  rounded-box max-w-[1280px] max-h-[740px] min-w-64 min-h-36 bg-base-100 bottom-8 right-8"
         id={props.id}
-        hx-on={`mouseenter: dragElement(${props.id})`}
+        hx-on={`mouseenter: dragElement(${props.id})\n touchstart: dragElement(${props.id})`}
         style="height: 200px"
       >
         <div
