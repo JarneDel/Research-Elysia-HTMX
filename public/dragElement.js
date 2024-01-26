@@ -12,7 +12,7 @@ class DragElement {
     this.pos3 = 0
     this.pos4 = 0
 
-    this.element.ontouchstart = this.dragtouch.bind(this)
+    this.element.ontouchstart = this.handleTouchStart.bind(this)
 
     if (document.querySelector('#' + ele.id + '-header')) {
       document.querySelector('#' + ele.id + '-header').onmousedown =
@@ -20,6 +20,8 @@ class DragElement {
     } else {
       this.element.onmousedown = this.dragMouseDown.bind(this)
     }
+
+    this.initialPinchDistance = 0
   }
 
   static outputSize(entries) {
@@ -46,6 +48,36 @@ class DragElement {
     }
   }
 
+  handleTouchStart(e) {
+    if (e.touches.length === 2) {
+      this.initialPinchDistance = this.getPinchDistance(
+        e.touches[0],
+        e.touches[1],
+      )
+      document.ontouchmove = this.handleTouchMove.bind(this)
+      document.ontouchend = this.handleTouchEnd.bind(this)
+    } else {
+      this.dragtouch(e)
+    }
+  }
+
+  handleTouchMove(e) {
+    if (e.touches.length === 2) {
+      const currentPinchDistance = this.getPinchDistance(
+        e.touches[0],
+        e.touches[1],
+      )
+      const scale = currentPinchDistance / this.initialPinchDistance
+
+      this.element.style.transform = `scale(${scale})`
+    }
+  }
+
+  handleTouchEnd(e) {
+    document.ontouchmove = null
+    document.ontouchend = null
+  }
+
   dragtouch(ev) {
     ev.preventDefault()
     const touch = ev.touches[0]
@@ -53,6 +85,12 @@ class DragElement {
     this.pos4 = touch.clientY
     document.ontouchend = this.closeDragElement.bind(this)
     document.ontouchmove = this.elementDrag.bind(this)
+  }
+
+  getPinchDistance(touch1, touch2) {
+    const dx = touch1.clientX - touch2.clientX
+    const dy = touch1.clientY - touch2.clientY
+    return Math.sqrt(dx * dx + dy * dy)
   }
 
   dragMouseDown(e) {
@@ -110,6 +148,8 @@ class DragElement {
   closeDragElement() {
     document.onmouseup = null
     document.onmousemove = null
+    document.ontouchend = null
+    document.ontouchmove = null
   }
 
   watchResize(element) {
