@@ -1,4 +1,3 @@
-import { Elysia } from 'elysia'
 import { checkAccessToken } from '@/libs/auth.ts'
 import { setAnonymousSessionCookie } from '@/libs/publicAuth.ts'
 

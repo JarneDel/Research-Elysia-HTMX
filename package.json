@@ -3,7 +3,6 @@
   "name": "app",
   "version": "1.0.50",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "concurrently \"bun run serve\" \"bun --inspect --watch src/index.ts\" \"bun run build --watch\" ",
     "build": "tailwindcss -i ./src/styles/globals.css -o ./public/globals.css",
     "----CHECK": "",
