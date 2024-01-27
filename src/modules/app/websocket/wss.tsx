@@ -1,4 +1,5 @@
 import { Elysia, t } from 'elysia'
+import { log } from '@/index.ts'
 import { anyAuth } from '@/modules/app/websocket/auth.tsx'
 import { getQuizCode } from '@/modules/app/websocket/generic.tsx'
 import { Participant } from '@/modules/app/websocket/participant.tsx'
@@ -44,9 +45,8 @@ export const wss = (app: Elysia) =>
       if (!quizCode) return
 
       const user = await anyAuth(ws.data.cookie)
-      console.log(
-        'ws::message::',
-        Object.keys(message).filter(key => key !== 'HEADERS'),
+      log.info(
+        'ws::message::' + Object.keys(message).filter(key => key !== 'HEADERS'),
       )
 
       // participant and presenter classes for handling messages
