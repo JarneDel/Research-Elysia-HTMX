@@ -2,7 +2,6 @@ import { html } from '@elysiajs/html'
 import { Elysia } from 'elysia'
 import { initHtmx } from '@/hooks/htmx.hook.tsx'
 import { isAnonymousUser } from '@/libs/authen'
-import { sanitizeDerive } from '@/libs/sanitize.ts'
 import { fragments } from '@/modules/app/fragments'
 import { auth } from '@/modules/app/views/auth/Auth.tsx'
 import { q } from '@/modules/app/views/publicPresentation/q.tsx'
@@ -19,7 +18,6 @@ export const app = (app: Elysia) =>
     .use(quiz)
     .use(q)
     .use(fragments)
-    .use(sanitizeDerive)
     .use(wss)
     .use(quizPresentation)
     .guard(

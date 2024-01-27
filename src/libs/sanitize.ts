@@ -1,4 +1,3 @@
-import { Elysia } from 'elysia'
 import sanitizeHtml from 'sanitize-html'
 
 export type sanitizeLevel = 'strict' | 'medium' | 'loose'
@@ -17,7 +16,6 @@ export const sanitize = (str?: string, level?: sanitizeLevel) => {
   if (!level) level = 'strict'
   switch (level) {
     case 'strict':
-      console.log('sanitizing', str)
       return sanitizeHtml(str, {
         allowedTags: [],
         disallowedTagsMode: 'discard',
@@ -43,21 +41,3 @@ export const sanitize = (str?: string, level?: sanitizeLevel) => {
       })
   }
 }
-
-export const sanitizeDerive = (app: Elysia) => app
-// app.onParse(({ request }, contentType) => {
-//   if (contentType !== 'application/json') return
-//
-//   console.log('sanitizing', body)
-//   if (headers['content-type'] === 'application/x-www-form-urlencoded') {
-//     Object.keys(body).forEach(key => {
-//       console.log(key, body[key])
-//       const sanitized = sanitize(body[key], 'strict')
-//       console.log(sanitized)
-//       body[key] = sanitized
-//     })
-//   }
-//   return {
-//     body,
-//   }
-// })

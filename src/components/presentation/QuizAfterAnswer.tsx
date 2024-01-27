@@ -10,7 +10,6 @@ export interface QuizAfterAnswerProps {
 }
 
 export function QuizAfterAnswer(props: QuizAfterAnswerProps) {
-  console.log(props)
   return (
     <>
       <div id="quiz-control" class="flex flex-row ">

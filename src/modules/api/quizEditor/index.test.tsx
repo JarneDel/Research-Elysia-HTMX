@@ -25,7 +25,6 @@ describe('quizEditor api module', () => {
 
   test('create short id', () => {
     const id = generateShortId()
-    console.log(id)
     expect(id).toHaveLength(6)
     expect(id).toMatch(/[a-z0-9]/)
   })

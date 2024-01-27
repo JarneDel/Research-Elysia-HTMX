@@ -6,8 +6,6 @@ interface props {
 export const QuizCard = (props: props) => {
   const { quiz, nowPresenting } = props
 
-  console.log({ nowPresenting })
-
   return (
     <div class="card max-w-96 bg-base-200 min-w-64">
       <div class="card-body">

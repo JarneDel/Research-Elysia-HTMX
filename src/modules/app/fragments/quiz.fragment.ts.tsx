@@ -11,7 +11,6 @@ export const quiz = (app: Elysia) =>
           const nextAnswer = getNextEmptyFieldIndex(
             Object.values(query).map(value => value as string),
           )
-          console.log(nextAnswer)
 
           return (
             <>

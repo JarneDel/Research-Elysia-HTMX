@@ -14,35 +14,61 @@
 5. Welk(e) live-streaming protocol of service is de beste optie, hoe implementeer ik deze?
 6. Hoe kan je een realtime livestream implementeren met HTMX
 
-## Getting Started
 
-To start this project, you need to have [Bun](https://bun.sh/) and [Docker](https://docker.com) installed.
 
-```bash
-curl -fsSL https://bun.sh/install | bash
-```
+# Local development
+## Prequisites
 
-# Install dependencies
+1. Supabase account: https://supabase.com/
+2. Cloudflare Account && Cloudflare stream https://dash.cloudflare.com/stream/videos
+3. Docker (optional) https://docs.docker.com/engine/install/
 
-```bash
-bun install
-```
-
-# start redis
+## Clone the project
 
 ```bash
-docker run -d -p 6379:6379 redis
+git clone https://github.com/JarneDel/Research-Elysia-HTMX
+cd Research-Elysia-HTMX
 ```
 
-# start dev server
+### Install dependencies
 
-```bash
-bun dev
+#### Bun
+`curl -fsSL https://bun.sh/install | bash`
+
+`bun install`
+
+### env
+
+#### Supabase env
+url: supabase | project | settings | api | Project url
+supabase_service_role: supabase | project | settings | api | project API Keys | service_role
+
+#### cloudflare env
+account identifier: https://developers.cloudflare.com/fundamentals/setup/find-account-and-zone-ids/
+api key: https://dash.cloudflare.com/profile/api-tokens
+
+Create an api token with Read and Write to cloudflare Stream and Images
+
+```env
+supabase_url=<Supabase-Project-URL>
+supabase_service_role=<supabase-service-role>
+PORT: <port you want api to run on>
+account_identifier=<cloudflare account id>
+cloudflare_api_key=<cloudflare api key>
 ```
 
-```bash
-curl -X POST \
--H "Authorization: Bearer QyFo_maa6jdgoZ5LRLX6En_4gR3k22LIirjVu3Gw" \
-https://api.cloudflare.com/client/v4/accounts/b39625d9de23956fbb840ecb2c111dd9/stream/live_inputs
+## Running the project
+`bun dev`
 
-```
+
+# Docker
+
+## Docker run
+
+`docker run -d -p 8080:80 --env-file ../.env.production.local --name api jarnedel/research-project-api:latest`
+
+## docker compose
+
+`bun deploy:docker`
+
+

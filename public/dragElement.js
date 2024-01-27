@@ -43,8 +43,6 @@ class DragElement {
           DragElement.isResizing = false
         })
       })
-
-      console.log(`Element size: ${width}px x ${height}px`)
     }
   }
 
@@ -154,7 +152,6 @@ class DragElement {
 
   watchResize(element) {
     if (DragElement.resizeLock) {
-      console.log('resizeLock')
       return
     }
     DragElement.resizeLock = true

@@ -40,8 +40,6 @@ export const auth = (app: Elysia) =>
       .post(
         '/sign-in',
         async ({ body, cookie, set, headers }) => {
-          console.log(body)
-          console.log({ headers })
           const { user, session, error } = await login(body, cookie)
 
           handleHxRequest(headers, set)

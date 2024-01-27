@@ -14,7 +14,6 @@ export const initHtmx = (app: Elysia): Elysia =>
         currentUrl &&
         (currentUrl.includes('/q/') || currentUrl.includes('/present/'))
       ) {
-        console.log('adding back header')
         return (
           <>
             <Header>
@@ -29,7 +28,6 @@ export const initHtmx = (app: Elysia): Elysia =>
     }
     if (!response) return undefined
     set.headers['content-type'] = 'text/html'
-    console.log('wrapping with layout,', path)
 
     if (
       path.includes('/auth') ||

@@ -47,14 +47,12 @@ export class StreamRepository {
         recording: result.result.webRTC.url,
       },
     ])
-    const dbresult = await supabase
+    await supabase
       .from('active_quiz')
       .update({
         stream: this.streamId,
       })
       .eq('id', this.quizCode)
-
-    console.log(dbresult)
 
     return {
       streamId: this.streamId,

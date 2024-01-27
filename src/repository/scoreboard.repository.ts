@@ -16,8 +16,6 @@ export class ScoreboardRepository {
     if (!result.data) {
       return { error: 'No data' }
     }
-    console.log(result.data)
-
     const scores: Record<
       string,
       {
@@ -38,13 +36,11 @@ export class ScoreboardRepository {
           userType: answer.anon ? 'anon' : 'user',
         }
       } else {
-        console.log(scores[user])
         scores[user]!.correct += answer.is_correct ? 1 : 0
         scores[user]!.incorrect += answer.is_correct ? 0 : 1
         scores[user]!.score += answer.score
       }
     })
-    console.log(scores)
 
     const scoreArray = Object.entries(scores).map(([key, value]) => {
       return {
@@ -56,15 +52,11 @@ export class ScoreboardRepository {
         score: value.score,
       }
     })
-    console.log(scoreArray, 'scoreArray')
 
-    const insertResult = await supabase.from('score').insert(scoreArray)
-    console.log(insertResult)
-    return insertResult
+    return supabase.from('score').insert(scoreArray)
   }
 
   public async getTopScores(count: number) {
-    console.log(count, this.quizCode)
     const result = await supabase
       .from('score')
       .select(
@@ -74,7 +66,6 @@ export class ScoreboardRepository {
       .order('score', { ascending: false })
       .eq('quiz_code', this.quizCode)
 
-    console.log(result, 'scoreboardRepositor.getTopScores')
     const users = result.data?.map(score => score.anon_user ?? score.user)
     const anonUsers = result.data?.map(score => score.anon_user)
 
@@ -96,13 +87,7 @@ export class ScoreboardRepository {
       userMap.set(user.anon_user_id, user.username)
     })
 
-    const finalResult = result.data?.map(score => {
-      console.log(
-        score.user,
-        score.anon_user,
-        userMap,
-        userMap.get(score.user ?? score.anon_user),
-      )
+    return result.data?.map(score => {
       const user = userMap.get(score.anon_user ?? score.user)
 
       return {
@@ -114,7 +99,5 @@ export class ScoreboardRepository {
         quiz_code: score.quiz_code,
       }
     })
-    console.log(finalResult, 'final result')
-    return finalResult
   }
 }

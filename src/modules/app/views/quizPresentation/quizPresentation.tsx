@@ -44,7 +44,6 @@ export const quizPresentation = (app: Elysia) =>
           },
           app =>
             app.get('/:id', async ({ params, authResult }) => {
-              console.log(params.id, authResult, 'params.id')
               const user = authResult().user
               if (!user) return
 
@@ -64,13 +63,11 @@ export const quizPresentation = (app: Elysia) =>
                 .single()
 
               if (error || !data) {
-                console.log(error, 'error')
                 return
               }
 
               const quiz = fixOneToOne(data.quiz_id)
 
-              console.log(process.env.PUBLIC_URL)
               const url = process.env.PUBLIC_URL || 'http://localhost:3000'
 
               const qrCode = await QRCode.toDataURL(url + '/q/' + params.id, {
@@ -86,7 +83,6 @@ export const quizPresentation = (app: Elysia) =>
                     {`
                     streamOptions.streamUrl = '${streamRepository.recordingUrl}'
                     streamOptions.streamId = '${streamRepository.streamId}'
-                    console.log(streamOptions, "streamOptions")
                   `}
                   </script>
                   <PresentationEntryPoint

@@ -146,7 +146,6 @@ export const quiz = (app: Elysia) =>
                   // send without quizEditor when hx-request is present
                   const { user } = authResult()
                   if (!user) return
-                  console.log('requesting page')
 
                   const { status, data, error } = await quizWithPage(
                     params.id,
@@ -171,7 +170,6 @@ export const quiz = (app: Elysia) =>
                   )
 
                   if (headers['hx-request'] != undefined) {
-                    console.log('requesting page without quizEditor')
                     return pageEditorHTML
                   }
                   // initialize with quizEditor
@@ -214,8 +212,6 @@ export const quiz = (app: Elysia) =>
                       .select('quiz_id, id')
                       .eq('user_id', account().user?.id)
                       .eq('has_ended', false)
-                  console.log('found quizzes', data?.length)
-                  console.log('now presenting', nowPresenting)
                   return (
                     <div class="container">
                       <div class=" grid md:grid-cols-2 xl:grid-cols-3 gap-6 mt-5 justify-center">

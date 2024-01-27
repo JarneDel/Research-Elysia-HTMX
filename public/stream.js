@@ -25,7 +25,6 @@ window.addEventListener('locationchange', function () {
 const checkIsPresentingUrl = () => {
   const location = window.location.pathname
   presentingId = window.location.pathname.split('/').pop()
-  console.log(location)
   if (location.startsWith('/present')) {
     isPresenting = true
     return true

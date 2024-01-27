@@ -45,8 +45,8 @@ export const wss = (app: Elysia) =>
 
       const user = await anyAuth(ws.data.cookie)
       console.log(
+        'ws::message::',
         Object.keys(message).filter(key => key !== 'HEADERS'),
-        '/ws.messageKeys',
       )
 
       // participant and presenter classes for handling messages

@@ -6,7 +6,6 @@ import {
   UsernameContainer,
 } from '@/components/presentation/Username.tsx'
 import { Scoreboard } from '@/components/scoreboard/Scoreboard.tsx'
-import { options } from '@/index.ts'
 import { supabase } from '@/libs'
 import { cache } from '@/libs/cache.ts'
 import {
@@ -67,7 +66,6 @@ export class Presenter {
   }
   async startPresentingQuiz() {
     if (this.msg['start-presenting'] == '') {
-      console.log('start presenting')
       const dataToSend = await this.getQuestion(1)
       if (dataToSend.error) {
         console.error(dataToSend.error) // TODO: handle error
@@ -83,7 +81,6 @@ export class Presenter {
       .from('user_detail')
       .select('username, participating_quiz_list')
       .contains('participating_quiz_list', [this.quizCode])
-    console.log(participatingUsers, 'presenter.reloadStartPresentingPage')
     this.ws.send(
       <>
         <UsernameContainer id="connected-users" hx-swap-oob="beforeend">
@@ -100,7 +97,6 @@ export class Presenter {
       !(this.msg['next-question'] == '' || this.msg['next-question'] == 'true')
     )
       return
-    console.log('presenter.handleNextQuestion')
     const currentQuestion = await activeQuizPageDetails(this.quizCode)
     if (!currentQuestion.data) return
     const page = fixOneToOne(currentQuestion.data.current_page_id).page
@@ -115,7 +111,6 @@ export class Presenter {
 
   async handleEndQuiz() {
     if (!(this.msg['end-quiz'] == '' || this.msg['end-quiz'] == 'true')) return
-    console.log('presenter.handleEndQuiz')
     const currentQuestion = await activeQuizPageDetails(this.quizCode)
     if (!currentQuestion.data) return
     const page = fixOneToOne(currentQuestion.data.current_page_id).page
@@ -178,7 +173,6 @@ export class Presenter {
 
     cache.set(this.quizCode + this.msg['after-answer'], '1', 20)
 
-    console.log('presenter.afterAnswer')
     // send if answer is correct to all participants
 
     // send overview to presenter
@@ -233,13 +227,9 @@ export class Presenter {
     const quiz = fixOneToOne(activeQuiz['quiz_id'])
 
     const page = quiz.page.filter(page => page.page === pageNumber).pop()
-    options.verbose && console.log({ page }, 'presenter.getQuestion.page')
 
     const result = await changeActiveQuizPage(this.quizCode, page?.id)
-    options.verbose &&
-      console.log({ result }, 'presenter.getQuestion.changeActiveQuizPage')
 
-    console.log(quiz.id, pageNumber)
     const { data: question, error: questionError } = await getPageWithQuiz(
       quiz.id,
       pageNumber,
@@ -249,10 +239,7 @@ export class Presenter {
     const hasNextPage =
       quiz.page.filter(page => page.page > pageNumber).length > 0
 
-    console.log('presenter.getQuestion.hasNextPage', hasNextPage)
-
     if (questionError || !question) {
-      console.log(questionError, 'presenter.getQuestion can not get question')
       return {
         error: questionError?.message,
         participantTemplate: <></>,

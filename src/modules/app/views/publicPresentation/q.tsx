@@ -47,7 +47,6 @@ export const q = (app: Elysia) =>
               if (result.error) {
                 const anon = await ctx.checkAnonymousUser()
                 if (!anon) {
-                  console.log('anon user not found')
                   return !result.error
                 }
               }
@@ -85,7 +84,6 @@ export const q = (app: Elysia) =>
                   username = result.data?.username
                 }
                 const stream = fixOneToOne(data.stream)
-                console.log(data)
                 if (!stream) console.warn('No stream found')
 
                 return (

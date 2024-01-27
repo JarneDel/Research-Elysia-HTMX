@@ -4,7 +4,7 @@
 
 module.exports = {
   proxy: {
-    target: 'http://localhost:3000', // our express server
+    target: 'http://localhost:2999', // our express server
     ws: true, // enables websockets
   },
   files: ['src/**/*.*'], // watch your frontend files

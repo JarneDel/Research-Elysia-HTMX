@@ -157,8 +157,6 @@ export const quizEditorApi = (app: Elysia) =>
                   params.page,
                 )
 
-                console.log(data, 'data')
-
                 if (!data) {
                   return (
                     <Alert severity="error">
@@ -167,7 +165,6 @@ export const quizEditorApi = (app: Elysia) =>
                   )
                 }
                 const page = data.page[0]
-                console.log(page, 'page')
 
                 let result: PostgrestSingleResponse<any>
 
@@ -202,7 +199,6 @@ export const quizEditorApi = (app: Elysia) =>
                     .select()
                     .single()
                 }
-                console.log(result)
 
                 const answerCountNoEmpty = result.data.answers.filter(
                   (answer: string) => answer !== '',
@@ -250,7 +246,6 @@ export const quizEditorApi = (app: Elysia) =>
                   .eq('created_by', account().user?.id)
                   .single()
                 if (!result.data) {
-                  console.log('not authorized')
                   // todo: return htmx error
                   return {
                     status: 401,
@@ -262,9 +257,6 @@ export const quizEditorApi = (app: Elysia) =>
                   file,
                   params.id + '/' + params.page,
                 )
-                console.log(error, 'error')
-
-                console.log(publicUrl, 'publicUrl')
                 // save media url to page
                 // todo: err handling
                 await updatePageMediaUrl(params.id, params.page, publicUrl!)
@@ -401,7 +393,6 @@ export const quizEditorApi = (app: Elysia) =>
             .get(
               '/quiz/:id/publish',
               async ({ params, authResult, headers }) => {
-                console.log('publishing quiz')
                 const { data, error } = await supabase
                   .from('quiz')
                   .update({
@@ -418,7 +409,6 @@ export const quizEditorApi = (app: Elysia) =>
                   .eq('user_id', authResult().user?.id)
                   .eq('quiz_id', params.id)
 
-                console.log(headers['hx-current-url'], 'current url')
                 if (headers['hx-current-url'].endsWith('/edit')) {
                   return (
                     <>
@@ -465,7 +455,6 @@ const createBody = (max = 6) => {
 }
 
 export const calculateCorrectAnswers = (body: any): number[] => {
-  console.log('calculating correct answers')
   const correctAnswers: number[] = []
   for (const [key, value] of Object.entries(body)) {
     if (key.includes('correct-') && value === 'on') {

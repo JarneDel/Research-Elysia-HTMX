@@ -15,7 +15,6 @@ import { CorrectAnswer } from '@/components/states/correctAnswer.tsx'
 import { LoadingDot } from '@/components/states/loadingIndicator.tsx'
 import { NoAnswer } from '@/components/states/noAnswer.tsx'
 import { WrongAnswer } from '@/components/states/wrongAnswer.tsx'
-import { options } from '@/index.ts'
 import { supabase } from '@/libs'
 import { cache } from '@/libs/cache'
 import {
@@ -106,9 +105,7 @@ export class Participant {
   async handleSetUsernameMessage() {
     const message = this.msg
     if (message['setUsername']) {
-      console.log(message)
       const result = await this.handleSetUsername(message['setUsername'])
-      console.log(result, 'participant.handleSetUsernameMessage')
       this.ws.subscribe(this.quizCode)
 
       this.ws.publish(
@@ -210,7 +207,6 @@ export class Participant {
 
       const page = await activeQuizAllFields(this.quizCode)
       if (page.error?.code === 'PGRST116') {
-        console.log('quiz not in progress')
         // return waiting for others to join quiz screen
 
         this.ws.send(
@@ -233,8 +229,6 @@ export class Participant {
       }
       const question = fixOneToOne(page.data.current_page_id)
       const quiz = fixOneToOne(page.data.quiz_id)
-      options.verbose &&
-        console.log('participant.reconnectToQuiz.question', page.data)
 
       const answer = await getAnswersForUser(
         this.quizCode,
@@ -243,7 +237,6 @@ export class Participant {
         this.user.type,
       )
       if (answer.data && answer.data?.length > 0) {
-        console.log('already answered')
         this.ws.send(
           <>
             <div id="lobby"></div>
@@ -254,12 +247,6 @@ export class Participant {
         )
         return
       }
-      options.verbose &&
-        console.log(
-          'participant.reconnectToQuiz.answer',
-          answer,
-          'answers found',
-        )
 
       this.ws.send(
         <Question
@@ -283,7 +270,6 @@ export class Participant {
         .eq('quiz_code', this.quizCode)
         .order('score', { ascending: false })
 
-      console.log(score, 'scoreboard-participant')
       score.data?.forEach((row, index) => {
         if (
           row.anon_user === this.user.userId ||
@@ -325,7 +311,6 @@ export class Participant {
 
     const lock = await cache.get(this.quizCode + afterAnswer + this.user.userId)
     if (lock) {
-      console.log('participant.handleNextQuestion lock')
       return
     }
     cache.set(this.quizCode + afterAnswer + this.user.userId, '1', 20)
@@ -333,11 +318,6 @@ export class Participant {
     const activeQuizMinimal = await getActiveQuizMinimal(this.quizCode)
     if (!activeQuizMinimal.data) return
 
-    console.log(
-      activeQuizMinimal.data,
-      afterAnswer,
-      'participant.handleNextQuestion',
-    )
     if (activeQuizMinimal.data.current_page_id != afterAnswer) return
 
     // check if answer is correct
@@ -362,7 +342,5 @@ export class Participant {
         this.ws.send(<WrongAnswer />)
         break
     }
-
-    console.log(userAnswers.data, 'participant.handleNextQuestion.userAnswers')
   }
 }

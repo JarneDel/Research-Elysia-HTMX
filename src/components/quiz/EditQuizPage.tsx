@@ -15,7 +15,6 @@ interface params {
 
 export const EditQuizPage = (params: params) => {
   const { quizId, pageNumber, page } = params
-  console.log(params, 'params')
   return (
     <>
       <div safe id="question_number" hx-swap-oob="innerHTML">

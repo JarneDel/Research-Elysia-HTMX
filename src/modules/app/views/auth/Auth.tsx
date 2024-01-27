@@ -11,7 +11,6 @@ export const auth = (app: Elysia) =>
         '/sign-in',
         async ({ cookie, set, body }) => {
           const { user, error } = await checkAccessToken(cookie)
-          console.log(error, 'sign in load error')
           if (user?.id) {
             set.redirect = '/'
             return
