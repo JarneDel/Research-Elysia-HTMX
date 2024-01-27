@@ -15,9 +15,10 @@ import { CorrectAnswer } from '@/components/states/correctAnswer.tsx'
 import { LoadingDot } from '@/components/states/loadingIndicator.tsx'
 import { NoAnswer } from '@/components/states/noAnswer.tsx'
 import { WrongAnswer } from '@/components/states/wrongAnswer.tsx'
+import { log } from '@/index.ts'
 import { supabase } from '@/libs'
 import { cache } from '@/libs/cache'
-import { calculateScore } from '@/libs/score.ts'
+import { calculateScore, getStartTimeForQuestion } from '@/libs/score.ts'
 import {
   anyAuthResult,
   SuccessfulAuthResult,
@@ -148,7 +149,7 @@ export class Participant {
       .from('active_quiz')
       .select(
         `id, current_page_id(
-      id, correct_answers
+      id, correct_answers, page
     )`,
       )
       .eq('id', quizId)
@@ -158,16 +159,10 @@ export class Participant {
     const currentPage = fixOneToOne(questionData?.current_page_id)
 
     const isCorrect = currentPage.correct_answers.includes(Number(answerIndex))
-    console.log(
-      isCorrect,
-      'participant.validateAnswer.isCorrect',
-      answerIndex,
-      currentPage.correct_answers,
-    )
-
-    const startTime = Number(cache.get(this.quizCode + 'qs' + currentPage.id))
-
+    log.info(`quiz::answer::isCorrect::${isCorrect}`)
+    const startTime = getStartTimeForQuestion(this.quizCode, currentPage.page)
     const score = calculateScore(startTime, requestTime, 20)
+    log.info(`quiz::answer::score::${score}`)
 
     const result = await setAnswer({
       activeQuizId: quizId,

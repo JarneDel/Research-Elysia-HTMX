@@ -6,8 +6,10 @@ import {
   UsernameContainer,
 } from '@/components/presentation/Username.tsx'
 import { Scoreboard } from '@/components/scoreboard/Scoreboard.tsx'
+import { log } from '@/index.ts'
 import { supabase } from '@/libs'
 import { cache } from '@/libs/cache.ts'
+import { setStartTimeForQuestion } from '@/libs/score.ts'
 import {
   anyAuthResult,
   AuthenticatedAuthResult,
@@ -73,6 +75,7 @@ export class Presenter {
       }
       this.ws.send(dataToSend.presenterTemplate)
       this.ws.publish(this.quizCode, dataToSend.participantTemplate)
+      setStartTimeForQuestion(this.quizCode, 1)
     }
   }
 
@@ -99,8 +102,8 @@ export class Presenter {
       return
     const currentQuestion = await activeQuizPageDetails(this.quizCode)
     if (!currentQuestion.data) return
-    const page = fixOneToOne(currentQuestion.data.current_page_id).page
-    const dataToSend = await this.getQuestion(page + 1)
+    const page = fixOneToOne(currentQuestion.data.current_page_id)
+    const dataToSend = await this.getQuestion(page.page + 1)
     if (dataToSend.error) {
       console.error(dataToSend.error, 'presenter.handleNextQuestion') // TODO: handle error
       return
@@ -108,7 +111,7 @@ export class Presenter {
     this.ws.send(dataToSend.presenterTemplate)
     this.ws.publish(this.quizCode, dataToSend.participantTemplate)
 
-    cache.set(this.quizCode + 'qs' + page.id, new Date().getTime(), 240)
+    setStartTimeForQuestion(this.quizCode, page.page + 1)
   }
 
   async handleEndQuiz() {
@@ -169,7 +172,7 @@ export class Presenter {
 
     const lock = cache.get(this.quizCode + this.msg['after-answer'])
     if (lock) {
-      console.log('presenter.afterAnswer lock')
+      log.warn('presenter::afterAnswer::lock')
       return
     }
 
