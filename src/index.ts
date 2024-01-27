@@ -1,4 +1,5 @@
 import { createPinoLogger } from '@bogeychan/elysia-logger'
+import { html } from '@elysiajs/html'
 import staticPlugin from '@elysiajs/static'
 import { swagger } from '@elysiajs/swagger'
 import { Elysia } from 'elysia'
@@ -12,6 +13,8 @@ checkEnv()
 export const log = createPinoLogger({})
 
 const app = new Elysia()
+  .use(staticPlugin())
+  .use(html())
   .use(
     log.into({
       autoLogging: {
@@ -21,7 +24,6 @@ const app = new Elysia()
       },
     }),
   )
-  .get('/health', () => 'Hello Elysia')
   .use(
     swagger({
       autoDarkMode: true,
@@ -30,12 +32,14 @@ const app = new Elysia()
     }),
   )
   .onError(ctx => {
-    log.error(ctx.err)
-    return ctx.res.status(500).send({ error: ctx.err.message })
+    log.error(ctx.error)
   })
+  .get('/health', () => 'Hello Elysia')
   .use(api)
   .use(App)
-  .use(staticPlugin())
   .listen(port)
 
 console.log(`🦊 Elysia is running at ${app.server?.url}`)
+// setInterval(() => {
+//   log.info(process.memoryUsage())
+// }, 1000)

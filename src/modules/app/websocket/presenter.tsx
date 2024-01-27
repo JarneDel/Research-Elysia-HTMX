@@ -48,6 +48,7 @@ export class Presenter {
 
   async presentQuiz() {
     if (!this.msg['presentQuizId']) return
+    cache.set(this.user.userId + '-wsPresenting', this.quizCode, 60 * 60 * 24)
     this.ws.isSubscribed(this.quizCode) || this.ws.subscribe(this.quizCode)
     this.ws.isSubscribed(this.quizCode + '-presenter') ||
       this.ws.subscribe(this.quizCode + '-presenter')

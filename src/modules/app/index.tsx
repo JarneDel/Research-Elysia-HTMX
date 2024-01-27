@@ -1,4 +1,3 @@
-import { html } from '@elysiajs/html'
 import { Elysia } from 'elysia'
 import { initHtmx } from '@/hooks/htmx.hook.tsx'
 import { isAnonymousUser } from '@/libs/authen'
@@ -12,7 +11,6 @@ import { wss } from './websocket/wss.tsx'
 
 export const app = (app: Elysia) =>
   app
-    .use(html())
     .use(initHtmx)
     .use(auth)
     .use(quiz)
