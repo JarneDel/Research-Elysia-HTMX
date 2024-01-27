@@ -7,6 +7,7 @@ export const setAnswer = async (options: {
   answer: string
   isCorrect: boolean
   pageId: number
+  score: number
 }) => {
   const { userType, userId, activeQuizId, answer, isCorrect, pageId } = options
   return supabase.from('answers').insert([
@@ -17,6 +18,7 @@ export const setAnswer = async (options: {
       active_quiz: activeQuizId,
       anon: userType === 'anonymous' ? userId : null,
       user: userType === 'authenticated' ? userId : null,
+      score: options.score,
     },
   ])
 }

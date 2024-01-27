@@ -17,6 +17,7 @@ import { NoAnswer } from '@/components/states/noAnswer.tsx'
 import { WrongAnswer } from '@/components/states/wrongAnswer.tsx'
 import { supabase } from '@/libs'
 import { cache } from '@/libs/cache'
+import { calculateScore } from '@/libs/score.ts'
 import {
   anyAuthResult,
   SuccessfulAuthResult,
@@ -139,6 +140,8 @@ export class Participant {
    * @param quizId
    */
   private async validateAnswer(answerIndexString: string, quizId: string) {
+    const requestTime = new Date().getTime()
+
     const answerIndex = answerIndexString.split('-').pop()
     if (!answerIndex) return
     const { data: questionData, error } = await supabase
@@ -162,6 +165,10 @@ export class Participant {
       currentPage.correct_answers,
     )
 
+    const startTime = Number(cache.get(this.quizCode + 'qs' + currentPage.id))
+
+    const score = calculateScore(startTime, requestTime, 20)
+
     const result = await setAnswer({
       activeQuizId: quizId,
       isCorrect,
@@ -169,6 +176,7 @@ export class Participant {
       userType: this.user.type,
       answer: answerIndex,
       pageId: currentPage.id,
+      score: isCorrect ? score : 0,
     })
 
     return <WaitingForOthers />

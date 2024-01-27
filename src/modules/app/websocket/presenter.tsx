@@ -107,6 +107,8 @@ export class Presenter {
     }
     this.ws.send(dataToSend.presenterTemplate)
     this.ws.publish(this.quizCode, dataToSend.participantTemplate)
+
+    cache.set(this.quizCode + 'qs' + page.id, new Date().getTime(), 240)
   }
 
   async handleEndQuiz() {

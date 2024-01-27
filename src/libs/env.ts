@@ -7,5 +7,3 @@ export const checkEnv = () => {
     throw new Error(`Missing environment variables: ${missing.join(', ')}`)
   }
 }
-
-checkEnv()

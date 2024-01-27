@@ -49,26 +49,33 @@ api key: https://dash.cloudflare.com/profile/api-tokens
 
 Create an api token with Read and Write to cloudflare Stream and Images
 
-```env
+```dotenv
 supabase_url=<Supabase-Project-URL>
 supabase_service_role=<supabase-service-role>
-PORT: <port you want api to run on>
-account_identifier=<cloudflare account id>
-cloudflare_api_key=<cloudflare api key>
+PORT: <portyou-want-api-to-run-on>
+account_identifier=<cloudflare-account-id>
+cloudflare_api_key=<cloudflare-api-key>
 ```
 
 ## Running the project
-`bun dev`
+```zsh
+bun dev
+```
 
 
 # Docker
 
 ## Docker run
 
-`docker run -d -p 8080:80 --env-file ../.env.production.local --name api jarnedel/research-project-api:latest`
+```zsh
+docker run -d -p 8080:80 --env-file ../.env.production.local --name api jarnedel/research-project-api:latest
+```
 
 ## docker compose
 
-`bun deploy:docker`
+```zsh 
+bun deploy:docker
+```
 
 
+t

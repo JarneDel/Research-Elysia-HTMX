@@ -9,3 +9,4 @@ services:
       - '8080:80'
     env_file:
       - ../.env.production.local
+
