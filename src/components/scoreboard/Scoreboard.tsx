@@ -1,4 +1,4 @@
-interface ScoreboardProps {
+export interface ScoreboardProps {
   data: {
     id: any
     user: string | undefined

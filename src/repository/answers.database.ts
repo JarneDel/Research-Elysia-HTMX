@@ -33,14 +33,14 @@ export const getAnswersForUser = async (
     case 'anonymous':
       return supabase
         .from('answers')
-        .select('id, is_correct')
+        .select('id, is_correct, score')
         .eq('page', pageId)
         .eq('anon', userId)
         .eq('active_quiz', quizCode)
     case 'authenticated':
       return supabase
         .from('answers')
-        .select('id, is_correct')
+        .select('id, is_correct, score')
         .eq('page', pageId)
         .eq('user', userId)
         .eq('active_quiz', quizCode)

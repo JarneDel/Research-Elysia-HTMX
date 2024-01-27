@@ -1,9 +1,5 @@
 import { ElysiaWS } from 'elysia/ws'
-import {
-  FirstPlace,
-  SecondPlace,
-  ThirdPlace,
-} from '@/components/icons/placement.tsx'
+import { Podium } from '@/components/icons/placement.tsx'
 import { Question } from '@/components/presentation/Question.tsx'
 import { QuestionReconnect } from '@/components/presentation/QuestionReconnect.tsx'
 import {
@@ -210,6 +206,7 @@ export class Participant {
 
       const page = await activeQuizAllFields(this.quizCode)
       if (page.error?.code === 'PGRST116') {
+        // PGREST116: no rows returned: quiz does not exist
         // return waiting for others to join quiz screen
 
         this.ws.send(
@@ -232,6 +229,9 @@ export class Participant {
       }
       const question = fixOneToOne(page.data.current_page_id)
       const quiz = fixOneToOne(page.data.quiz_id)
+      if (page.data.has_ended) {
+        return this.handleScoreboardMessage()
+      }
 
       const answer = await getAnswersForUser(
         this.quizCode,
@@ -267,44 +267,7 @@ export class Participant {
 
   async handleScoreboard() {
     if (this.msg['scoreboard-participant']) {
-      const score = await supabase
-        .from('score')
-        .select()
-        .eq('quiz_code', this.quizCode)
-        .order('score', { ascending: false })
-
-      score.data?.forEach((row, index) => {
-        if (
-          row.anon_user === this.user.userId ||
-          row.user === this.user.userId
-        ) {
-          this.ws.send(
-            <>
-              <div
-                class="flex flex-col justify-center items-center full-height"
-                id="game"
-              >
-                {index === 0 && <FirstPlace />}
-                {index === 1 && <SecondPlace />}
-                {index === 2 && <ThirdPlace />}
-                {index > 2 && (
-                  <div class="text-center">Your rank is {index + 1}</div>
-                )}
-              </div>
-            </>,
-          )
-        }
-      })
-    }
-  }
-
-  async handleAnswer() {
-    for (const key of Object.keys(this.msg)) {
-      if (key.startsWith('quiz-answer')) {
-        this.ws.send(await this.validateAnswer(key, this.quizCode))
-
-        this.ws.publish(this.quizCode + '-presenter', 'submitted')
-      }
+      return this.handleScoreboardMessage()
     }
   }
 
@@ -339,11 +302,57 @@ export class Participant {
     }
     switch (firstAnswer.is_correct) {
       case true:
-        this.ws.send(<CorrectAnswer />)
+        this.ws.send(<CorrectAnswer score={firstAnswer.score} />)
         break
       case false:
         this.ws.send(<WrongAnswer />)
         break
     }
+  }
+
+  async handleAnswer() {
+    for (const key of Object.keys(this.msg)) {
+      if (key.startsWith('quiz-answer')) {
+        this.ws.send(await this.validateAnswer(key, this.quizCode))
+
+        this.ws.publish(this.quizCode + '-presenter', 'submitted')
+      }
+    }
+  }
+
+  private async handleScoreboardMessage() {
+    const score = await supabase
+      .from('score')
+      .select()
+      .eq('quiz_code', this.quizCode)
+      .order('score', { ascending: false })
+
+    score.data?.forEach((row, index) => {
+      if (row.anon_user === this.user.userId || row.user === this.user.userId) {
+        this.ws.send(
+          <>
+            <div id="lobby"></div>
+            <div
+              class="flex flex-col justify-center items-center full-height lg:text-6xl text-3xl font-bold"
+              id="game"
+            >
+              {index < 3 && (
+                <>
+                  <Podium score={row.score} position={index + 1} />
+                </>
+              )}
+              {index > 2 && (
+                <>
+                  <div class="text-center">You placed {index + 1}th</div>
+                  <div class="text-center">
+                    with a score of {row.score} points
+                  </div>
+                </>
+              )}
+            </div>
+          </>,
+        )
+      }
+    })
   }
 }

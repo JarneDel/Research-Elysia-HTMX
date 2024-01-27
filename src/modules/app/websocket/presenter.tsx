@@ -1,11 +1,11 @@
 import { ElysiaWS } from 'elysia/ws'
 import { Question } from '@/components/presentation/Question.tsx'
 import { QuizAfterAnswer } from '@/components/presentation/QuizAfterAnswer.tsx'
+import { ScoreboardView } from '@/components/presentation/ScoreboardView.tsx'
 import {
   Username,
   UsernameContainer,
 } from '@/components/presentation/Username.tsx'
-import { Scoreboard } from '@/components/scoreboard/Scoreboard.tsx'
 import { log } from '@/index.ts'
 import { supabase } from '@/libs'
 import { cache } from '@/libs/cache.ts'
@@ -55,6 +55,11 @@ export class Presenter {
     const { data: activeQuiz, error } = await activeQuizPageDetails(
       this.quizCode,
     )
+    if (activeQuiz?.has_ended) {
+      await this.getScoreboard()
+      return
+    }
+
     if (activeQuiz?.current_page_id) {
       const page = fixOneToOne(activeQuiz.current_page_id).page
       const dataToSend = await this.getQuestion(page)
@@ -115,11 +120,12 @@ export class Presenter {
     setStartTimeForQuestion(this.quizCode, page.page + 1)
   }
 
-  async handleEndQuiz() {
-    if (!(this.msg['end-quiz'] == '' || this.msg['end-quiz'] == 'true')) return
-    const currentQuestion = await activeQuizPageDetails(this.quizCode)
-    if (!currentQuestion.data) return
-    const page = fixOneToOne(currentQuestion.data.current_page_id).page
+  async handleEndQuiz(force?: boolean) {
+    if (
+      !force &&
+      !(this.msg['end-quiz'] == '' || this.msg['end-quiz'] == 'true')
+    )
+      return
     await endActiveQuiz(this.quizCode)
 
     this.ws.send(
@@ -133,23 +139,7 @@ export class Presenter {
 
     this.scoreboardRepository.calculateScores().then(() => {
       this.scoreboardRepository.getTopScores(10).then(scores => {
-        this.ws.send(
-          <>
-            <div id="quiz-control">
-              <a
-                class="btn btn-primary"
-                id="start-presenting"
-                hx-get="/quiz/my"
-                hx-target="main"
-                href="/quiz/my"
-              >
-                Exit
-              </a>
-            </div>
-            <div id="loader"></div>
-            <Scoreboard data={scores!} />
-          </>,
-        )
+        this.ws.send(<ScoreboardView data={scores!} />)
         this.ws.publish(
           this.quizCode,
           <>
@@ -157,7 +147,7 @@ export class Presenter {
               <input
                 type="hidden"
                 name="scoreboard-participant"
-                value={'true'}
+                value="true"
                 ws-send
                 hx-trigger="load"
               />
@@ -166,6 +156,17 @@ export class Presenter {
         )
       })
     })
+  }
+
+  private async getScoreboard() {
+    const result = await this.scoreboardRepository.getTopScores(10)
+    if (!result) return
+    this.ws.send(
+      <>
+        <div id="streaming-controls"></div>
+        <ScoreboardView data={result} />
+      </>,
+    )
   }
 
   async afterAnswer() {

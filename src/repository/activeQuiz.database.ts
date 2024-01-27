@@ -87,6 +87,7 @@ export const activeQuizAllFields = async (quizCode: string) => {
       `
       id,
       created_at,
+      has_ended,
       current_page_id (id, page, question, answers, correct_answers, media_url),
       quiz_id (
         id,
