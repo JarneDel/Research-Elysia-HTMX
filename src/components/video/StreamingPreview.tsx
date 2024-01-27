@@ -11,6 +11,7 @@ export const StreamingPreview = () => (
         class="p-2 cursor-move z-10 bg-accent"
         id="stream-container-header"
       />
+      {/*//@ts-expect-error muted does exist on video tag*/}
       <video id="input-video" autoplay muted />
     </div>
   </>

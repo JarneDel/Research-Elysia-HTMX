@@ -76,9 +76,9 @@ export const ThemeSwitcher = (props: ThemeProps) => {
 
 export const ThemeSelector = (props: ThemeProps) => {
   return (
-    <ul tabindex="0">
+    <ul tabindex="0" class="w-full">
       {themes.map(theme => (
-        <li>
+        <li class="w-full">
           <input
             type="radio"
             name="theme-dropdown"

@@ -17,7 +17,7 @@ import { NoAnswer } from '@/components/states/noAnswer.tsx'
 import { WrongAnswer } from '@/components/states/wrongAnswer.tsx'
 import { options } from '@/index.ts'
 import { supabase } from '@/libs'
-import { redisClient } from '@/libs/redis.ts'
+import { cache } from '@/libs/cache'
 import {
   anyAuthResult,
   SuccessfulAuthResult,
@@ -213,7 +213,7 @@ export class Participant {
         console.log('quiz not in progress')
         // return waiting for others to join quiz screen
 
-        return this.ws.send(
+        this.ws.send(
           <>
             <div
               id="username"
@@ -224,6 +224,7 @@ export class Participant {
             </div>
           </>,
         )
+        return
       }
 
       if (!page.data) {
@@ -322,18 +323,12 @@ export class Participant {
     const afterAnswer = this.msg['after-answer-participant']
     if (!afterAnswer) return
 
-    const lock = await redisClient.get(
-      this.quizCode + afterAnswer + this.user.userId,
-    )
+    const lock = await cache.get(this.quizCode + afterAnswer + this.user.userId)
     if (lock) {
       console.log('participant.handleNextQuestion lock')
       return
     }
-    await redisClient.setEx(
-      this.quizCode + afterAnswer + this.user.userId,
-      20,
-      '1',
-    )
+    cache.set(this.quizCode + afterAnswer + this.user.userId, '1', 20)
 
     const activeQuizMinimal = await getActiveQuizMinimal(this.quizCode)
     if (!activeQuizMinimal.data) return
@@ -355,14 +350,17 @@ export class Participant {
     if (!userAnswers.data) return
     const firstAnswer = userAnswers.data[0]
     if (!firstAnswer) {
-      this.validateAnswer('-1', this.quizCode)
-      return this.ws.send(<NoAnswer />)
+      this.ws.send(<NoAnswer />)
+      await this.validateAnswer('-1', this.quizCode)
+      return
     }
     switch (firstAnswer.is_correct) {
       case true:
-        return this.ws.send(<CorrectAnswer />)
+        this.ws.send(<CorrectAnswer />)
+        break
       case false:
-        return this.ws.send(<WrongAnswer />)
+        this.ws.send(<WrongAnswer />)
+        break
     }
 
     console.log(userAnswers.data, 'participant.handleNextQuestion.userAnswers')

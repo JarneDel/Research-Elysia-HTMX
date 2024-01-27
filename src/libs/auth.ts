@@ -1,5 +1,5 @@
 import { Session, User } from '@supabase/supabase-js'
-import { redisClient } from '@/libs/redis.ts'
+import { cache } from '@/libs/cache.ts'
 import { supabase } from '@/libs/supabase.ts'
 
 export interface AuthResult {
@@ -41,14 +41,14 @@ export async function checkAccessToken(cookie: any): Promise<AuthResult> {
     return { error: 'Refresh token is required' }
   }
   if (cookie.access_token.value) {
-    debug && console.log('reading from redis')
-    const cachedAccessToken = await redisClient.get(cookie.access_token.value)
+    debug && console.log('reading from cache')
+    const cachedAccessToken = await cache.get(cookie.access_token.value)
     if (cachedAccessToken) {
-      const user = JSON.parse(cachedAccessToken)
-      debug && console.log('found in redis', user.id)
+      const user = cachedAccessToken as User
+      debug && console.log('found in cache', user.id)
       return { user }
     }
-    debug && console.log('not found in redis')
+    debug && console.log('not found in cache')
   }
 
   const user = await supabase.auth.getUser(cookie.access_token.value)
@@ -68,19 +68,19 @@ export async function checkAccessToken(cookie: any): Promise<AuthResult> {
     debug && console.log('successfully refreshed session')
 
     setAuthCookies(cookie, refreshed.data.session!)
-    await setAccessTokenToRedis(
+    await saveUserAccessToken(
       refreshed.data.session!.access_token,
       refreshed.data.user!,
     )
-    debug && console.log('successfully set access token to redis')
+    debug && console.log('successfully set access token to cache')
     return { user: refreshed.data.user!, session: refreshed.data.session! }
   }
-  await setAccessTokenToRedis(cookie.access_token.value, user.data.user!)
+  await saveUserAccessToken(cookie.access_token.value, user.data.user!)
   return { user: user.data.user! }
 }
 
-async function setAccessTokenToRedis(accessToken: string, user: User) {
-  await redisClient.setEx(accessToken, 60 * 5, JSON.stringify(user))
+async function saveUserAccessToken(accessToken: string, user: User) {
+  cache.set(accessToken, user, 60 * 5)
 }
 
 export async function login(

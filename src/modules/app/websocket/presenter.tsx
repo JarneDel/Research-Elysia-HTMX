@@ -8,7 +8,7 @@ import {
 import { Scoreboard } from '@/components/scoreboard/Scoreboard.tsx'
 import { options } from '@/index.ts'
 import { supabase } from '@/libs'
-import { redisClient } from '@/libs/redis.ts'
+import { cache } from '@/libs/cache.ts'
 import {
   anyAuthResult,
   AuthenticatedAuthResult,
@@ -66,14 +66,16 @@ export class Presenter {
     }
   }
   async startPresentingQuiz() {
-    if (this.msg['start-presenting'] != '') return
-    const dataToSend = await this.getQuestion(1)
-    if (dataToSend.error) {
-      console.error(dataToSend.error) // TODO: handle error
-      return
+    if (this.msg['start-presenting'] == '') {
+      console.log('start presenting')
+      const dataToSend = await this.getQuestion(1)
+      if (dataToSend.error) {
+        console.error(dataToSend.error) // TODO: handle error
+        return
+      }
+      this.ws.send(dataToSend.presenterTemplate)
+      this.ws.publish(this.quizCode, dataToSend.participantTemplate)
     }
-    this.ws.send(dataToSend.presenterTemplate)
-    this.ws.publish(this.quizCode, dataToSend.participantTemplate)
   }
 
   private async reloadStartPresentingPage() {
@@ -132,6 +134,17 @@ export class Presenter {
       this.scoreboardRepository.getTopScores(10).then(scores => {
         this.ws.send(
           <>
+            <div id="quiz-control">
+              <a
+                class="btn btn-primary"
+                id="start-presenting"
+                hx-get="/quiz/my"
+                hx-target="main"
+                href="/quiz/my"
+              >
+                Exit
+              </a>
+            </div>
             <div id="loader"></div>
             <Scoreboard data={scores!} />
           </>,
@@ -157,12 +170,13 @@ export class Presenter {
   async afterAnswer() {
     if (!this.msg['after-answer']) return
 
-    const lock = await redisClient.get(this.quizCode + this.msg['after-answer'])
+    const lock = cache.get(this.quizCode + this.msg['after-answer'])
     if (lock) {
       console.log('presenter.afterAnswer lock')
       return
     }
-    await redisClient.setEx(this.quizCode + this.msg['after-answer'], 20, '1')
+
+    cache.set(this.quizCode + this.msg['after-answer'], '1', 20)
 
     console.log('presenter.afterAnswer')
     // send if answer is correct to all participants

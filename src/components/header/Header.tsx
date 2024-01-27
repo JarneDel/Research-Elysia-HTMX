@@ -102,12 +102,22 @@ export const Header = (props: props) => (
       ></label>
       <ul class="menu p-4 w-80 min-h-full bg-base-200">
         <li class="collapse" tabindex="0">
-          <input type="checkbox" />
+          {/*<input type="checkbox" />*/}
 
           <div class="collapse-title">Theme</div>
-          <div class="collapse-content p-0">
+          <div class="collapse-content p-0 w-full">
             <ThemeSelector />
           </div>
+        </li>
+        <li>
+          <a
+            href="/quiz/my"
+            hx-get="/quiz/my"
+            hx-target="main"
+            hx-push-url="true"
+          >
+            My Quizzes
+          </a>
         </li>
         <li>
           <a
