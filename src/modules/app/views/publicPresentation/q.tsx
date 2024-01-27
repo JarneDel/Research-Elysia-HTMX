@@ -126,7 +126,10 @@ export const q = (app: Elysia) =>
                       </div>
 
                       <MovableResizableDiv id="video">
-                        <div class="loading" id="video-loading-indicator"></div>
+                        <div
+                          class="loading absolute top-[50%] right-[50%] -translate-x-1/2 -translate-y-1/2 z-10"
+                          id="video-loading-indicator"
+                        ></div>
                         {/*//@ts-expect-error muted does exist on video tag*/}
                         <video id="output-video" autoplay controls muted />
                       </MovableResizableDiv>

@@ -134,6 +134,8 @@ class WHEPClient {
     document
       .querySelector('#video-loading-indicator')
       .classList.remove('hidden')
+    // hide video element until connected
+    document.querySelector('#video').classList.add('hidden')
     this.endpoint = endpoint
     this.videoElement = videoElement
     this.stream = new MediaStream()
@@ -157,6 +159,7 @@ class WHEPClient {
     this.peerConnection.addTransceiver('audio', {
       direction: 'recvonly',
     })
+
     /**
      * When new tracks are received in the connection, store local references,
      * so that they can be added to a MediaStream, and to the <video> element.
