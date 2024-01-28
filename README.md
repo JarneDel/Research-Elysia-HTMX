@@ -1,18 +1,16 @@
-# Elysia with Bun runtime
-
+# Quizx: Research project Bun Elysia Htmx Live-streaming
 ## Research question
 
-- Hoe bouw je een performante real-time livestream collaboratie
-  tool met behulp van HTMX en een bun-Elysiajs backend?
+- How do you build a performant real-time livestream collaboration tool using HTMX and a bun-Elysiajs backend?
 
-### Deel vragen
+### Sub-questions
 
-1. Wat zijn de kernfunctionaliteiten van een collaborative tool
-2. Hoe kan WebSocket-communicatie worden geïntegreerd in HTMX en Elysia voor realtime updates?
-3. Hoe implementeer je een ElysiaJS-backend voor gegevensopslag en realtime communica-tie?
-4. Hoe kan je gebruikersauthenticatie en authorizatie toepassen in de collaboration tool
-5. Welk(e) live-streaming protocol of service is de beste optie, hoe implementeer ik deze?
-6. Hoe kan je een realtime livestream implementeren met HTMX
+1. What are the core functionalities of a collaborative tool?
+2. How can WebSocket communication be integrated into HTMX and Elysia for real-time updates?
+3. How do you implement an ElysiaJS backend for data storage and real-time communication?
+4. How can you apply user authentication and authorization in the collaboration tool?
+5. Which live-streaming protocol or service is the best option, how do I implement this?
+6. How can you implement a real-time live stream with HTMX?
 
 
 
@@ -76,6 +74,3 @@ docker run -d -p 8080:80 --env-file ../.env.production.local --name api jarnedel
 ```zsh 
 bun deploy:docker
 ```
-
-
-t

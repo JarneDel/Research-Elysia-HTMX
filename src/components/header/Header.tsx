@@ -73,6 +73,7 @@ export const Header = (props: props) => (
             type="text"
             class="input"
             name="code"
+            required
             aria-label="Join a quiz by code"
             placeholder="Join a quiz"
           />
