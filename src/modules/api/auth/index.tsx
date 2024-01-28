@@ -1,6 +1,8 @@
 import { Elysia, t } from 'elysia'
+import { Alert } from '@/components/errors/Alerts.tsx'
+import { log } from '@/index.ts'
 import { supabase } from '@/libs'
-import { login, setAuthCookies } from '@/libs/auth.ts'
+import { login } from '@/libs/auth.ts'
 import { handleHxRequest } from '@/modules/api/auth/header.ts'
 import { Cookie } from '@/types/cookie.type'
 
@@ -10,20 +12,40 @@ export const auth = (app: Elysia) =>
       .post(
         '/sign-up',
         async ({ body, cookie, headers, set }) => {
-          const { data, error } = await supabase.auth.signUp(body)
-          if (error) return error
-          setAuthCookies(cookie, data.session!)
-          handleHxRequest(headers, set)
-          return data.user
+          const { data, error } = await supabase.auth.signUp({
+            email: body.email,
+            password: body.password,
+          })
+          if (error) {
+            log.error(error, 'api::auth::sign-up::error')
+            return (
+              <>
+                <Alert severity="error">{error.message}</Alert>
+              </>
+            )
+          }
+          log.info(data, 'api::auth::sign-up::data')
+          return (
+            <>
+              <Alert severity="success">
+                We have sent you an email to confirm your account. Please check
+                your inbox.
+              </Alert>
+              <button
+                class="btn btn-primary"
+                name="sign-in"
+                hx-get="/auth/sign-in"
+                hx-target="body"
+              >
+                Sign in
+              </button>
+            </>
+          )
         },
         {
           body: t.Object({
-            email: t.String({
-              format: 'email',
-            }),
-            password: t.String({
-              minLength: 8,
-            }),
+            email: t.String(),
+            password: t.String(),
           }),
           detail: {
             description: 'Sign up a new user',
@@ -41,18 +63,21 @@ export const auth = (app: Elysia) =>
         '/sign-in',
         async ({ body, cookie, set, headers }) => {
           const { user, session, error } = await login(body, cookie)
-
+          if (error) {
+            log.error(error, 'api::auth::sign-in::error')
+            return (
+              <>
+                <Alert severity="error">{error}</Alert>
+              </>
+            )
+          }
           handleHxRequest(headers, set)
           return user
         },
         {
           body: t.Object({
-            email: t.String({
-              format: 'email',
-            }),
-            password: t.String({
-              minLength: 8,
-            }),
+            email: t.String(),
+            password: t.String(),
           }),
           cookie: Cookie,
           headers: t.Object({

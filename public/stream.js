@@ -329,14 +329,15 @@ async function initiateWHEPClient() {
   if (checkIsViewingUrl() && !streamOptions.isWatching) {
     console.log('viewing url')
     await waitForPlaybackUrl()
-    const url = streamOptions.playbackUrl
     const videoElement = document.getElementById('output-video')
+    const url = streamOptions.playbackUrl
     whepClient = new WHEPClient(url, videoElement)
     streamOptions.isWatching = true
   }
 }
 
 async function waitForPlaybackUrl() {
+  document.querySelector('#video').classList.add('hidden')
   return new Promise(resolve => {
     setTimeout(function () {
       console.log('waiting for playback url')

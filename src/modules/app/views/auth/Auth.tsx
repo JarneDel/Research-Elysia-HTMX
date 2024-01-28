@@ -24,10 +24,11 @@ export const auth = (app: Elysia) =>
                 <div class="card-body">
                   {/*<h1 class="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">*/}
                   <h1 class="card-title">Sign in to your account</h1>
+                  <div id="sign-in-result"></div>
                   <form
                     hx-post="/api/auth/sign-in"
-                    hx-target="closest div"
-                    hx-swap="outerHTML"
+                    hx-target="#sign-in-result"
+                    hx-swap="innerHTML"
                   >
                     <label class="form-control w-full max-w-xs">
                       <div class="label">
@@ -95,11 +96,7 @@ export const auth = (app: Elysia) =>
                 <div class="card-body">
                   {/*<h1 class="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">*/}
                   <h1 class="card-title">Create an account</h1>
-                  <form
-                    hx-post="/api/auth/sign-in"
-                    hx-target="closest div"
-                    hx-swap="outerHTML"
-                  >
+                  <form hx-post="/api/auth/sign-up" hx-swap="outerHTML">
                     <label class="form-control w-full max-w-xs">
                       <div class="label">
                         <span class="label-text">Email</span>
