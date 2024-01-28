@@ -1,5 +1,5 @@
 # Quizx: Research project Bun Elysia Htmx Live-streaming
-Live Url: quizx.jarnedel.dev
+Live Url: https://quizx.jarnedel.dev
 ## Research question
 
 - How do you build a performant real-time livestream collaboration tool using HTMX and a bun-Elysiajs backend?
