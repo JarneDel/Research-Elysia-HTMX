@@ -6,7 +6,7 @@ export interface LayoutProps {
 }
 
 export const Layout = (props: LayoutProps) => {
-  const { title = 'elysia-kickstart' } = props
+  const { title = 'QuizX' } = props
   return (
     '<!DOCTYPE html>' +
     (

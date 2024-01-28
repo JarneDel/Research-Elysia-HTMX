@@ -7,6 +7,7 @@ import { NextButton } from '@/components/quiz/PageNavigationButtons.tsx'
 import { QuizCard } from '@/components/quiz/QuizCard.tsx'
 import { QuizValidation } from '@/components/quiz/QuizValidation.tsx'
 import { ViewMedia } from '@/components/quiz/ViewMedia.tsx'
+import { log } from '@/index.ts'
 import { AuthResult, checkAccessToken } from '@/libs/auth.ts'
 import { sanitize } from '@/libs/sanitize.ts'
 import { supabase } from '@/libs/supabase'
@@ -358,6 +359,7 @@ export const quizEditorApi = (app: Elysia) =>
                 .eq('id', params.id)
                 .eq('created_by', user.user?.id)
               if (quizError) {
+                log.error(quizError, 'quizEditorApi::delete::quizError')
                 return <Alert severity="error">Something went wrong</Alert>
               }
               set.headers['HX-Redirect'] = '/quiz/my'
@@ -409,7 +411,7 @@ export const quizEditorApi = (app: Elysia) =>
                   .eq('user_id', authResult().user?.id)
                   .eq('quiz_id', params.id)
 
-                if (headers['hx-current-url'].endsWith('/edit')) {
+                if (headers['hx-current-url'].includes('/edit')) {
                   return (
                     <>
                       <a

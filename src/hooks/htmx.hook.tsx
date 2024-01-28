@@ -10,6 +10,7 @@ export const initHtmx = (app: Elysia): Elysia =>
     const isHtmx = headers['hx-request']
     if (isHtmx == 'true') {
       const currentUrl = headers['hx-current-url']
+      // when moving from pages without a header present add a header
       if (
         currentUrl &&
         (currentUrl.includes('/q/') || currentUrl.includes('/present/'))
