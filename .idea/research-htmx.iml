@@ -10,5 +10,7 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="theme-change" level="application" />
+    <orderEntry type="library" name="htmx.org" level="application" />
+    <orderEntry type="library" name="webrtc-adapter" level="application" />
   </component>
 </module>

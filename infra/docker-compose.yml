@@ -1,7 +1,7 @@
 version: '3'
 services:
   api:
-    image: jarnedel.registry.jetbrains.space/p/main/containers/api:latest
+    image: ghcr.io/jarnedel/research-project-api:latest
     build:
       context: ../
       dockerfile: Dockerfile

@@ -2,7 +2,7 @@ import { AnswerIcon } from '@/components/quiz/CreateQuiz.tsx'
 
 export interface QuizAfterAnswerProps {
   answers: {
-    answer: string
+    answer: string | number
     isCorrect: boolean
     count: number
   }[]

@@ -52,7 +52,7 @@ export class Presenter {
     this.ws.isSubscribed(this.quizCode) || this.ws.subscribe(this.quizCode)
     this.ws.isSubscribed(this.quizCode + '-presenter') ||
       this.ws.subscribe(this.quizCode + '-presenter')
-    const { data: activeQuiz, error } = await activeQuizPageDetails(
+    const { data: activeQuiz, error } = await activeQuizPageDetailsWithNextPage(
       this.quizCode,
     )
     if (activeQuiz?.has_ended) {
@@ -61,13 +61,24 @@ export class Presenter {
     }
 
     if (activeQuiz?.current_page_id) {
-      const page = fixOneToOne(activeQuiz.current_page_id).page
-      const dataToSend = await this.getQuestion(page)
+      const page = fixOneToOne(activeQuiz.current_page_id)
+      const dataToSend = await this.getQuestion(page.page)
       if (dataToSend.error) {
         console.error(dataToSend.error) // TODO: handle error
         return
       }
       this.ws.send(dataToSend.presenterTemplate)
+
+      const pageResults = fixOneToOne(activeQuiz.page_results_id)
+      if (pageResults.id === page.id) {
+        log.info('presenter::presentQuiz::sendAnswerToPresenter')
+        this.sendAnswerToPresenter(
+          page.answers,
+          page.correct_answers,
+          pageResults.page,
+          fixOneToOne(activeQuiz.quiz_id),
+        )
+      }
     } else {
       await this.reloadStartPresentingPage()
     }
@@ -99,6 +110,57 @@ export class Presenter {
         </UsernameContainer>
       </>,
     )
+  }
+
+  async afterAnswer() {
+    if (!this.msg['after-answer']) return
+
+    const lock = cache.get(this.quizCode + this.msg['after-answer'])
+    if (lock) {
+      log.warn('presenter::afterAnswer::lock')
+      return
+    }
+
+    cache.set(this.quizCode + this.msg['after-answer'], '1', 20)
+
+    // send if answer is correct to all participants
+
+    // send overview to presenter
+    const currentQuestion = await activeQuizPageDetailsWithNextPage(
+      this.quizCode,
+    )
+    if (!currentQuestion.data) return
+    const page = fixOneToOne(currentQuestion.data.current_page_id)
+    if (page.page != this.msg['after-answer']) return
+    this.ws.publish(
+      this.quizCode,
+      <>
+        <div id="game">
+          <input
+            type="hidden"
+            name="after-answer-participant"
+            value={page.id}
+            ws-send
+            hx-trigger="load"
+          />
+        </div>
+      </>,
+    )
+
+    this.sendAnswerToPresenter(
+      page.answers,
+      page.correct_answers,
+      page.page,
+      fixOneToOne(currentQuestion.data.quiz_id),
+    )
+
+    const updateResult = await supabase
+      .from('active_quiz')
+      .update({ page_results_id: page.id })
+      .eq('id', this.quizCode)
+    if (updateResult.error) {
+      log.error(updateResult.error)
+    }
   }
 
   async handleNextQuestion() {
@@ -169,52 +231,30 @@ export class Presenter {
     )
   }
 
-  async afterAnswer() {
-    if (!this.msg['after-answer']) return
-
-    const lock = cache.get(this.quizCode + this.msg['after-answer'])
-    if (lock) {
-      log.warn('presenter::afterAnswer::lock')
-      return
-    }
-
-    cache.set(this.quizCode + this.msg['after-answer'], '1', 20)
-
-    // send if answer is correct to all participants
-
-    // send overview to presenter
-    const currentQuestion = await activeQuizPageDetailsWithNextPage(
-      this.quizCode,
-    )
-    if (!currentQuestion.data) return
-    const page = fixOneToOne(currentQuestion.data.current_page_id)
-    if (page.page != this.msg['after-answer']) return
-    this.ws.publish(
-      this.quizCode,
-      <>
-        <div id="game">
-          <input
-            type="hidden"
-            name="after-answer-participant"
-            value={page.id}
-            ws-send
-            hx-trigger="load"
-          />
-        </div>
-      </>,
-    )
-    const answers = page.answers.map((answer: string, index: number) => ({
+  private sendAnswerToPresenter(
+    answers: number[],
+    correctAnswers: number[],
+    pageNumber: number,
+    quiz: {
+      page: {
+        id: any
+        page: any
+      }[]
+    },
+  ) {
+    const answersWithCorrect = answers.map((answer: number, index: number) => ({
       answer: answer,
-      isCorrect: page.correct_answers.includes(index),
+      isCorrect: correctAnswers.includes(index),
       count: 0,
     }))
-    const quiz = fixOneToOne(currentQuestion.data.quiz_id)
-    const pageNumber = page.page
     const hasNextPage =
       quiz.page.filter(page => page.page > pageNumber).length > 0
 
     this.ws.send(
-      <QuizAfterAnswer answers={answers} hasNextPage={hasNextPage} />,
+      <QuizAfterAnswer
+        answers={answersWithCorrect}
+        hasNextPage={hasNextPage}
+      />,
     )
   }
 

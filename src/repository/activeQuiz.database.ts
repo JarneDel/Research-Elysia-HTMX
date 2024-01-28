@@ -48,6 +48,7 @@ export const activeQuizPageDetails = async (quizId: string) => {
       id,
       created_at,
       has_ended,
+      page_results_id (id, page),
       current_page_id (id, page, question, answers, correct_answers, media_url)
     `,
     )
@@ -63,6 +64,7 @@ export const activeQuizPageDetailsWithNextPage = async (quizId: string) => {
       id,
       created_at,
       has_ended,
+      page_results_id (id, page),
       current_page_id (id, page, question, answers, correct_answers, media_url),
       quiz_id (
         page (id, page)

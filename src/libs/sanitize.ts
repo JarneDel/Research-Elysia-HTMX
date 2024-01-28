@@ -1,4 +1,5 @@
 import sanitizeHtml from 'sanitize-html'
+import { log } from '@/index.ts'
 
 export type sanitizeLevel = 'strict' | 'medium' | 'loose'
 
@@ -12,7 +13,7 @@ export type sanitizeLevel = 'strict' | 'medium' | 'loose'
  */
 export const sanitize = (str?: string, level?: sanitizeLevel) => {
   if (!str) return ''
-  console.log('sanitizing', str, level)
+  log.info(`sanitizing::${level}::${str}`)
   if (!level) level = 'strict'
   switch (level) {
     case 'strict':
