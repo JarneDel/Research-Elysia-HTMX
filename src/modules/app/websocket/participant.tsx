@@ -229,6 +229,7 @@ export class Participant {
       }
       const question = fixOneToOne(page.data.current_page_id)
       const quiz = fixOneToOne(page.data.quiz_id)
+      const pageResults = fixOneToOne(page.data.page_results_id)
       if (page.data.has_ended) {
         return this.handleScoreboardMessage()
       }
@@ -239,14 +240,49 @@ export class Participant {
         this.user.userId,
         this.user.type,
       )
+      console.log(answer)
+
       if (answer.data && answer.data?.length > 0) {
+        if (pageResults.id === question.id) {
+          log.info(answer, 'answer')
+          // if correct answer
+          if (answer.data[0]?.is_correct) {
+            log.info(
+              'participant::reconnect::sendQuestionResultToParticipant::correct',
+            )
+            this.ws.send(
+              <QuestionReconnect question={question.question}>
+                <CorrectAnswer score={answer.data[0]?.score} />
+              </QuestionReconnect>,
+            )
+            return
+          } else if (answer.data[0]?.is_correct === false) {
+            log.info(
+              'participant::reconnect::sendQuestionResultToParticipant::wrong',
+            )
+            this.ws.send(
+              <QuestionReconnect question={question.question}>
+                <WrongAnswer />
+              </QuestionReconnect>,
+            )
+            return
+          } else {
+            log.info(
+              'participant::reconnect::sendQuestionResultToParticipant::noAnswer',
+            )
+            this.ws.send(
+              <QuestionReconnect question={question.question}>
+                <NoAnswer />
+              </QuestionReconnect>,
+            )
+            return
+          }
+        }
+
         this.ws.send(
-          <>
-            <div id="lobby"></div>
-            <QuestionReconnect question={question.question}>
-              <WaitingForOthers />
-            </QuestionReconnect>
-          </>,
+          <QuestionReconnect question={question.question}>
+            <WaitingForOthers />
+          </QuestionReconnect>,
         )
         return
       }

@@ -91,6 +91,7 @@ export const activeQuizAllFields = async (quizCode: string) => {
       created_at,
       has_ended,
       current_page_id (id, page, question, answers, correct_answers, media_url),
+      page_results_id (id, page),
       quiz_id (
         id,
         name,
