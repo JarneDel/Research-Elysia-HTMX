@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/package",
   "name": "app",
-  "version": "1.0.2",
+  "version": "1.0.1",
   "scripts": {
     "dev": "concurrently \"bun run serve\" \"bun --inspect --watch src/index.ts | pino-pretty\" \"bun run build --watch\" ",
     "build": "tailwindcss -i ./src/styles/globals.css -o ./public/globals.css",
